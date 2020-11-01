@@ -45,11 +45,11 @@ namespace Domain
 
                 entity.HasKey(m => new { m.UserRecipientId, m.UserSenderId });
 
-                entity.HasOne(t => t.StatusCode)
-                      .WithMany(u => u.Friendships)
-                      .HasForeignKey(d => d.StatusCodeID)
-                      .OnDelete(DeleteBehavior.ClientSetNull)
-                      .HasConstraintName("FK_Friendship_StatusCode");
+                //entity.HasOne(t => t.StatusCode)
+                //      .WithMany(u => u.Friendships)
+                //      .HasForeignKey(d => d.StatusCodeID)
+                //      .OnDelete(DeleteBehavior.ClientSetNull)
+                //      .HasConstraintName("FK_Friendship_StatusCode");
 
             });
 
