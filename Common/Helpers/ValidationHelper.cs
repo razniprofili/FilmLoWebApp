@@ -13,13 +13,13 @@ namespace Common.Helpers
         public static void ValidateNotNull<T>(T entity) where T : class
         {
             if (entity == null)
-                throw new ValidationException($"{typeof(T).Name} ne postoji!"); //ako je objekat null, naziv tog entiteta ne postoji!
+                throw new ValidationException($"{typeof(T).Name} not exist!"); //ako je objekat null, naziv tog entiteta ne postoji!
         }
 
         public static void ValidateEntityExists<T>(T entity) where T : class
         {
             if (entity != null)
-                throw new ValidationException($"{typeof(T).Name} vec postoji!");
+                throw new ValidationException($"{typeof(T).Name} currently exists!");
         }
     }
 }
