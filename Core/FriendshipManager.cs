@@ -7,16 +7,50 @@ using System.Text;
 
 namespace Core
 {
-   public class FriendshipManager
+    public class FriendshipManager
     {
         public List<User> SearchMyFriends(long idUser, string searchCriteria)
         {
-            return null;
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(user);
+
+                var friendships = uow.FriendshipRepository.Find(m => m.UserSenderId == idUser); // ali mora i da bude prihvaceno prijateljstvo
+
+                List<User> friends = new List<User>();
+
+                foreach (var friend in friendships)
+                {
+                    var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserRecipientId && (f.Name == searchCriteria || f.Surname == searchCriteria));
+                    friends.Add(userFriend);
+                }
+
+                return friends;
+            }
         }
 
         public List<User> LoadAllMyFriends(long idUser)
         {
-            return null;
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(user);
+
+                var friendships = uow.FriendshipRepository.Find(m => m.UserSenderId == idUser);
+
+                List<User> friends = new List<User>();
+
+                foreach (var friend in friendships)
+                {
+                    var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
+                    friends.Add(userFriend);
+                }
+
+                return friends;
+            }
         }
 
         public Friendship Add(Friendship friendship)
@@ -52,7 +86,7 @@ namespace Core
                 return friendship;
 
             }
-               
+
         }
 
         public User GetFriendInfo(long idFriend, long idUser)
@@ -81,6 +115,56 @@ namespace Core
 
                 uow.FriendshipRepository.Delete(friendship);
                 uow.Save();
+            }
+        }
+
+        public Friendship AcceptRequest(long userId, long requestUserId)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji useri i prijateljstvo za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == requestUserId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var friendship = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient
+                ValidationHelper.ValidateNotNull(friendship);
+
+                friendship.StatusCode = new StatusCode
+                {
+                    Code = 'A',
+                    Name = "Accepted"
+                };
+                friendship.StatusCodeID = 'A';
+
+                uow.FriendshipRepository.Update(friendship, userId);
+                uow.Save();
+
+
+                return friendship;
+            }
+
+        }
+
+        public void DeclineRequest(long userId, long requestUserId) // kao delete metoda, obrisace friendship
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji useri i prijateljstvo za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == requestUserId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var friendship = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient
+                ValidationHelper.ValidateNotNull(friendship);
+
+                uow.FriendshipRepository.Delete(friendship);
+                uow.Save();
+
             }
         }
     }
