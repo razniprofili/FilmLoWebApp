@@ -25,6 +25,6 @@ namespace Domain
         // public string Comment { get; set; } u asocijativnu klasu, korisnikov komentar
 
         //Ima vise Usera, asocijativna veza
-        public List<User> Users { get; set; }
+        public List<WatchedMovie> Users { get; set; } // mora ovako, a ne lista klase User
     }
 }

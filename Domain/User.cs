@@ -14,15 +14,13 @@ namespace Domain
         public string Password { get; set; }
         public string Picture { get; set; }
 
-        public List<MovieDetailsJMDBApi> WatchedMovies { get; set; }
-        public List<MovieJMDBApi> SavedMovies { get; set; }
+        //public List<MovieDetailsJMDBApi> WatchedMovies { get; set; }
+        public List<WatchedMovie> WatchedMovies { get; set; }
+        // public List<MovieJMDBApi> SavedMovies { get; set; }
+        public List<SavedMovie> SavedMovies { get; set; }
 
-        //public List<SavedMovie> SavedMovies { get; set; }
-        //public List<WatchedMovie> WatchedMovies { get; set; }
-
-
-        //za prijateljstvo
-        public List<User> Friends { get; set; }
+        //za prijateljstvo -> ????
+        public List<Friendship> Friends { get; set; }
        // public List<Friendship> Friendships { get; set; }
     }
 }

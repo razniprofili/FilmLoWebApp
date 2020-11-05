@@ -26,10 +26,10 @@ namespace Domain
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<MovieDetailsJMDBApi>(entity => entity.HasMany(u => u.Users));
-            modelBuilder.Entity<MovieJMDBApi>(entity => entity.HasMany(u => u.Users));
-            modelBuilder.Entity<User>(entity => entity.HasMany(u => u.WatchedMovies));
-            modelBuilder.Entity<User>(entity => entity.HasMany(u => u.SavedMovies));
+            //modelBuilder.Entity<MovieDetailsJMDBApi>(entity => entity.HasMany(u => u.Users));
+            //modelBuilder.Entity<MovieJMDBApi>(entity => entity.HasMany(u => u.Users));
+            //modelBuilder.Entity<User>(entity => entity.HasMany(u => u.WatchedMovies));
+            //modelBuilder.Entity<User>(entity => entity.HasMany(u => u.SavedMovies));
 
             modelBuilder.Entity<WatchedMovie>(entity =>
             {
@@ -45,11 +45,7 @@ namespace Domain
 
                 entity.HasKey(m => new { m.UserRecipientId, m.UserSenderId });
 
-                //entity.HasOne(t => t.StatusCode)
-                //      .WithMany(u => u.Friendships)
-                //      .HasForeignKey(d => d.StatusCodeID)
-                //      .OnDelete(DeleteBehavior.ClientSetNull)
-                //      .HasConstraintName("FK_Friendship_StatusCode");
+                entity.HasOne(t => t.StatusCode).WithMany();
 
             });
 

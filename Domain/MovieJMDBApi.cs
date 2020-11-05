@@ -18,6 +18,6 @@ namespace Domain
         //public long UserId { get; set; }
         //public User User { get; set; }
         //Ima vise Usera, asocijativna veza
-        public List<User> Users { get; set; }
+        public List<SavedMovie> Users { get; set; } // mora ovako a ne lista klase User
     }
 }
