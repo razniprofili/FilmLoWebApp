@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Common.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +21,7 @@ namespace Domain
         {
             //base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=FilmLoTestWebApp;Trusted_Connection=True");
+            optionsBuilder.UseSqlServer(Helper.ConnectionString);
 
         }
 
@@ -33,7 +34,11 @@ namespace Domain
 
             modelBuilder.Entity<WatchedMovie>(entity =>
             {
-                entity.HasKey(m => new { m.UserId, m.MovieDetailsJMDBApiId });       
+                entity.HasKey(m => new { m.UserId, m.MovieDetailsJMDBApiId });
+
+                entity.HasOne(u => u.User).WithMany(m => m.WatchedMovies).HasForeignKey(f => f.UserId);
+
+                entity.HasOne(u => u.MovieDetailsJMDBApi).WithMany(m => m.Users).HasForeignKey(f => f.MovieDetailsJMDBApiId);
 
             });
            
@@ -46,6 +51,10 @@ namespace Domain
                 entity.HasKey(m => new { m.UserRecipientId, m.UserSenderId });
 
                 entity.HasOne(t => t.StatusCode).WithMany();
+
+              //  entity.HasOne(u => u.UserRecipient).WithMany(t => t.Friends).HasForeignKey(t => t.UserRecipientId);
+
+                //entity.HasOne(u => u.UserSender).WithMany(t => t.Friends).HasForeignKey(t => t.UserSenderId);
 
             });
 

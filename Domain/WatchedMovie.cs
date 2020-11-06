@@ -13,7 +13,7 @@ namespace Domain
         public User User { get; set; }
 
         public long MovieDetailsJMDBApiId { get; set; }
-        public MovieJMDBApi MovieDetailsJMDBApi { get; set; }
+        public MovieDetailsJMDBApi MovieDetailsJMDBApi { get; set; }
 
         [NotNull]
         public string WatchingDate { get; set; } // na front delu se bira datum, i mora da bude posebog formata, pa je lakse sacuvatikao string
