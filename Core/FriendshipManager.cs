@@ -31,7 +31,7 @@ namespace Core
             }
         }
 
-        public List<User> LoadAllMyFriends(long idUser)
+        public List<User> GetAllMyFriends(long idUser)
         {
             using (var uow = new UnitOfWork())
             {
