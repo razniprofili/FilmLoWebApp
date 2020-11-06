@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Data
 {
-    public abstract class GenericRepository<T> where T : class
+    public abstract class GenericRepository<T> : IRepository<T> where T : class
     {
         protected DbContext _context;
 

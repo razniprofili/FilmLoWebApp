@@ -302,7 +302,7 @@ namespace Core
 
         // update movie
 
-        public MovieDetailsJMDBApi Update(MovieDetailsJMDBApi movie, string comment, string rate, long userId)
+        public MovieDetailsJMDBApi Update(MovieDetailsJMDBApi movie, string comment, string rate, long userId, string date)
         {
             using (var uow = new UnitOfWork())
             {
@@ -348,6 +348,9 @@ namespace Core
 
                 if (rate != null)
                     watchedMovie.Rating = Int32.Parse(rate);
+
+                if (date != null)
+                    watchedMovie.WatchingDate = date;
 
                 uow.WatchedMovieRepository.Update(watchedMovie, watchedMovie.MovieDetailsJMDBApiId);
                 uow.Save();

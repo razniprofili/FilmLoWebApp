@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{F9332C53-F1DE-4D0E-B5F9-9BB3BB719F87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{F9332C53-F1DE-4D0E-B5F9-9BB3BB719F87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{44895C36-7392-40C6-ADF0-D4ADF1894D98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "Data\Data.csproj", "{44895C36-7392-40C6-ADF0-D4ADF1894D98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{16522DA9-57AF-4DBF-A392-788B11C21895}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{16522DA9-57AF-4DBF-A392-788B11C21895}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{F611B330-2F8E-433E-9297-AF560CFF5FE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{F611B330-2F8E-433E-9297-AF560CFF5FE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmLoApp.API", "FilmLoApp.API\FilmLoApp.API.csproj", "{BB1EF51F-DE0F-4DCA-B768-368466713D65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F611B330-2F8E-433E-9297-AF560CFF5FE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F611B330-2F8E-433E-9297-AF560CFF5FE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F611B330-2F8E-433E-9297-AF560CFF5FE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB1EF51F-DE0F-4DCA-B768-368466713D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB1EF51F-DE0F-4DCA-B768-368466713D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB1EF51F-DE0F-4DCA-B768-368466713D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB1EF51F-DE0F-4DCA-B768-368466713D65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
