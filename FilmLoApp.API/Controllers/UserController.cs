@@ -60,7 +60,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPut("obrisi/{id}")]
+        [HttpPut("delete/{id}")]
         public void DeleteUser(long id)
         {
             UserManager.DeleteUser(id);

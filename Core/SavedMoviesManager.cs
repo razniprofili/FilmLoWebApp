@@ -96,6 +96,7 @@ namespace Core
                 foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
                 {
                     var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
+                   // var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId);
                     usersSavedMovies.Add(movieAPI);
                 }
 

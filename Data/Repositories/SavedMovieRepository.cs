@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Data.Repositories
 {
-    public class SavedMovieRepository : GenericRepository<SavedMovie>
+    public class SavedMovieRepository : GenericRepository<SavedMovie>, ISavedMovieRepository
     {
         public SavedMovieRepository(DbContext context) : base(context)
         {

@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using Domain;
+using FilmLoApp.API.Models.SavedMovies;
+using FilmLoApp.API.Models.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +22,40 @@ namespace FilmLoApp.API.Helpers
         }
 
         // ovde dodati jos mapera po potrebi
+
+        public static SavedMovieModel Map(MovieJMDBApi movie, long userId)
+        {
+            var userMovie = new User();
+            foreach(var movie1 in movie.Users)
+            {
+                if( movie1.UserId == userId)
+                {
+                    userMovie = movie1.User;
+                    break;
+                }
+
+            }
+            return new SavedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Poster = movie.Poster,
+                UserId = userId,
+                User = AutoMap<User, UserModel>(userMovie)
+            };
+        }
+
+        public static AddSavedMovieModel MapAdd(MovieJMDBApi movie, long userId)
+        {
+           
+            return new AddSavedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Poster = movie.Poster,
+                UserId = userId,
+               // User = AutoMap<User, UserModel>(userMovie)
+            };
+        }
     }
 }

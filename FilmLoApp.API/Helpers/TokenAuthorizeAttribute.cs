@@ -16,12 +16,12 @@ namespace FilmLoApp.API.Helpers
             var authheder = context.HttpContext.Request.Headers.FirstOrDefault(a => a.Key == "Authorization");
 
             if (authheder.Key == null)
-                throw new AuthenticationException("Nema autorizacionog hedera!");
+                throw new AuthenticationException("No authorization header!");
 
             string token = authheder.Value.FirstOrDefault();
 
             if (string.IsNullOrWhiteSpace(token))
-                throw new AuthenticationException("Autorizacioni heder ne sme biti prazan!");
+                throw new AuthenticationException("Authorization header must not be empty!");
 
             UserJwtModel user;
             try
@@ -32,11 +32,11 @@ namespace FilmLoApp.API.Helpers
             }
             catch
             {
-                throw new AuthenticationException("Token nije validan!");
+                throw new AuthenticationException("Token not valid!");
             }
 
-            if (user.ExpirationTime < DateTime.UtcNow)
-                throw new AuthenticationException("Token je istekao, ponovo se ulogujte!");
+            if (user.ExpirationTime < DateTime.Now)
+                throw new AuthenticationException("Token expired, login again!");
 
             //if (Roles != null && !Roles.Split(',').ToList().Contains(user.Role.Name)) //ako u listi dozvoljenih rola ne postoji rola ulogovanog usera
             //    throw new AuthenticationException("Nemate prava pristupa!");

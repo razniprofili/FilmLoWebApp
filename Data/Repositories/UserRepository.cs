@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Data.Repositories
 {
-    public class UserRepository : GenericRepository<User>
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         public UserRepository(DbContext context) : base(context)
         {

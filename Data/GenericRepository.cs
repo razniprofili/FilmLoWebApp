@@ -123,7 +123,7 @@ namespace Data
 
         // za brisanje contextra, diskoektovanje
         private bool _disposed = false;
-        protected virtual void Dispose(bool disposing)
+        public void Dispose(bool disposing) //protected virtual
         {
             if (!_disposed)
             {

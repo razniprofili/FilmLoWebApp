@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Data.Repositories
 {
-    public class FriendshipRepository : GenericRepository<Friendship>
+    public class FriendshipRepository : GenericRepository<Friendship>, IFriendshipRepository
     {
         public FriendshipRepository(DbContext context) : base(context)
         {

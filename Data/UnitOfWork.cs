@@ -5,7 +5,7 @@ using System;
 
 namespace Data
 {
-    public class UnitOfWork : IDisposable
+    public class UnitOfWork : IDisposable, IUnitOfWork
     {
 
         private DbContext _context;
@@ -18,23 +18,37 @@ namespace Data
         //instaciranje repozitorijuma
         //singlton patern
 
-        private UserRepository _userRepository;
-        public UserRepository UserRepository => _userRepository ?? (_userRepository = new UserRepository(DataContext));
+        public IFriendshipRepository Friendships { get; set; }
+        public IMovieDetailsJMDBApiRepository MoviesDetails { get; set; }
+        public IMovieJMDBApiRepository MoviesJMDBApi { get; set; }
+        public ISavedMovieRepository SavedMovies { get; set; }
+        public IUserRepository Users { get; set; }
+        public IWatchedMovieRepository WatchedMovies { get; set; }
 
-        private FriendshipRepository _friendshipRepository;
-        public FriendshipRepository FriendshipRepository => _friendshipRepository ?? (_friendshipRepository = new FriendshipRepository(DataContext));
+        // private UserRepository _userRepository;
+        public IUserRepository UserRepository => Users ?? (Users = new UserRepository(DataContext));
 
-        private MovieDetailsJMDBApiRepository _movieDetailsJMDBApiRepository;
-        public MovieDetailsJMDBApiRepository MovieDetailsJMDBApiRepository => _movieDetailsJMDBApiRepository ?? (_movieDetailsJMDBApiRepository = new MovieDetailsJMDBApiRepository(DataContext));
+        //private FriendshipRepository _friendshipRepository;
+        public IFriendshipRepository FriendshipRepository => Friendships ?? (Friendships = new FriendshipRepository(DataContext));
 
-        private MovieJMDBApiRepository _movieJMDBApiRepository;
-        public MovieJMDBApiRepository MovieJMDBApiRepository => _movieJMDBApiRepository ?? (_movieJMDBApiRepository = new MovieJMDBApiRepository(DataContext));
+       // private MovieDetailsJMDBApiRepository _movieDetailsJMDBApiRepository;
+        public IMovieDetailsJMDBApiRepository MovieDetailsJMDBApiRepository => MoviesDetails ?? (MoviesDetails = new MovieDetailsJMDBApiRepository(DataContext));
 
-        private SavedMovieRepository _savedMovieRepository;
-        public SavedMovieRepository SavedMovieRepository => _savedMovieRepository ?? (_savedMovieRepository = new SavedMovieRepository(DataContext));
+       // private MovieJMDBApiRepository _movieJMDBApiRepository;
+        public IMovieJMDBApiRepository MovieJMDBApiRepository => MoviesJMDBApi ?? (MoviesJMDBApi = new MovieJMDBApiRepository(DataContext));
 
-        private WatchedMovieRepository _watchedMovieRepository;
-        public WatchedMovieRepository WatchedMovieRepository => _watchedMovieRepository ?? (_watchedMovieRepository = new WatchedMovieRepository(DataContext));
+       // private SavedMovieRepository _savedMovieRepository;
+        public ISavedMovieRepository SavedMovieRepository => SavedMovies ?? (SavedMovies = new SavedMovieRepository(DataContext));
+
+       // private WatchedMovieRepository _watchedMovieRepository;
+        public IWatchedMovieRepository WatchedMovieRepository => WatchedMovies ?? (WatchedMovies = new WatchedMovieRepository(DataContext));
+
+        //public IFriendshipRepository Friendships { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public IMovieDetailsJMDBApiRepository MoviesDetails { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public IMovieJMDBApiRepository MoviesJMDBApi { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public ISavedMovieRepository SavedMovies { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public IUserRepository Users { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public IWatchedMovieRepository WatchedMovies { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         #endregion
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Data.Repositories
 {
-    public class MovieDetailsJMDBApiRepository : GenericRepository<MovieDetailsJMDBApi>
+    public class MovieDetailsJMDBApiRepository : GenericRepository<MovieDetailsJMDBApi>, IMovieDetailsJMDBApiRepository
     {
         public MovieDetailsJMDBApiRepository(DbContext context) : base(context)
         {

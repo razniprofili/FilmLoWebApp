@@ -19,6 +19,7 @@ namespace Data
         long Count();
         long Count(Expression<Func<T, bool>> match);
         void Save();
+        void Dispose(bool disposing);
         void Dispose();
 
     }
