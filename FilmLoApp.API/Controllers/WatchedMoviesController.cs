@@ -17,7 +17,7 @@ namespace FilmLoApp.API.Controllers
     {
         [TokenAuthorize]
         [HttpGet("{id}")] // user id
-        public List<WatchedMovieModel> GetAllMovies(long id) 
+        public List<WatchedMovieModel> GetAllMovies(long id)     // ISTA GRESKA O KONEKCIJI
         {
             List<MovieDetailsJMDBApi> movies = WatchedMoviesManager.GetAllMovies(id);
             return movies.Select(a => Mapper.Map(a, id)).ToList();
@@ -48,7 +48,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("{id}/{movieId}")]
+        [HttpGet("commentRate/{id}/{movieId}")]
         public CommentRateModel GetCommentRate(long id, long movieId)
         {
             var movie = WatchedMoviesManager.GetCommentRate(movieId, id);
@@ -68,7 +68,7 @@ namespace FilmLoApp.API.Controllers
         public WatchedMovieModel GetMovie(long movieId, long id)
         {
             var movie = WatchedMoviesManager.GetMovie(movieId, id);
-            return Mapper.AutoMap<MovieDetailsJMDBApi, WatchedMovieModel>(movie);
+            return Mapper.Map(movie, id);
         }
 
         [TokenAuthorize]
@@ -86,11 +86,11 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPost("{comment}/{rate}/{date}")]
-        public WatchedMovieModel Add([FromBody]WatchedMovieModel movie, string comment, int rate, string date)
+        [HttpPost("addWatchedMovie")]
+        public WatchedMovieModel Add([FromBody]AddWatchedMovieModel movie)
         {
-            var addedMovie = WatchedMoviesManager.Add(Mapper.AutoMap<WatchedMovieModel, MovieDetailsJMDBApi>(movie), CurrentUser.Id, comment, rate, date);
-            return Mapper.AutoMap<MovieDetailsJMDBApi, WatchedMovieModel>(addedMovie);
+            var addedMovie = WatchedMoviesManager.Add(Mapper.AutoMap<AddWatchedMovieModel, MovieDetailsJMDBApi>(movie), CurrentUser.Id, movie.Comment, movie.Rate, movie.DateTimeWatched);
+            return Mapper.Map(addedMovie, CurrentUser.Id);
         }
 
         // update

@@ -117,5 +117,25 @@ namespace FilmLoApp.API.Helpers
                 DateTimeWatched = movie.WatchingDate
             };
         }
+
+        //public static WatchedMovieModel MapGet(MovieDetailsJMDBApi movie, long userID)
+        //{
+        //    var 
+        //    return new WatchedMovieModel
+        //    {
+        //        Id = movie.Id,
+        //        Name = movie.Name,
+        //        Actors = movie.Actors,
+        //        Year = movie.Year,
+        //        Director = movie.Director,
+        //        Duration = movie.Duration,
+        //        Genre = movie.Genre,
+        //        Country = movie.Country,
+        //        //Rate = watchedMovie.Rating,
+        //        //Comment = watchedMovie.Comment,
+        //        //DateTimeWatched = watchedMovie.WatchingDate
+
+        //    };
+        //}
     }
 }
