@@ -2,6 +2,7 @@
 using Domain;
 using FilmLoApp.API.Models.SavedMovies;
 using FilmLoApp.API.Models.User;
+using FilmLoApp.API.Models.WatchedMovies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,55 @@ namespace FilmLoApp.API.Helpers
             };
         }
 
+        public static WatchedMovieModel Map(MovieDetailsJMDBApi movie, long userId)
+        {
+            var watchedMovie = new WatchedMovie();
+            foreach (var movie1 in movie.Users)
+            {
+                if (movie1.UserId == userId && movie1.MovieDetailsJMDBApiId == movie.Id)
+                {
+                    watchedMovie = movie1;
+                    break;
+                }
+
+            }
+            return new WatchedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Actors = movie.Actors,
+                Year = movie.Year,
+                Director = movie.Director,
+                Duration = movie.Duration,
+                Genre = movie.Genre,
+                Country = movie.Country,
+                Rate = watchedMovie.Rating,
+                Comment = watchedMovie.Comment,
+                DateTimeWatched = watchedMovie.WatchingDate
+
+            };
+        }
+
+        public static WatchedMovieModel Map(MovieDetailsJMDBApi movie)
+        {
+          
+            return new WatchedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Actors = movie.Actors,
+                Year = movie.Year,
+                Director = movie.Director,
+                Duration = movie.Duration,
+                Genre = movie.Genre,
+                Country = movie.Country,
+                //Rate = watchedMovie.Rating,
+                //Comment = watchedMovie.Comment,
+                //DateTimeWatched = watchedMovie.WatchingDate
+
+            };
+        }
+
         public static AddSavedMovieModel MapAdd(MovieJMDBApi movie, long userId)
         {
            
@@ -55,6 +105,16 @@ namespace FilmLoApp.API.Helpers
                 Poster = movie.Poster,
                 UserId = userId,
                // User = AutoMap<User, UserModel>(userMovie)
+            };
+        }
+
+        public static CommentRateModel Map(WatchedMovie movie)
+        {
+            return new CommentRateModel
+            {
+                Rate = movie.Rating,
+                Comment = movie.Comment,
+                DateTimeWatched = movie.WatchingDate
             };
         }
     }

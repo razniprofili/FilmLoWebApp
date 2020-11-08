@@ -76,7 +76,7 @@ namespace FilmLoApp.API.Controllers
 
 
         [TokenAuthorize] //mora da bude ulogovan
-        [HttpGet("deleteFriend/{id}")]
+        [HttpPut("deleteFriend/{id}")]
         public void DeleteFriend(long id)
         {
             FriendshipManager.DeleteFriend(id, CurrentUser.Id);
@@ -93,7 +93,7 @@ namespace FilmLoApp.API.Controllers
         //  public List<User> SearchMyFriends(long idUser, string searchCriteria) URADITI
 
         [TokenAuthorize] //mora da bude ulogovan
-        [HttpGet("addFriend")]
+        [HttpPost("addFriend")]
         public FriendshipModel AddFriend( [FromBody] AddFriendshipModel model)
         {
             var friendship = FriendshipManager.Add(Mapper.AutoMap<AddFriendshipModel, Friendship>(model));
@@ -101,7 +101,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize] //mora da bude ulogovan
-        [HttpGet("acceptRequest/{id}")]
+        [HttpPost("acceptRequest/{id}")]
         public FriendshipModel AcceptRequest(long id)
         {
             var acceptedRequest = FriendshipManager.AcceptRequest(CurrentUser.Id, id);
@@ -109,7 +109,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize] //mora da bude ulogovan
-        [HttpGet("declineRequest/{id}")]
+        [HttpPost("declineRequest/{id}")]
         public void DeclineRequest(long id)
         {
             FriendshipManager.DeclineRequest(CurrentUser.Id, id);
