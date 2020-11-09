@@ -15,7 +15,7 @@ namespace Data
         IQueryable<T> Find(Expression<Func<T, bool>> match, string includePropreties = null);
         T Add(T entity, string includePropreties = null);
         void Delete(T entity);
-        T Update(T entity, object key);
+        T Update(T entity, params object[] key);
         long Count();
         long Count(Expression<Func<T, bool>> match);
         void Save();

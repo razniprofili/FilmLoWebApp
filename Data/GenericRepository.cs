@@ -91,7 +91,7 @@ namespace Data
 
         }
 
-        public virtual T Update(T entity, object key)
+        public virtual T Update(T entity, params object[] key)
         {
             if (entity == null) return null;
 

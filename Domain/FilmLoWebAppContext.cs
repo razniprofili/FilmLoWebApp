@@ -21,7 +21,8 @@ namespace Domain
         {
             //base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseSqlServer(Helper.ConnectionString);
+              optionsBuilder.UseSqlServer(Helper.ConnectionString);
+            //optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=FilmLoWebAPI;Trusted_Connection=True");
 
         }
 
@@ -52,9 +53,9 @@ namespace Domain
 
                 entity.HasOne(t => t.StatusCode).WithMany();
 
-              //  entity.HasOne(u => u.UserRecipient).WithMany(t => t.Friends).HasForeignKey(t => t.UserRecipientId);
+                entity.HasOne(u => u.UserRecipient).WithMany(t => t.FriendsReceived).HasForeignKey(t => t.UserRecipientId).OnDelete(DeleteBehavior.Restrict);
 
-                //entity.HasOne(u => u.UserSender).WithMany(t => t.Friends).HasForeignKey(t => t.UserSenderId);
+                entity.HasOne(u => u.UserSender).WithMany(t => t.FriendsSent).HasForeignKey(t => t.UserSenderId).OnDelete(DeleteBehavior.Restrict);
 
             });
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain
 {
@@ -18,9 +19,10 @@ namespace Domain
         public List<WatchedMovie> WatchedMovies { get; set; }
         // public List<MovieJMDBApi> SavedMovies { get; set; }
         public List<SavedMovie> SavedMovies { get; set; }
-
-        //za prijateljstvo -> ????
-        public List<Friendship> Friends { get; set; }
-       // public List<Friendship> Friendships { get; set; }
+        
+        public List<Friendship> FriendsSent { get; set; }
+        
+        public List<Friendship> FriendsReceived { get; set; }
+   
     }
 }

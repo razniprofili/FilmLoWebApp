@@ -97,7 +97,7 @@ namespace FilmLoApp.API.Controllers
         public FriendshipModel AddFriend( [FromBody] AddFriendshipModel model)
         {
             var friendship = FriendshipManager.Add(Mapper.AutoMap<AddFriendshipModel, Friendship>(model));
-            return Mapper.AutoMap<Friendship, FriendshipModel>(friendship);
+            return Mapper.Map(friendship);
         }
 
         [TokenAuthorize] //mora da bude ulogovan
@@ -105,7 +105,7 @@ namespace FilmLoApp.API.Controllers
         public FriendshipModel AcceptRequest(long id)
         {
             var acceptedRequest = FriendshipManager.AcceptRequest(CurrentUser.Id, id);
-            return Mapper.AutoMap<Friendship, FriendshipModel>(acceptedRequest); 
+            return Mapper.Map(acceptedRequest); 
         }
 
         [TokenAuthorize] //mora da bude ulogovan

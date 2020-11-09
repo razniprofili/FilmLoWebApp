@@ -34,14 +34,11 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("UserRecipientId", "UserSenderId");
 
                     b.HasIndex("StatusCodeID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserSenderId");
 
                     b.ToTable("Friendship");
                 });
@@ -186,9 +183,17 @@ namespace Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.User", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId");
+                    b.HasOne("Domain.User", "UserRecipient")
+                        .WithMany("FriendsReceived")
+                        .HasForeignKey("UserRecipientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User", "UserSender")
+                        .WithMany("FriendsSent")
+                        .HasForeignKey("UserSenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.SavedMovie", b =>

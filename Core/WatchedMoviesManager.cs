@@ -1,6 +1,7 @@
 ﻿using Common.Helpers;
 using Data;
 using Domain;
+using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -46,7 +47,7 @@ namespace Core
 
                 //provera prijateljstva:
                 var exist = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A');
-                ValidationHelper.ValidateEntityExists(exist);
+                ValidationHelper.ValidateNotNull(exist);
 
                 var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId); //pronalazi sve sacuvane filmove za tog prijatelja
 
@@ -158,7 +159,7 @@ namespace Core
 
                 //provera prijateljstva:
                 var exist = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A');
-                ValidationHelper.ValidateEntityExists(exist);
+                ValidationHelper.ValidateNotNull(exist);
 
                 var movie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == friendId && a.MovieDetailsJMDBApiId == movieId);
                 ValidationHelper.ValidateNotNull(movie);
@@ -302,21 +303,23 @@ namespace Core
 
         // update movie
 
-        public MovieDetailsJMDBApi Update(MovieDetailsJMDBApi movie, string comment, string rate, long userId, string date)
+        public MovieDetailsJMDBApi Update(MovieDetailsJMDBApi movie, long movieId, string comment, string rate, long userId, string date)
         {
             using (var uow = new UnitOfWork())
             {
                 var userExists = uow.UserRepository.GetById(userId);
                 ValidationHelper.ValidateNotNull(userExists);
 
-                var movieExists = uow.MovieDetailsJMDBApiRepository.GetById(movie.Id);
+                var movieExists = uow.MovieDetailsJMDBApiRepository.GetById(movieId);
                 ValidationHelper.ValidateNotNull(movieExists);
 
                 // da li je taj user pogledao taj film:
-                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(m => m.MovieDetailsJMDBApiId == movie.Id && m.UserId == userId);
+                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(m => m.MovieDetailsJMDBApiId == movieId && m.UserId == userId);
                 ValidationHelper.ValidateNotNull(watchedMovie);
 
-                if (movie.Name == null)
+                movie.Id = movieId;
+
+                if (string.IsNullOrEmpty(movie.Name))
                     movie.Name = movieExists.Name;
 
                 if (movie.Year == null)
@@ -325,34 +328,36 @@ namespace Core
                 if (movie.Duration == null)
                     movie.Duration = movieExists.Duration;
 
-                if (movie.Director == null)
+                if (string.IsNullOrEmpty(movie.Director))
                     movie.Director = movieExists.Director;
 
-                if (movie.Country == null)
+                if (string.IsNullOrEmpty(movie.Country))
                     movie.Country = movieExists.Country;
 
-                if (movie.Actors == null)
+                if (string.IsNullOrEmpty(movie.Actors))
                     movie.Actors = movieExists.Actors;
 
-                if (movie.Genre == null)
+                if (string.IsNullOrEmpty(movie.Genre))
                     movie.Genre = movieExists.Genre;
 
+                
 
                 uow.MovieDetailsJMDBApiRepository.Update(movie, movie.Id);
-                uow.Save();
+              //  uow.Save();
 
-              //  WatchedMovie updatedMovie = new WatchedMovie();
-
-                if (comment != null)
+                if (!string.IsNullOrEmpty(comment))
                     watchedMovie.Comment = comment;
 
-                if (rate != null)
+                if (!string.IsNullOrEmpty(rate))
                     watchedMovie.Rating = Int32.Parse(rate);
 
-                if (date != null)
+                if (!string.IsNullOrEmpty(date))
                     watchedMovie.WatchingDate = date;
 
-                uow.WatchedMovieRepository.Update(watchedMovie, watchedMovie.MovieDetailsJMDBApiId);
+                movie.Users = new List<WatchedMovie>();
+                movie.Users.Add(watchedMovie);
+
+                uow.WatchedMovieRepository.Update(watchedMovie, watchedMovie.MovieDetailsJMDBApiId, userId);
                 uow.Save();
 
 

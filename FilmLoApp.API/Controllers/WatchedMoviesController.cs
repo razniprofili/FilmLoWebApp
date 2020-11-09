@@ -49,7 +49,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("commentRate/{id}/{movieId}")]
-        public CommentRateModel GetCommentRate(long id, long movieId)
+        public CommentRateModel GetCommentRate(long id, long movieId)//done
         {
             var movie = WatchedMoviesManager.GetCommentRate(movieId, id);
             return Mapper.Map(movie);
@@ -65,7 +65,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("getMovie/{id}/{movieId}")]
-        public WatchedMovieModel GetMovie(long movieId, long id)
+        public WatchedMovieModel GetMovie(long movieId, long id)//done
         {
             var movie = WatchedMoviesManager.GetMovie(movieId, id);
             return Mapper.Map(movie, id);
@@ -73,28 +73,33 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpPut("{id}/{movieId}")]
-        public void DeleteMovie(long movieId, long id)
+        public void DeleteMovie(long movieId, long id)//done
         {
             WatchedMoviesManager.DeleteMovie(movieId, id);
         }
 
         [TokenAuthorize]
         [HttpGet]
-        public long CountMovies()
+        public long CountMovies()//done
         {
             return WatchedMoviesManager.CountMovies(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpPost("addWatchedMovie")]
-        public WatchedMovieModel Add([FromBody]AddWatchedMovieModel movie)
+        public WatchedMovieModel Add([FromBody]AddWatchedMovieModel movie) //done
         {
             var addedMovie = WatchedMoviesManager.Add(Mapper.AutoMap<AddWatchedMovieModel, MovieDetailsJMDBApi>(movie), CurrentUser.Id, movie.Comment, movie.Rate, movie.DateTimeWatched);
             return Mapper.Map(addedMovie, CurrentUser.Id);
         }
 
-        // update
 
-
+        [TokenAuthorize]
+        [HttpPut("updateWatchedMovie/{id}")] 
+        public WatchedMovieModel Update([FromBody]UpdateWatchedMovieModel movie, long id) //done
+        {
+            var updatedMovie = WatchedMoviesManager.Update(Mapper.AutoMap<UpdateWatchedMovieModel, MovieDetailsJMDBApi>(movie), id, movie.Comment, movie.Rate.ToString(), CurrentUser.Id,  movie.DateTimeWatched);
+            return Mapper.Map(updatedMovie, CurrentUser.Id);
+        }
     }
 }

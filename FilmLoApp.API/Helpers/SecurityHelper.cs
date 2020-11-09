@@ -31,7 +31,7 @@ namespace FilmLoApp.API.Helpers
             var userJwtModel = new UserJwtModel
             {
                 Id = user.Id,
-                ExpirationTime = DateTime.Now.AddMinutes(30), // token vazi 30 min
+                ExpirationTime = DateTime.Now.AddMinutes(90), // token vazi 90 min
                 Name = user.Name,
                 Surname = user.Surname,
                 Mail = user.Email

@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(FilmLoWebAppContext))]
-    [Migration("20201106215105_test1234")]
-    partial class test1234
+    [Migration("20201109212130_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -36,14 +36,11 @@ namespace Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(1)");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("UserRecipientId", "UserSenderId");
 
                     b.HasIndex("StatusCodeID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserSenderId");
 
                     b.ToTable("Friendship");
                 });
@@ -188,9 +185,17 @@ namespace Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.User", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId");
+                    b.HasOne("Domain.User", "UserRecipient")
+                        .WithMany("FriendsReceived")
+                        .HasForeignKey("UserRecipientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User", "UserSender")
+                        .WithMany("FriendsSent")
+                        .HasForeignKey("UserSenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.SavedMovie", b =>

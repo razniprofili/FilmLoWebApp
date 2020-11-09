@@ -71,13 +71,13 @@ namespace Core
                 ValidationHelper.ValidateEntityExists(exist);
 
                 //punimo preostalim podacima
-                friendship.StatusCode = new StatusCode
-                {
-                    Code = 'R',
-                    Name = "Requested"
-                };
-                friendship.StatusCodeID = 'R';
-                friendship.FriendshipDate = DateTime.UtcNow;
+                //friendship.StatusCode = new StatusCode
+                //{
+                //    Code = 'R',
+                //    Name = "Requested"
+                //};
+                friendship.StatusCodeID ='R';
+                friendship.FriendshipDate = DateTime.Now;
 
                 //dodajemo prijateljstvo
                 uow.FriendshipRepository.Add(friendship);
@@ -139,7 +139,7 @@ namespace Core
                 };
                 friendship.StatusCodeID = 'A';
 
-                uow.FriendshipRepository.Update(friendship, userId);
+                uow.FriendshipRepository.Update(friendship, requestUserId, userId);
                 uow.Save();
 
 

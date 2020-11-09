@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Core;
 using Domain;
+using FilmLoApp.API.Models.Friendship;
 using FilmLoApp.API.Models.SavedMovies;
 using FilmLoApp.API.Models.User;
 using FilmLoApp.API.Models.WatchedMovies;
@@ -117,6 +119,19 @@ namespace FilmLoApp.API.Helpers
                 DateTimeWatched = movie.WatchingDate
             };
         }
+
+        public static FriendshipModel Map(Friendship friendship)
+        {
+            return new FriendshipModel
+            {
+                UserSenderId = friendship.UserSenderId,
+                UserRecipientId = friendship.UserRecipientId,
+                StatusCodeID = friendship.StatusCodeID,
+                FriendshipDate = friendship.FriendshipDate
+            };
+        }
+
+
 
         //public static WatchedMovieModel MapGet(MovieDetailsJMDBApi movie, long userID)
         //{

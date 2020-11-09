@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Domain.Migrations
 {
-    public partial class test1234 : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -75,8 +75,7 @@ namespace Domain.Migrations
                     UserSenderId = table.Column<long>(nullable: false),
                     UserRecipientId = table.Column<long>(nullable: false),
                     FriendshipDate = table.Column<DateTime>(nullable: false),
-                    StatusCodeID = table.Column<string>(nullable: false),
-                    UserId = table.Column<long>(nullable: true)
+                    StatusCodeID = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -88,8 +87,14 @@ namespace Domain.Migrations
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Friendship_User_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Friendship_User_UserRecipientId",
+                        column: x => x.UserRecipientId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Friendship_User_UserSenderId",
+                        column: x => x.UserSenderId,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -153,9 +158,9 @@ namespace Domain.Migrations
                 column: "StatusCodeID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Friendship_UserId",
+                name: "IX_Friendship_UserSenderId",
                 table: "Friendship",
-                column: "UserId");
+                column: "UserSenderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SavedMovie_MovieJMDBApiId",
