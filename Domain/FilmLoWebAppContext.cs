@@ -23,7 +23,7 @@ namespace Domain
 
               optionsBuilder.UseSqlServer(Helper.ConnectionString);
             //optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=FilmLoWebAPI;Trusted_Connection=True");
-
+            //optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=FilmLoWebAPI;Trusted_Connection=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
