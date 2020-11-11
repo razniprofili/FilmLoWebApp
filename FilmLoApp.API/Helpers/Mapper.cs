@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Core;
+using Data.Repositories;
 using Domain;
 using FilmLoApp.API.Models.Friendship;
 using FilmLoApp.API.Models.SavedMovies;
@@ -51,11 +52,14 @@ namespace FilmLoApp.API.Helpers
         public static WatchedMovieModel Map(MovieDetailsJMDBApi movie, long userId)
         {
             var watchedMovie = new WatchedMovie();
+            var userMovie = new User();
+
             foreach (var movie1 in movie.Users)
             {
                 if (movie1.UserId == userId && movie1.MovieDetailsJMDBApiId == movie.Id)
                 {
                     watchedMovie = movie1;
+                    userMovie = movie1.User;
                     break;
                 }
 
@@ -72,14 +76,19 @@ namespace FilmLoApp.API.Helpers
                 Country = movie.Country,
                 Rate = watchedMovie.Rating,
                 Comment = watchedMovie.Comment,
-                DateTimeWatched = watchedMovie.WatchingDate
+                DateTimeWatched = watchedMovie.WatchingDate,
+                UserId = userId,
+                User = AutoMap<User, UserModel>(userMovie)
 
             };
         }
 
-        public static WatchedMovieModel Map(MovieDetailsJMDBApi movie)
+        public static WatchedMovieModel MapAllMovies(MovieDetailsJMDBApi movie, long userID, List<WatchedMovie> watchedMovies)
         {
-          
+           // var friendWatchedMovie = new WatchedMovie();
+
+
+
             return new WatchedMovieModel
             {
                 Id = movie.Id,
@@ -93,6 +102,29 @@ namespace FilmLoApp.API.Helpers
                 //Rate = watchedMovie.Rating,
                 //Comment = watchedMovie.Comment,
                 //DateTimeWatched = watchedMovie.WatchingDate
+
+            };
+        }
+
+        public static WatchedMovieModel MapFriend(MovieDetailsJMDBApi movie, WatchedMovie watchedMovie)
+        {
+
+          
+            return new WatchedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Actors = movie.Actors,
+                Year = movie.Year,
+                Director = movie.Director,
+                Duration = movie.Duration,
+                Genre = movie.Genre,
+                Country = movie.Country,
+                Rate = watchedMovie.Rating,
+                Comment = watchedMovie.Comment,
+                DateTimeWatched = watchedMovie.WatchingDate,
+                UserId = watchedMovie.UserId,
+                User = AutoMap<User, UserModel>(watchedMovie.User)
 
             };
         }
@@ -131,6 +163,7 @@ namespace FilmLoApp.API.Helpers
             };
         }
 
+        
 
 
         //public static WatchedMovieModel MapGet(MovieDetailsJMDBApi movie, long userID)

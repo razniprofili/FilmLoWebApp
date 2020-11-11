@@ -39,14 +39,22 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(m => m.UserSenderId == idUser && m.StatusCodeID == 'A');
+                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A'));
 
                 List<User> friends = new List<User>();
 
                 foreach (var friend in friendships)
                 {
-                    var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
-                    friends.Add(userFriend);
+                    if (friend.UserSenderId == idUser)
+                    {
+                        var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
+                        friends.Add(userFriend);
+                    }
+                    else
+                    {
+                        var userFriend = uow.UserRepository.GetById(friend.UserSenderId);
+                        friends.Add(userFriend);
+                    }
                 }
 
                 return friends;

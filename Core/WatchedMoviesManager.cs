@@ -46,7 +46,7 @@ namespace Core
                 ValidationHelper.ValidateNotNull(userFriend);
 
                 //provera prijateljstva:
-                var exist = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A');
+                var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
                 ValidationHelper.ValidateNotNull(exist);
 
                 var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId); //pronalazi sve sacuvane filmove za tog prijatelja
@@ -74,19 +74,31 @@ namespace Core
                 ValidationHelper.ValidateNotNull(user);
 
                 //pretraga prijateljstva:
-                var friendships = uow.FriendshipRepository.Find(f => f.UserSenderId == userId && f.StatusCodeID == 'A');
+                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A'));
                 ValidationHelper.ValidateNotNull(friendships);
 
                 List<MovieDetailsJMDBApi> friendsWatchedMovies = new List<MovieDetailsJMDBApi>();
 
                 foreach ( var friend in friendships)
                 {
-                    var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserRecipientId); //pronalazi sve sacuvane filmove za tog prijatelja
-
-                    foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                   if( friend.UserRecipientId == userId)
                     {
-                        var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
-                        friendsWatchedMovies.Add(movieAPI);
+                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserSenderId, "User"); //pronalazi sve sacuvane filmove za tog prijatelja
+
+                        foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                        {
+                            var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
+                            friendsWatchedMovies.Add(movieAPI);
+                        }
+                    } else
+                    {
+                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserRecipientId, "User"); //pronalazi sve sacuvane filmove za tog prijatelja
+
+                        foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                        {
+                            var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
+                            friendsWatchedMovies.Add(movieAPI);
+                        }
                     }
                 }
 
@@ -103,7 +115,7 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(f => f.UserSenderId == userId && f.StatusCodeID == 'A');
+                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A'));
 
                 var friends = new List<User>(); // useri koji su mi prijatelji
                 var friendsWatched = new List<User>();
@@ -111,8 +123,16 @@ namespace Core
 
                 foreach(var friend in friendships)
                 {
-                    var friendAdd = uow.UserRepository.FirstOrDefault(a => a.Id == friend.UserRecipientId);
-                    friends.Add(friendAdd);
+                   if(friend.UserRecipientId == userId) // ako sam ja primla zahtev za prijateljstvo, moji prijatelji su oni koji su mi poslali zahtev
+                    {
+                        var friendAdd = uow.UserRepository.FirstOrDefault(a => a.Id == friend.UserSenderId);
+                        friends.Add(friendAdd);
+
+                    } else // obrnuta situacija
+                    {
+                        var friendAdd = uow.UserRepository.FirstOrDefault(a => a.Id == friend.UserRecipientId);
+                        friends.Add(friendAdd);
+                    }
                 }
 
                 foreach( var friend in friends)

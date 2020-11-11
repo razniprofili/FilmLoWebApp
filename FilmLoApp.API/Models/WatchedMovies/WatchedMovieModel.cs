@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FilmLoApp.API.Models.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,5 +19,7 @@ namespace FilmLoApp.API.Models.WatchedMovies
         public int Rate { get; set; }
         public string Comment { get; set; }
         public string DateTimeWatched { get; set; }
+        public long UserId { get; set; }
+        public UserModel User { get; set; }
     }
 }

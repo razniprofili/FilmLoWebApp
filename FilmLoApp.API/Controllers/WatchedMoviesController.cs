@@ -32,15 +32,31 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("allMovies/{id}")] // user Id
+        [HttpGet("allMovies/{id}")] // user Id, SREDITI DA SE PRIKAZE ID USERA I NJEGOVI COMM I RATE
         public List<WatchedMovieModel> GetAllFriendsMovies(long id)
         {
             List<MovieDetailsJMDBApi> movies = WatchedMoviesManager.GetAllFriendsMovies(id);
-            return movies.Select(a => Mapper.Map(a)).ToList();
+
+            List<WatchedMovieModel> moviesToReturn = new List<WatchedMovieModel>();
+
+            foreach(var movie in movies)
+            {
+                foreach (var watchedMovie in movie.Users)
+                {
+                    var addMovie = Mapper.MapFriend(movie, watchedMovie);
+                    
+                    if (!moviesToReturn.Exists(x => x.Name == addMovie.Name && x.UserId == addMovie.UserId))
+                    {
+                        moviesToReturn.Add(addMovie);
+                    }
+                }
+            }
+
+            return moviesToReturn;
         }
 
         [TokenAuthorize]
-        [HttpGet("friendWatched/{id}")] // user Id
+        [HttpGet("friendWatched/{id}")] // user Id SREDITI!!!
         public List<UserModel> FriendsWatchThatMovie([FromBody] string moiveName, long id)
         {
             List<User> friends = WatchedMoviesManager.FriendsWatchThatMovie(id, moiveName);

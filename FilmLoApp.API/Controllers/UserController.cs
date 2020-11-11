@@ -50,6 +50,14 @@ namespace FilmLoApp.API.Controllers
             return Mapper.AutoMap<User, UserModel>(user);
         }
 
+        [TokenAuthorize] //mora da bude ulogovan
+        [HttpGet("allUsers")]
+        public List<UserModel> GetAllUsers()
+        {
+            var users = UserManager.GetAllUsers(CurrentUser.Id);
+            return users.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
+        }
+
         [TokenAuthorize]
         [HttpPut("{id}")]
         public UserModel UpdateUser(long id, [FromBody] UpdateModel user)

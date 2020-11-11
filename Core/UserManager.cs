@@ -4,6 +4,7 @@ using Data;
 using Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Core
@@ -96,6 +97,20 @@ namespace Core
 
                 uow.UserRepository.Delete(userToDelete);
                 uow.Save();
+            }
+        }
+
+        public List<User> GetAllUsers(long idUser)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(user);
+
+                var allUsers = uow.UserRepository.GetAll().ToList();
+
+                return allUsers;
             }
         }
 
