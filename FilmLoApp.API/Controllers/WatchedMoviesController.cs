@@ -56,7 +56,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("friendWatched/{id}")] // user Id SREDITI!!!
+        [HttpPost("friendWatched/{id}")] // user Id
         public List<UserModel> FriendsWatchThatMovie([FromBody] string moiveName, long id)
         {
             List<User> friends = WatchedMoviesManager.FriendsWatchThatMovie(id, moiveName);

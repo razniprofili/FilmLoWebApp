@@ -137,7 +137,7 @@ namespace Core
 
                 foreach( var friend in friends)
                 {
-                    friendsWatchedMovies = GetAllFriendsMovies(friend.Id); // za svakog usera prijatelja uzimamo sve njegove odgledane filmove
+                    friendsWatchedMovies = GetAllFriendMovies(userId, friend.Id); // za svakog usera prijatelja uzimamo sve njegove odgledane filmove
 
                     foreach(var movie in friendsWatchedMovies)
                     {
