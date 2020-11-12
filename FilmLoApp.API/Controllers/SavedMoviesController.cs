@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FilmLoApp.API.Controllers
 {
-    [ValidateModel] // to je ono sto smo pisali u Helpers folderu
+    [ValidateModel]
     [Produces("application/json")]
     [Route("api/SavedMovies")]
     public class SavedMoviesController : BaseController
@@ -24,7 +24,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("{id}")] // user id
-        public List<SavedMovieModel> GetAllMovies(long id) // javlja gresku o gasenju konekcije
+        public List<SavedMovieModel> GetAllMovies(long id)
         {
             List<MovieJMDBApi> movies = SavedMoviesManager.GetAllMovies(id);
             return movies.Select(a => Mapper.Map(a, id)).ToList();

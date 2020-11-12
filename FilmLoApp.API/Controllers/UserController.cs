@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace FilmLoApp.API.Controllers
 {
-    [ValidateModel] // to je ono sto smo pisali u Helpers folderu
+    [ValidateModel]
     [Produces("application/json")]
     [Route("api/User")]
     public class UserController : BaseController
@@ -50,7 +50,7 @@ namespace FilmLoApp.API.Controllers
             return Mapper.AutoMap<User, UserModel>(user);
         }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize]
         [HttpGet("allUsers")]
         public List<UserModel> GetAllUsers()
         {
@@ -59,22 +59,22 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPut("{id}")]
-        public UserModel UpdateUser(long id, [FromBody] UpdateModel user)
+        [HttpPut]
+        public UserModel UpdateUser([FromBody] UpdateModel user)
         {
 
-            var newUser = UserManager.Update(id, Mapper.AutoMap<UpdateModel, User>(user));
+            var newUser = UserManager.Update(CurrentUser.Id, Mapper.AutoMap<UpdateModel, User>(user));
             return Mapper.AutoMap<User, UserModel>(newUser);
         }
 
         [TokenAuthorize]
-        [HttpPut("delete/{id}")]
-        public void DeleteUser(long id)
+        [HttpPut("delete")]
+        public void DeleteUser()
         {
-            UserManager.DeleteUser(id);
+            UserManager.DeleteUser(CurrentUser.Id);
         }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize] 
         [HttpGet("friendInfo/{id}")]
         public UserModel GetFriendInfo(long id)
         {
@@ -83,14 +83,14 @@ namespace FilmLoApp.API.Controllers
         }
 
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize] 
         [HttpPut("deleteFriend/{id}")]
         public void DeleteFriend(long id)
         {
             FriendshipManager.DeleteFriend(id, CurrentUser.Id);
         }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize]
         [HttpGet("myFriends")]
         public List<UserModel> GetMyFriends()
         {
@@ -98,17 +98,23 @@ namespace FilmLoApp.API.Controllers
             return friends.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 
-        //  public List<User> SearchMyFriends(long idUser, string searchCriteria) URADITI
+        [TokenAuthorize]
+        [HttpPost("myFriends/search")]
+        public List<UserModel> SearchMyFriends([FromBody]string searchCriteria)
+        {
+            var friends = FriendshipManager.SearchMyFriends(CurrentUser.Id, searchCriteria);
+            return friends.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
+        }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize]
         [HttpPost("addFriend")]
         public FriendshipModel AddFriend( [FromBody] AddFriendshipModel model)
         {
-            var friendship = FriendshipManager.Add(Mapper.AutoMap<AddFriendshipModel, Friendship>(model));
+            var friendship = FriendshipManager.Add(Mapper.Map(model, CurrentUser.Id), CurrentUser.Id);
             return Mapper.Map(friendship);
         }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize] 
         [HttpPost("acceptRequest/{id}")]
         public FriendshipModel AcceptRequest(long id)
         {
@@ -116,7 +122,7 @@ namespace FilmLoApp.API.Controllers
             return Mapper.Map(acceptedRequest); 
         }
 
-        [TokenAuthorize] //mora da bude ulogovan
+        [TokenAuthorize] 
         [HttpPost("declineRequest/{id}")]
         public void DeclineRequest(long id)
         {

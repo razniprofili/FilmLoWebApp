@@ -43,13 +43,6 @@ namespace Data
        // private WatchedMovieRepository _watchedMovieRepository;
         public IWatchedMovieRepository WatchedMovieRepository => WatchedMovies ?? (WatchedMovies = new WatchedMovieRepository(DataContext));
 
-        //public IFriendshipRepository Friendships { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        //public IMovieDetailsJMDBApiRepository MoviesDetails { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        //public IMovieJMDBApiRepository MoviesJMDBApi { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        //public ISavedMovieRepository SavedMovies { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        //public IUserRepository Users { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        //public IWatchedMovieRepository WatchedMovies { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         #endregion
 
         public virtual void Save()

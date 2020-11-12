@@ -49,6 +49,15 @@ namespace FilmLoApp.API.Helpers
             };
         }
 
+        public static Friendship Map(AddFriendshipModel model, long userId)
+        {
+            return new Friendship
+            {
+                UserSenderId = userId,
+                UserRecipientId = model.UserRecipientId
+            };
+        }
+
         public static WatchedMovieModel Map(MovieDetailsJMDBApi movie, long userId)
         {
             var watchedMovie = new WatchedMovie();
@@ -79,29 +88,6 @@ namespace FilmLoApp.API.Helpers
                 DateTimeWatched = watchedMovie.WatchingDate,
                 UserId = userId,
                 User = AutoMap<User, UserModel>(userMovie)
-
-            };
-        }
-
-        public static WatchedMovieModel MapAllMovies(MovieDetailsJMDBApi movie, long userID, List<WatchedMovie> watchedMovies)
-        {
-           // var friendWatchedMovie = new WatchedMovie();
-
-
-
-            return new WatchedMovieModel
-            {
-                Id = movie.Id,
-                Name = movie.Name,
-                Actors = movie.Actors,
-                Year = movie.Year,
-                Director = movie.Director,
-                Duration = movie.Duration,
-                Genre = movie.Genre,
-                Country = movie.Country,
-                //Rate = watchedMovie.Rating,
-                //Comment = watchedMovie.Comment,
-                //DateTimeWatched = watchedMovie.WatchingDate
 
             };
         }
@@ -159,31 +145,10 @@ namespace FilmLoApp.API.Helpers
                 UserSenderId = friendship.UserSenderId,
                 UserRecipientId = friendship.UserRecipientId,
                 StatusCodeID = friendship.StatusCodeID,
-                FriendshipDate = friendship.FriendshipDate
+                FriendshipDate = friendship.FriendshipDate,
+                UserRecipient = AutoMap<User, UserModel>(friendship.UserRecipient),
+                UserSender = AutoMap<User, UserModel>(friendship.UserSender)
             };
         }
-
-        
-
-
-        //public static WatchedMovieModel MapGet(MovieDetailsJMDBApi movie, long userID)
-        //{
-        //    var 
-        //    return new WatchedMovieModel
-        //    {
-        //        Id = movie.Id,
-        //        Name = movie.Name,
-        //        Actors = movie.Actors,
-        //        Year = movie.Year,
-        //        Director = movie.Director,
-        //        Duration = movie.Duration,
-        //        Genre = movie.Genre,
-        //        Country = movie.Country,
-        //        //Rate = watchedMovie.Rating,
-        //        //Comment = watchedMovie.Comment,
-        //        //DateTimeWatched = watchedMovie.WatchingDate
-
-        //    };
-        //}
     }
 }

@@ -10,14 +10,14 @@ using FilmLoApp.API.Models.User;
 
 namespace FilmLoApp.API.Controllers
 {
-    [ValidateModel] // to je ono sto smo pisali u Helpers folderu
+    [ValidateModel] 
     [Produces("application/json")]
     [Route("api/WatchedMovies")]
     public class WatchedMoviesController : BaseController
     {
         [TokenAuthorize]
         [HttpGet("{id}")] // user id
-        public List<WatchedMovieModel> GetAllMovies(long id)     // ISTA GRESKA O KONEKCIJI
+        public List<WatchedMovieModel> GetAllMovies(long id) 
         {
             List<MovieDetailsJMDBApi> movies = WatchedMoviesManager.GetAllMovies(id);
             return movies.Select(a => Mapper.Map(a, id)).ToList();
@@ -32,7 +32,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("allMovies/{id}")] // user Id, SREDITI DA SE PRIKAZE ID USERA I NJEGOVI COMM I RATE
+        [HttpGet("allMovies/{id}")] // user Id
         public List<WatchedMovieModel> GetAllFriendsMovies(long id)
         {
             List<MovieDetailsJMDBApi> movies = WatchedMoviesManager.GetAllFriendsMovies(id);
@@ -65,7 +65,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("commentRate/{id}/{movieId}")]
-        public CommentRateModel GetCommentRate(long id, long movieId)//done
+        public CommentRateModel GetCommentRate(long id, long movieId)
         {
             var movie = WatchedMoviesManager.GetCommentRate(movieId, id);
             return Mapper.Map(movie);
@@ -80,30 +80,30 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("getMovie/{id}/{movieId}")]
-        public WatchedMovieModel GetMovie(long movieId, long id)//done
+        [HttpGet("getMovie/{movieId}")]
+        public WatchedMovieModel GetMovie(long movieId)
         {
-            var movie = WatchedMoviesManager.GetMovie(movieId, id);
-            return Mapper.Map(movie, id);
+            var movie = WatchedMoviesManager.GetMovie(movieId, CurrentUser.Id);
+            return Mapper.Map(movie, CurrentUser.Id);
         }
 
         [TokenAuthorize]
-        [HttpPut("{id}/{movieId}")]
-        public void DeleteMovie(long movieId, long id)//done
+        [HttpPut("delete/{movieId}")]
+        public void DeleteMovie(long movieId)
         {
-            WatchedMoviesManager.DeleteMovie(movieId, id);
+            WatchedMoviesManager.DeleteMovie(movieId, CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet]
-        public long CountMovies()//done
+        public long CountMovies()
         {
             return WatchedMoviesManager.CountMovies(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpPost("addWatchedMovie")]
-        public WatchedMovieModel Add([FromBody]AddWatchedMovieModel movie) //done
+        public WatchedMovieModel Add([FromBody]AddWatchedMovieModel movie)
         {
             var addedMovie = WatchedMoviesManager.Add(Mapper.AutoMap<AddWatchedMovieModel, MovieDetailsJMDBApi>(movie), CurrentUser.Id, movie.Comment, movie.Rate, movie.DateTimeWatched);
             return Mapper.Map(addedMovie, CurrentUser.Id);
@@ -112,7 +112,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpPut("updateWatchedMovie/{id}")] 
-        public WatchedMovieModel Update([FromBody]UpdateWatchedMovieModel movie, long id) //done
+        public WatchedMovieModel Update([FromBody]UpdateWatchedMovieModel movie, long id)
         {
             var updatedMovie = WatchedMoviesManager.Update(Mapper.AutoMap<UpdateWatchedMovieModel, MovieDetailsJMDBApi>(movie), id, movie.Comment, movie.Rate.ToString(), CurrentUser.Id,  movie.DateTimeWatched);
             return Mapper.Map(updatedMovie, CurrentUser.Id);

@@ -95,6 +95,19 @@ namespace Core
                 var userToDelete = uow.UserRepository.FirstOrDefault(a => a.Id == id);
                 ValidationHelper.ValidateNotNull(userToDelete);
 
+                var friends = uow.FriendshipRepository.Find(f => f.UserRecipientId == id || f.UserSenderId == id);
+
+                if(friends != null)
+                {
+                    foreach(var friend in friends)
+                    {
+                        uow.FriendshipRepository.Delete(friend);
+                       // uow.Save();
+                    }
+
+                    uow.Save();
+                }
+
                 uow.UserRepository.Delete(userToDelete);
                 uow.Save();
             }
@@ -108,7 +121,8 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var allUsers = uow.UserRepository.GetAll().ToList();
+                //var allUsers = uow.UserRepository.GetAll().ToList();
+                var allUsers = uow.UserRepository.Find(x => x.Id != idUser).ToList(); // necemo da nam vraca nas (crr usera)
 
                 return allUsers;
             }
