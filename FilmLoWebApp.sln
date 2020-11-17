@@ -11,7 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{F611B330-2F8E-433E-9297-AF560CFF5FE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilmLoApp.API", "FilmLoApp.API\FilmLoApp.API.csproj", "{BB1EF51F-DE0F-4DCA-B768-368466713D65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FilmLoApp.API", "FilmLoApp.API\FilmLoApp.API.csproj", "{BB1EF51F-DE0F-4DCA-B768-368466713D65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B0ACD9D5-2DED-4E36-8640-09A28FB1204B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

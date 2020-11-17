@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -74,7 +75,7 @@ namespace Core
                 ValidationHelper.ValidateNotNull(user);
 
                 //pretraga prijateljstva:
-                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A'));
+                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A')).ToList();
                 ValidationHelper.ValidateNotNull(friendships);
 
                 List<MovieDetailsJMDBApi> friendsWatchedMovies = new List<MovieDetailsJMDBApi>();
@@ -83,7 +84,7 @@ namespace Core
                 {
                    if( friend.UserRecipientId == userId)
                     {
-                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserSenderId, "User"); //pronalazi sve sacuvane filmove za tog prijatelja
+                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserSenderId, "User").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
                         foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
                         {
@@ -92,7 +93,7 @@ namespace Core
                         }
                     } else
                     {
-                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserRecipientId, "User"); //pronalazi sve sacuvane filmove za tog prijatelja
+                        var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserRecipientId, "User").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
                         foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
                         {
