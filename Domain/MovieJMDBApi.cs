@@ -14,10 +14,9 @@ namespace Domain
         public string Id { get; set; } // id je oblika tt15784 u tom APIju
         public string Name { get; set; }
         public string Poster { get; set; }
-
-        //public long UserId { get; set; }
-        //public User User { get; set; }
         //Ima vise Usera, asocijativna veza
-        public List<SavedMovie> Users { get; set; } // mora ovako a ne lista klase User
+        public List<SavedMovie> SavedUsers { get; set; } // mora ovako a ne lista klase User
+        public List<WatchedMovie> WatchedUsers { get; set; }
+        public MovieDetailsJMDBApi MovieDetailsJMDBApi { get; set; }
     }
 }

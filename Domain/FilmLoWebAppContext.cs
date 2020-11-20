@@ -19,31 +19,29 @@ namespace Domain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //base.OnConfiguring(optionsBuilder);
+           //  base.OnConfiguring(optionsBuilder);
 
-              optionsBuilder.UseSqlServer(Helper.ConnectionString);
+             optionsBuilder.UseSqlServer(Helper.ConnectionString);
             //optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=FilmLoWebAPI;Trusted_Connection=True");
-            //optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=FilmLoWebAPI;Trusted_Connection=True");
+            //optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=Test1Database;Trusted_Connection=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<MovieDetailsJMDBApi>(entity => entity.HasMany(u => u.Users));
-            //modelBuilder.Entity<MovieJMDBApi>(entity => entity.HasMany(u => u.Users));
-            //modelBuilder.Entity<User>(entity => entity.HasMany(u => u.WatchedMovies));
-            //modelBuilder.Entity<User>(entity => entity.HasMany(u => u.SavedMovies));
 
             modelBuilder.Entity<WatchedMovie>(entity =>
             {
-                entity.HasKey(m => new { m.UserId, m.MovieDetailsJMDBApiId });
+                entity.HasKey(m => new { m.UserId, m.MovieJMDBApiId });
 
                 entity.HasOne(u => u.User).WithMany(m => m.WatchedMovies).HasForeignKey(f => f.UserId);
 
-                entity.HasOne(u => u.MovieDetailsJMDBApi).WithMany(m => m.Users).HasForeignKey(f => f.MovieDetailsJMDBApiId);
+                entity.HasOne(u => u.MovieJMDBApi).WithMany(m => m.WatchedUsers).HasForeignKey(f => f.MovieJMDBApiId);
 
             });
-           
+
+            modelBuilder.Entity<MovieJMDBApi>().OwnsOne(m => m.MovieDetailsJMDBApi); 
             
+
             modelBuilder.Entity<SavedMovie>().HasKey(m => new { m.UserId, m.MovieJMDBApiId });
 
             modelBuilder.Entity<Friendship>(entity =>

@@ -21,12 +21,10 @@ namespace FilmLoApp.API.Controllers
         public object Register([FromBody] RegisterModel registerModel)
         {
             var user = UserManager.Register(Mapper.AutoMap<RegisterModel, User>(registerModel));
-            // return Mapper.AutoMap<User, UserModel>(user);
+
             return new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(user)
-                //Token = SecurityHelper.CreateLoginToken(user)
-
             };
         }
 
@@ -38,7 +36,6 @@ namespace FilmLoApp.API.Controllers
             return new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(user)
-                // Token = SecurityHelper.CreateLoginToken(user)
             };
         }
 
@@ -81,7 +78,6 @@ namespace FilmLoApp.API.Controllers
             var user = FriendshipManager.GetFriendInfo(id, CurrentUser.Id);
             return Mapper.AutoMap<User, UserModel>(user);
         }
-
 
         [TokenAuthorize] 
         [HttpPut("deleteFriend/{id}")]

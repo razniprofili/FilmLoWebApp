@@ -121,7 +121,6 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                //var allUsers = uow.UserRepository.GetAll().ToList();
                 var allUsers = uow.UserRepository.Find(x => x.Id != idUser).ToList(); // necemo da nam vraca nas (crr usera)
 
                 return allUsers;

@@ -3,6 +3,7 @@ using Data;
 using Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Core
@@ -89,7 +90,7 @@ namespace Core
                 var user= uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId); //pronalazi sve sacuvane filmove za tog usera
+                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
 
                 List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
 
@@ -112,7 +113,7 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId); //pronalazi sve sacuvane filmove za tog usera
+                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
 
                 List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
 

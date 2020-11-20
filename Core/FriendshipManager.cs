@@ -3,6 +3,7 @@ using Data;
 using Domain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Core
@@ -17,7 +18,7 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')); // ali mora i da bude prihvaceno prijateljstvo
+                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList(); // ali mora i da bude prihvaceno prijateljstvo
 
                 List<User> friends = new List<User>();
 
@@ -51,7 +52,7 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A'));
+                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
 
                 List<User> friends = new List<User>();
 
@@ -149,16 +150,10 @@ namespace Core
                 var friendship = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId && f.StatusCodeID == 'R'); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient, i ako je zahtev u statusu Requested
                 ValidationHelper.ValidateNotNull(friendship);
 
-                //friendship.StatusCode = new StatusCode
-                //{
-                //    Code = 'A',
-                //    Name = "Accepted"
-                //};
                 friendship.StatusCodeID = 'A';
 
                 uow.FriendshipRepository.Update(friendship, requestUserId, userId);
                 uow.Save();
-
 
                 return friendship;
             }

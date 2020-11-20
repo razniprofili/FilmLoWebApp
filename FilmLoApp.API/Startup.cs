@@ -5,11 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 //using AutoMapper.Configuration;
 using Common.Helpers;
+using Data;
+using Domain;
 using FilmLoApp.API.Helpers;
 using FilmLoApp.API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +37,8 @@ namespace FilmLoApp.API
             services.AddMvc(options => options.EnableEndpointRouting = false);
             services.AddControllers().AddNewtonsoftJson();
             services.AddCors();
+            //services.AddScoped<DbContext, FilmLoWebAppContext>();
+            //services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
       
 

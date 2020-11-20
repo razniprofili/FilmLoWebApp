@@ -11,17 +11,13 @@ namespace Domain
 
         public long UserId { get; set; }
         public User User { get; set; }
-
-        public long MovieDetailsJMDBApiId { get; set; }
-        public MovieDetailsJMDBApi MovieDetailsJMDBApi { get; set; }
-
+        public string MovieJMDBApiId { get; set; }
+        public MovieJMDBApi MovieJMDBApi { get; set; }
         [NotNull]
         public string WatchingDate { get; set; } // na front delu se bira datum, i mora da bude posebog formata, pa je lakse sacuvatikao string
         [NotNull]
         public int Rating { get; set; }
         [NotNull]
         public string Comment { get; set; }
-
-
     }
 }

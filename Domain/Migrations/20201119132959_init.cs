@@ -8,25 +8,6 @@ namespace Domain.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "MovieDetailsJMDBApi",
-                columns: table => new
-                {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Actors = table.Column<string>(nullable: true),
-                    Year = table.Column<int>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Director = table.Column<string>(nullable: true),
-                    Duration = table.Column<int>(nullable: true),
-                    Genre = table.Column<string>(nullable: true),
-                    Country = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MovieDetailsJMDBApi", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MovieJMDBApi",
                 columns: table => new
                 {
@@ -66,6 +47,30 @@ namespace Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_User", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MovieDetailsJMDBApi",
+                columns: table => new
+                {
+                    MovieJMDBApiId = table.Column<string>(nullable: false),
+                    Actors = table.Column<string>(nullable: true),
+                    Year = table.Column<int>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Director = table.Column<string>(nullable: true),
+                    Duration = table.Column<int>(nullable: true),
+                    Genre = table.Column<string>(nullable: true),
+                    Country = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MovieDetailsJMDBApi", x => x.MovieJMDBApiId);
+                    table.ForeignKey(
+                        name: "FK_MovieDetailsJMDBApi_MovieJMDBApi_MovieJMDBApiId",
+                        column: x => x.MovieJMDBApiId,
+                        principalTable: "MovieJMDBApi",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,18 +135,18 @@ namespace Domain.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<long>(nullable: false),
-                    MovieDetailsJMDBApiId = table.Column<long>(nullable: false),
+                    MovieJMDBApiId = table.Column<string>(nullable: false),
                     WatchingDate = table.Column<string>(nullable: true),
                     Rating = table.Column<int>(nullable: false),
                     Comment = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WatchedMovie", x => new { x.UserId, x.MovieDetailsJMDBApiId });
+                    table.PrimaryKey("PK_WatchedMovie", x => new { x.UserId, x.MovieJMDBApiId });
                     table.ForeignKey(
-                        name: "FK_WatchedMovie_MovieDetailsJMDBApi_MovieDetailsJMDBApiId",
-                        column: x => x.MovieDetailsJMDBApiId,
-                        principalTable: "MovieDetailsJMDBApi",
+                        name: "FK_WatchedMovie_MovieJMDBApi_MovieJMDBApiId",
+                        column: x => x.MovieJMDBApiId,
+                        principalTable: "MovieJMDBApi",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -168,15 +173,18 @@ namespace Domain.Migrations
                 column: "MovieJMDBApiId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WatchedMovie_MovieDetailsJMDBApiId",
+                name: "IX_WatchedMovie_MovieJMDBApiId",
                 table: "WatchedMovie",
-                column: "MovieDetailsJMDBApiId");
+                column: "MovieJMDBApiId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "Friendship");
+
+            migrationBuilder.DropTable(
+                name: "MovieDetailsJMDBApi");
 
             migrationBuilder.DropTable(
                 name: "SavedMovie");
@@ -189,9 +197,6 @@ namespace Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "MovieJMDBApi");
-
-            migrationBuilder.DropTable(
-                name: "MovieDetailsJMDBApi");
 
             migrationBuilder.DropTable(
                 name: "User");

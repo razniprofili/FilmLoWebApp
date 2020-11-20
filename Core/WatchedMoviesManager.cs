@@ -13,7 +13,7 @@ namespace Core
 {
     public class WatchedMoviesManager
     {
-        public List<MovieDetailsJMDBApi> GetAllMovies(long userId)
+        public List<MovieJMDBApi> GetAllMovies(long userId)
         {
             using (var uow = new UnitOfWork())
             {
@@ -21,21 +21,19 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == userId, "MovieDetailsJMDBApi"); //pronalazi sve sacuvane filmove za tog usera
+                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve odgledane filmove za tog usera
 
-                List<MovieDetailsJMDBApi> usersWatchedMovies = new List<MovieDetailsJMDBApi>();
+                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
 
-                foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                foreach (var movie in watchedMovies) // za sve te odgledane filmove uzima njihove detalje
                 {
-                    //var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
-                    usersWatchedMovies.Add(movie.MovieDetailsJMDBApi);
+                    usersWatchedMovies.Add(movie.MovieJMDBApi);
                 }
-
                 return usersWatchedMovies;
             }
         }
 
-        public List<MovieDetailsJMDBApi> GetAllFriendMovies(long userId, long friendId)
+        public List<MovieJMDBApi> GetAllFriendMovies(long userId, long friendId)
         {
             using (var uow = new UnitOfWork())
             {
@@ -50,14 +48,13 @@ namespace Core
                 var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
                 ValidationHelper.ValidateNotNull(exist);
 
-                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId, "MovieDetailsJMDBApi"); //pronalazi sve sacuvane filmove za tog prijatelja
+                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
-                List<MovieDetailsJMDBApi> usersWatchedMovies = new List<MovieDetailsJMDBApi>();
+                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
 
                 foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
                 {
-                   // var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
-                    usersWatchedMovies.Add(movie.MovieDetailsJMDBApi);
+                    usersWatchedMovies.Add(movie.MovieJMDBApi);
                 }
 
                 return usersWatchedMovies;
@@ -66,7 +63,7 @@ namespace Core
 
         // odgledani filmovi svih mojih prijatelja:
 
-        public List<MovieDetailsJMDBApi> GetAllFriendsMovies(long userId)
+        public List<MovieJMDBApi> GetAllFriendsMovies(long userId)
         {
             using (var uow = new UnitOfWork())
             {
@@ -78,26 +75,27 @@ namespace Core
                 var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A')).ToList();
                 ValidationHelper.ValidateNotNull(friendships);
 
-                List<MovieDetailsJMDBApi> friendsWatchedMovies = new List<MovieDetailsJMDBApi>();
+                List<MovieJMDBApi> friendsWatchedMovies = new List<MovieJMDBApi>();
 
-                foreach ( var friend in friendships)
+                foreach (var friend in friendships)
                 {
-                   if( friend.UserRecipientId == userId)
+                    if (friend.UserRecipientId == userId)
                     {
                         var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserSenderId, "User").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
                         foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
                         {
-                            var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
+                            var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
                             friendsWatchedMovies.Add(movieAPI);
                         }
-                    } else
+                    }
+                    else
                     {
                         var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friend.UserRecipientId, "User").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
                         foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
                         {
-                            var movieAPI = uow.MovieDetailsJMDBApiRepository.GetById(movie.MovieDetailsJMDBApiId);
+                            var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
                             friendsWatchedMovies.Add(movieAPI);
                         }
                     }
@@ -116,36 +114,38 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A'));
+                var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A')).ToList();
 
                 var friends = new List<User>(); // useri koji su mi prijatelji
                 var friendsWatched = new List<User>();
-                var friendsWatchedMovies = new List<MovieDetailsJMDBApi>();
+                var friendsWatchedMovies = new List<MovieJMDBApi>();
 
-                foreach(var friend in friendships)
+                foreach (var friend in friendships)
                 {
-                   if(friend.UserRecipientId == userId) // ako sam ja primla zahtev za prijateljstvo, moji prijatelji su oni koji su mi poslali zahtev
+                    if (friend.UserRecipientId == userId) // ako sam ja primla zahtev za prijateljstvo, moji prijatelji su oni koji su mi poslali zahtev
                     {
                         var friendAdd = uow.UserRepository.FirstOrDefault(a => a.Id == friend.UserSenderId);
                         friends.Add(friendAdd);
 
-                    } else // obrnuta situacija
+                    }
+                    else // obrnuta situacija
                     {
                         var friendAdd = uow.UserRepository.FirstOrDefault(a => a.Id == friend.UserRecipientId);
                         friends.Add(friendAdd);
                     }
                 }
 
-                foreach( var friend in friends)
+                foreach (var friend in friends)
                 {
                     friendsWatchedMovies = GetAllFriendMovies(userId, friend.Id); // za svakog usera prijatelja uzimamo sve njegove odgledane filmove
 
-                    foreach(var movie in friendsWatchedMovies)
+                    foreach (var movie in friendsWatchedMovies)
                     {
-                        if (movie.Name.ToLower() == movieName.ToLower()) { // ukoliko je neki prijatelj odgledao taj film dodajemo ga u listu
+                        if (movie.Name.ToLower() == movieName.ToLower())
+                        { // ukoliko je neki prijatelj odgledao taj film dodajemo ga u listu
                             friendsWatched.Add(friend);
                             break;
-                        }      
+                        }
                     }
                 }
 
@@ -153,22 +153,21 @@ namespace Core
             }
         }
 
-
-        public WatchedMovie GetCommentRate(long movieId, long userId)
+        public WatchedMovie GetCommentRate(string movieId, long userId)
         {
             using (var uow = new UnitOfWork())
             {
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var movie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieDetailsJMDBApiId == movieId);
+                var movie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId);
                 ValidationHelper.ValidateNotNull(movie);
 
                 return movie;
             }
         }
 
-        public WatchedMovie GetFriendCommentRate(long movieId, long userId, long friendId)
+        public WatchedMovie GetFriendCommentRate(string movieId, long userId, long friendId)
         {
             using (var uow = new UnitOfWork())
             {
@@ -182,46 +181,42 @@ namespace Core
                 var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
                 ValidationHelper.ValidateNotNull(exist);
 
-                var movie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == friendId && a.MovieDetailsJMDBApiId == movieId);
+                var movie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == friendId && a.MovieJMDBApiId == movieId);
                 ValidationHelper.ValidateNotNull(movie);
 
                 return movie;
             }
         }
 
-        public MovieDetailsJMDBApi GetMovie(long movieId, long userId)
+        public MovieJMDBApi GetMovie(string movieId, long userId)
         {
             using (var uow = new UnitOfWork())
             {
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieDetailsJMDBApiId == movieId);
+                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId);
                 ValidationHelper.ValidateNotNull(watchedMovie);
 
-                var movie = uow.MovieDetailsJMDBApiRepository.GetById(movieId);
+                var movie = uow.MovieJMDBApiRepository.GetById(movieId);
                 ValidationHelper.ValidateNotNull(movie);
 
                 return movie;
             }
         }
 
-        public void DeleteMovie(long movieId, long userId)
+        public void DeleteMovie(string movieId, long userId)
         {
             using (var uow = new UnitOfWork())
             {
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var watchedMovieDelete = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieDetailsJMDBApiId == movieId);
+                var watchedMovieDelete = uow.WatchedMovieRepository.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId);
                 ValidationHelper.ValidateNotNull(watchedMovieDelete);
 
-                var movie = uow.MovieDetailsJMDBApiRepository.GetById(watchedMovieDelete.MovieDetailsJMDBApiId);
-                ValidationHelper.ValidateNotNull(movie);
-
-                uow.WatchedMovieRepository.Delete(watchedMovieDelete);
-                uow.MovieDetailsJMDBApiRepository.Delete(movie);  // mora da obrise i njega jer je ipak slobodna volja korisnika da unosi glumce kako on zeli, itd
-                uow.Save(); // cuva se tek ako je sve uspesno
+                uow.WatchedMovieRepository.Delete(watchedMovieDelete); // samo brise iz odgledanih, detalji i movieAPI ostaju!
+                uow.Save(); 
             }
         }
 
@@ -233,9 +228,11 @@ namespace Core
             }
         }
 
-
-        public MovieDetailsJMDBApi Add(MovieDetailsJMDBApi movie, long userId,string comment, int rate, string date)
+        public MovieJMDBApi Add(MovieDetailsJMDBApi movie, long userId, string comment, int rate, string date, string poster, string movieAPIid)
         {
+            // 1. dodati film u MovieJMDBApi ako ne postoji
+            // 2. uneti odgledan film na kraju, pod USLOVOM da ga taj user NIJE pogledao
+
             using (var uow = new UnitOfWork())
             {
                 // user mora da postoji
@@ -244,99 +241,85 @@ namespace Core
 
                 // provera da li je user vec odgledao taj film (po nazivu), ne bi trebalo da se doda u tom slucaju:
 
-                var watchedMovies = uow.WatchedMovieRepository.Find(f => f.UserId == userId, "MovieDetailsJMDBApi");
+                var watchedMovies = uow.WatchedMovieRepository.Find(f => f.UserId == userId, "MovieJMDBApi").ToList();
 
-                foreach(var movieIter in watchedMovies)
+                foreach (var movieIter in watchedMovies)
                 {
-                    if( movieIter.MovieDetailsJMDBApi.Name.ToLower() == movie.Name.ToLower())
-                        ValidationHelper.ValidateEntityExists(movieIter); //ako vec  postoji taj film sa tim nazivom u odgledanim filmovima usera, baca gresku
+                    if (movieIter.MovieJMDBApi.Name.ToLower() == movie.Name.ToLower())
+                        ValidationHelper.ValidateEntityExists(movieIter); //ako vec  postoji taj film sa tim nazivom u odgledanim filmovima usera, baca gresku, sve dalje se prekida
                 }
 
-                //moramo da ga dodamo a nakon toga i asocijativnu klasu
-                var newMovie = uow.MovieDetailsJMDBApiRepository.Add(movie); // dobijamo genericki id, PAZI
-                uow.Save();
+                var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(a => a.Id == movieAPIid);
+                if (movieAPI == null)
+                {
+                    MovieJMDBApi add = new MovieJMDBApi
+                    {
+                        Id = movieAPIid,
+                        Name = movie.Name,
+                        Poster = poster,
+                        MovieDetailsJMDBApi = movie
+                    };
+                    uow.MovieJMDBApiRepository.Add(add);
+                    uow.Save();
+
+                    // ne moze ovako, mora preko glavnog entitija, svaki film mora da ima detalje!!
+                    // dodaju se i detalji jer i oni ne postoje:
+                   // var newMovie = uow.MovieDetailsJMDBApiRepository.Add(movie);
+                   // uow.Save();
+                } 
 
                 //provera da li je vec unet film za tog usera (za svaki slucaj):
-                var exist = uow.WatchedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieDetailsJMDBApiId == newMovie.Id);
+                var exist = uow.WatchedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movieAPIid);
                 ValidationHelper.ValidateEntityExists(exist);
 
                 // ako nije dodajemo ga
                 WatchedMovie watchedMoive = new WatchedMovie
                 {
                     UserId = userId,
-                    MovieDetailsJMDBApiId = newMovie.Id,
+                    MovieJMDBApiId = movieAPIid,
                     Comment = comment,
                     Rating = rate,
                     WatchingDate = date
                 };
 
-                uow.WatchedMovieRepository.Add(watchedMoive);
+                var watchedMovie = uow.WatchedMovieRepository.Add(watchedMoive);
                 uow.Save();
 
-                return newMovie;
+                var addedMovie = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movieAPIid, "MovieDetailsJMDBApi");
+                addedMovie.WatchedUsers.Add(watchedMovie);
+
+                return addedMovie;
             }
         }
 
-
-        public MovieDetailsJMDBApi Update(MovieDetailsJMDBApi movie, long movieId, string comment, string rate, long userId, string date)
+        public MovieJMDBApi Update(WatchedMovie movie, string movieId, long userId)
         {
             using (var uow = new UnitOfWork())
             {
                 var userExists = uow.UserRepository.GetById(userId);
                 ValidationHelper.ValidateNotNull(userExists);
 
-                var movieExists = uow.MovieDetailsJMDBApiRepository.GetById(movieId);
+                var movieExists = uow.MovieJMDBApiRepository.GetById(movieId);
                 ValidationHelper.ValidateNotNull(movieExists);
 
                 // da li je taj user pogledao taj film:
-                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(m => m.MovieDetailsJMDBApiId == movieId && m.UserId == userId);
+                var watchedMovie = uow.WatchedMovieRepository.FirstOrDefault(m => m.MovieJMDBApiId == movieId && m.UserId == userId);
                 ValidationHelper.ValidateNotNull(watchedMovie);
 
-                movie.Id = movieId;
 
-                if (string.IsNullOrEmpty(movie.Name))
-                    movie.Name = movieExists.Name;
+                if (!string.IsNullOrEmpty(movie.Comment))
+                    watchedMovie.Comment = movie.Comment;
 
-                if (movie.Year == null)
-                    movie.Year = movieExists.Year;
+                if (movie.Rating != 0)
+                    watchedMovie.Rating = movie.Rating;
 
-                if (movie.Duration == null)
-                    movie.Duration = movieExists.Duration;
+                if (!string.IsNullOrEmpty(movie.WatchingDate))
+                    watchedMovie.WatchingDate = movie.WatchingDate;
 
-                if (string.IsNullOrEmpty(movie.Director))
-                    movie.Director = movieExists.Director;
-
-                if (string.IsNullOrEmpty(movie.Country))
-                    movie.Country = movieExists.Country;
-
-                if (string.IsNullOrEmpty(movie.Actors))
-                    movie.Actors = movieExists.Actors;
-
-                if (string.IsNullOrEmpty(movie.Genre))
-                    movie.Genre = movieExists.Genre;
-
-                
-
-                uow.MovieDetailsJMDBApiRepository.Update(movie, movie.Id);
-              //  uow.Save();
-
-                if (!string.IsNullOrEmpty(comment))
-                    watchedMovie.Comment = comment;
-
-                if (!string.IsNullOrEmpty(rate))
-                    watchedMovie.Rating = Int32.Parse(rate);
-
-                if (!string.IsNullOrEmpty(date))
-                    watchedMovie.WatchingDate = date;
-
-                movie.Users = new List<WatchedMovie>();
-                movie.Users.Add(watchedMovie);
-
-                uow.WatchedMovieRepository.Update(watchedMovie, watchedMovie.MovieDetailsJMDBApiId, userId);
+                uow.WatchedMovieRepository.Update(watchedMovie,  userId, watchedMovie.MovieJMDBApiId);
                 uow.Save();
 
-
-                return movie;
+                return movieExists;
 
             }
         }

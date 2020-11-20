@@ -8,7 +8,7 @@ namespace FilmLoApp.API.Models.WatchedMovies
 {
     public class WatchedMovieModel // ovo mi vracamo kljentu!
     {
-        public long Id { get; set; } // mi stavljamo nas id, a ne onaj tt8445
+        public string Id { get; set; }
         public string Actors { get; set; }
         public int? Year { get; set; }
         public string Name { get; set; }

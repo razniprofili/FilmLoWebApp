@@ -39,7 +39,7 @@ namespace Data
 
             if (!string.IsNullOrWhiteSpace(includePropreties))
             {
-                //da bude ovako: "Role, Subject"
+                //da bude ovako: "User, MovieJMDBApi" npr
                 foreach (var prop in includePropreties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(prop);  // formiramo upit
@@ -55,7 +55,7 @@ namespace Data
 
             if (!string.IsNullOrWhiteSpace(includePropreties))
             {
-                //da bude ovako: "Role, Subject"
+                //da bude ovako: "User, MovieJMDBApi" npr
                 foreach (var prop in includePropreties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(prop);  // formiramo upit
@@ -70,7 +70,7 @@ namespace Data
 
             if (!string.IsNullOrWhiteSpace(includePropreties))
             {
-                //da bude ovako: "Role, Subject"
+                //da bude ovako: "User, MovieJMDBApi" npr
                 foreach (var prop in includePropreties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(prop);  // formiramo upit
@@ -121,7 +121,7 @@ namespace Data
             _context.SaveChanges();
         }
 
-        // za brisanje contextra, diskoektovanje
+        // za brisanje contexta, diskoektovanje
         private bool _disposed = false;
         public void Dispose(bool disposing) //protected virtual
         {
@@ -139,7 +139,7 @@ namespace Data
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this); //poziva garbice collector da se izbrise iz memorije
+            GC.SuppressFinalize(this); //poziva garbige collector da se izbrise iz memorije
         }
     }
 }

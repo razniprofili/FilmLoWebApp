@@ -43,39 +43,6 @@ namespace Domain.Migrations
                     b.ToTable("Friendship");
                 });
 
-            modelBuilder.Entity("Domain.MovieDetailsJMDBApi", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Actors")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Director")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Duration")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Genre")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MovieDetailsJMDBApi");
-                });
-
             modelBuilder.Entity("Domain.MovieJMDBApi", b =>
                 {
                     b.Property<string>("Id")
@@ -156,8 +123,8 @@ namespace Domain.Migrations
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("MovieDetailsJMDBApiId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("MovieJMDBApiId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Comment")
                         .HasColumnType("nvarchar(max)");
@@ -168,9 +135,9 @@ namespace Domain.Migrations
                     b.Property<string>("WatchingDate")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId", "MovieDetailsJMDBApiId");
+                    b.HasKey("UserId", "MovieJMDBApiId");
 
-                    b.HasIndex("MovieDetailsJMDBApiId");
+                    b.HasIndex("MovieJMDBApiId");
 
                     b.ToTable("WatchedMovie");
                 });
@@ -196,10 +163,47 @@ namespace Domain.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.MovieJMDBApi", b =>
+                {
+                    b.OwnsOne("Domain.MovieDetailsJMDBApi", "MovieDetailsJMDBApi", b1 =>
+                        {
+                            b1.Property<string>("MovieJMDBApiId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("Actors")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Country")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Director")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int?>("Duration")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Genre")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Name")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int?>("Year")
+                                .HasColumnType("int");
+
+                            b1.HasKey("MovieJMDBApiId");
+
+                            b1.ToTable("MovieDetailsJMDBApi");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MovieJMDBApiId");
+                        });
+                });
+
             modelBuilder.Entity("Domain.SavedMovie", b =>
                 {
                     b.HasOne("Domain.MovieJMDBApi", "MovieJMDBApi")
-                        .WithMany("Users")
+                        .WithMany("SavedUsers")
                         .HasForeignKey("MovieJMDBApiId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -213,9 +217,9 @@ namespace Domain.Migrations
 
             modelBuilder.Entity("Domain.WatchedMovie", b =>
                 {
-                    b.HasOne("Domain.MovieDetailsJMDBApi", "MovieDetailsJMDBApi")
-                        .WithMany("Users")
-                        .HasForeignKey("MovieDetailsJMDBApiId")
+                    b.HasOne("Domain.MovieJMDBApi", "MovieJMDBApi")
+                        .WithMany("WatchedUsers")
+                        .HasForeignKey("MovieJMDBApiId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -8,6 +8,8 @@ namespace FilmLoApp.API.Models.WatchedMovies
 {
     public class AddWatchedMovieModel
     {
+        [Required]
+        public string Id { get; set; }
         public string Actors { get; set; }
         public int? Year { get; set; }
         [Required]
@@ -21,6 +23,7 @@ namespace FilmLoApp.API.Models.WatchedMovies
         [Required]
         public string Comment { get; set; }
         public string DateTimeWatched { get; set; }
+        public string Poster { get; set; }
         //[Required]
         //public int UserId { get; set; } // imacu promenljivu koja prati trenutno ulogovanog usera, mozda nam ovo nije neophodno, ili mozemo u ruti da damo id Usera
     }

@@ -14,14 +14,9 @@ namespace Domain
         public string Surname { get; set; }
         public string Password { get; set; }
         public string Picture { get; set; }
-
-        //public List<MovieDetailsJMDBApi> WatchedMovies { get; set; }
         public List<WatchedMovie> WatchedMovies { get; set; }
-        // public List<MovieJMDBApi> SavedMovies { get; set; }
-        public List<SavedMovie> SavedMovies { get; set; }
-        
-        public List<Friendship> FriendsSent { get; set; }
-        
+        public List<SavedMovie> SavedMovies { get; set; }       
+        public List<Friendship> FriendsSent { get; set; }        
         public List<Friendship> FriendsReceived { get; set; }
    
     }

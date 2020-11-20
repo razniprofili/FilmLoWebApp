@@ -10,7 +10,5 @@ namespace Domain
         [Key]
         public char Code { get; set; }
         public string Name { get; set; }
-
-      //  public List<Friendship> Friendships { get; set; }
     }
 }
