@@ -9,8 +9,15 @@ using System.Text;
 
 namespace Core
 {
-   public class UserManager
+   public class UserManager: IUserManager
     {
+
+        //private readonly IUnitOfWork _uow;
+        //public UserManager(IUnitOfWork uow)
+        //{
+        //    _uow = uow;
+        //}
+
         public User Register(User user)
         {
             using (var uow = new UnitOfWork())

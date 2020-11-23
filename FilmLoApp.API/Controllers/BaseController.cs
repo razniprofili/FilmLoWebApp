@@ -1,4 +1,5 @@
 ﻿using Core;
+using Data;
 using FilmLoApp.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +12,10 @@ namespace FilmLoApp.API.Controllers
     public class BaseController : Controller
     {
         internal UserJwtModel CurrentUser { get; set; }
+
+        private IUnitOfWork _uow;
+
+        public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
 
         private UserManager _userManager;
         internal UserManager UserManager => _userManager ?? (_userManager = new UserManager());
