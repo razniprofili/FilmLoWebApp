@@ -1,10 +1,9 @@
-﻿using FilmLoApp.API.Models.User;
+﻿using Models.User;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace FilmLoApp.API.Models.WatchedMovies
+namespace Models.WatchedMovies
 {
     public class WatchedMovieModel // ovo mi vracamo kljentu!
     {

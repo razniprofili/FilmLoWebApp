@@ -1,8 +1,8 @@
-﻿using Core;
-using Domain;
+﻿
+
 using FilmLoApp.API.Helpers;
-using FilmLoApp.API.Models.SavedMovies;
 using Microsoft.AspNetCore.Mvc;
+using Models.SavedMovies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,24 +19,22 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("delete/{id}")]
         public void DeleteSavedMovie(string id)
         {
-            SavedMoviesManager.Delete(CurrentUser.Id, id);
+            facade.DeleteSavedMovie(CurrentUser.Id, id);
         }
 
         [TokenAuthorize]
         [HttpGet("{id}")] // user id
         public List<SavedMovieModel> GetAllMovies(long id)
         {
-            List<MovieJMDBApi> movies = SavedMoviesManager.GetAllMovies(id);
-            return movies.Select(a => Mapper.Map(a, id)).ToList();
+            return facade.GetAllSavedMovies(id);
+            
         }
 
         [TokenAuthorize]
         [HttpPost("add")]
-        public AddSavedMovieModel AddSavedMovie([FromBody]AddSavedMovieModel savedMovieModel)
+        public AddSavedMovieModel AddSavedMovie([FromBody] AddSavedMovieModel savedMovieModel)
         {
-            var savedMovie = SavedMoviesManager.Add(savedMovieModel.UserId, Mapper.AutoMap<AddSavedMovieModel, MovieJMDBApi>(savedMovieModel));
-            // return Mapper.AutoMap<MovieJMDBApi, AddSavedMovieModel>(savedMovie);
-            return Mapper.MapAdd(savedMovie, CurrentUser.Id);
+            return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
         }
 
         // Ovo moze i na front delu :)

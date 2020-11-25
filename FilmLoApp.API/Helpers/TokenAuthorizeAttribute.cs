@@ -1,7 +1,8 @@
 ﻿using Common.Exceptions;
 using FilmLoApp.API.Controllers;
-using FilmLoApp.API.Models;
+//using FilmLoApp.API.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

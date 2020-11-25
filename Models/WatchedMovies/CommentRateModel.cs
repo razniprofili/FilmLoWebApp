@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace FilmLoApp.API.Models.WatchedMovies
+namespace Models.WatchedMovies
 {
     public class CommentRateModel
     {
-      
+
         public int Rate { get; set; }
-       
+
         public string Comment { get; set; }
 
         public string DateTimeWatched { get; set; }

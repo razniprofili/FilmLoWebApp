@@ -1,8 +1,9 @@
 ﻿using Domain;
-using FilmLoApp.API.Models;
+//using FilmLoApp.API.Models;
 using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
+using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

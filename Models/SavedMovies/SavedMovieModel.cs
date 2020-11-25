@@ -1,11 +1,10 @@
-﻿using FilmLoApp.API.Models.User;
+﻿using Models.User;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace FilmLoApp.API.Models.SavedMovies
+namespace Models.SavedMovies
 {
     public class SavedMovieModel
     {

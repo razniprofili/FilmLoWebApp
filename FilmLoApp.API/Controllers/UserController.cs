@@ -1,13 +1,13 @@
-﻿using Domain;
+﻿
 using FilmLoApp.API.Helpers;
-using FilmLoApp.API.Models.Friendship;
-using FilmLoApp.API.Models.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Models.User;
+using Models.Friendship;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -20,7 +20,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("Register")]
         public object Register([FromBody] RegisterModel registerModel)
         {
-            var user = UserManager.Register(Mapper.AutoMap<RegisterModel, User>(registerModel));
+            var user = facade.Register(registerModel);
 
             return new
             {
@@ -32,7 +32,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("Login")]
         public object Login([FromBody] LoginModel loginModel)
         {
-            var user = UserManager.Login(Mapper.AutoMap<LoginModel, User>(loginModel));
+            var user = facade.Login(loginModel);
             return new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(user)
@@ -43,86 +43,81 @@ namespace FilmLoApp.API.Controllers
         [HttpGet]
         public UserModel GetUser(long id)
         {
-            var user = UserManager.GetUser(id);
-            return Mapper.AutoMap<User, UserModel>(user);
+            return facade.GetUser(id);
         }
 
         [TokenAuthorize]
         [HttpGet("allUsers")]
         public List<UserModel> GetAllUsers()
         {
-            var users = UserManager.GetAllUsers(CurrentUser.Id);
-            return users.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
+            return facade.GetAllUsers(CurrentUser.Id);  
         }
 
         [TokenAuthorize]
         [HttpPut]
         public UserModel UpdateUser([FromBody] UpdateModel user)
         {
-
-            var newUser = UserManager.Update(CurrentUser.Id, Mapper.AutoMap<UpdateModel, User>(user));
-            return Mapper.AutoMap<User, UserModel>(newUser);
+            return facade.Update(CurrentUser.Id, user);   
         }
 
         [TokenAuthorize]
         [HttpPut("delete")]
         public void DeleteUser()
         {
-            UserManager.DeleteUser(CurrentUser.Id);
+            facade.Delete(CurrentUser.Id);
         }
 
         [TokenAuthorize] 
         [HttpGet("friendInfo/{id}")]
         public UserModel GetFriendInfo(long id)
         {
-            var user = FriendshipManager.GetFriendInfo(id, CurrentUser.Id);
-            return Mapper.AutoMap<User, UserModel>(user);
+            return facade.GetFriendInfo(id, CurrentUser.Id);
+            
         }
 
         [TokenAuthorize] 
         [HttpPut("deleteFriend/{id}")]
         public void DeleteFriend(long id)
         {
-            FriendshipManager.DeleteFriend(id, CurrentUser.Id);
+            facade.DeleteFriend(id, CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("myFriends")]
         public List<UserModel> GetMyFriends()
         {
-            List<User> friends = FriendshipManager.GetAllMyFriends(CurrentUser.Id);
-            return friends.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
+            return facade.GetAllMyFriends(CurrentUser.Id);
+            
         }
 
         [TokenAuthorize]
         [HttpPost("myFriends/search")]
         public List<UserModel> SearchMyFriends([FromBody]string searchCriteria)
         {
-            var friends = FriendshipManager.SearchMyFriends(CurrentUser.Id, searchCriteria);
-            return friends.Select(a => Mapper.AutoMap<User, UserModel>(a)).ToList();
+            return  facade.SearchMyFriends(CurrentUser.Id, searchCriteria);
+           
         }
 
         [TokenAuthorize]
         [HttpPost("addFriend")]
         public FriendshipModel AddFriend( [FromBody] AddFriendshipModel model)
         {
-            var friendship = FriendshipManager.Add(Mapper.Map(model, CurrentUser.Id), CurrentUser.Id);
-            return Mapper.Map(friendship);
+            return facade.Add(model, CurrentUser.Id);    
         }
 
         [TokenAuthorize] 
         [HttpPost("acceptRequest/{id}")]
         public FriendshipModel AcceptRequest(long id)
         {
-            var acceptedRequest = FriendshipManager.AcceptRequest(CurrentUser.Id, id);
-            return Mapper.Map(acceptedRequest); 
+            return facade.AcceptRequest(CurrentUser.Id, id);
+            
         }
 
         [TokenAuthorize] 
         [HttpPost("declineRequest/{id}")]
         public void DeclineRequest(long id)
         {
-            FriendshipManager.DeclineRequest(CurrentUser.Id, id);
+            facade.DeclineRequest(CurrentUser.Id, id);
         }
     }
 }
