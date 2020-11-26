@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Models.User;
 using Models.Friendship;
+using Models;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -22,10 +23,26 @@ namespace FilmLoApp.API.Controllers
         {
             var user = facade.Register(registerModel);
 
-            return new
+            var userToReturn = new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(user)
             };
+
+            //return new
+            //{
+            //    AuthResponseData = SecurityHelper.CreateLoginToken(user)
+            //};
+
+            var links = CreateLinksForUser(userToReturn.AuthResponseData.Id, null);
+
+            var linkedResourceToReturn = userToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetUser",
+                new { userId = linkedResourceToReturn["AuthResponseData"] },
+                linkedResourceToReturn);
+
         }
 
         [AllowAnonymous] // ne treba nam autorizacija
@@ -33,19 +50,38 @@ namespace FilmLoApp.API.Controllers
         public object Login([FromBody] LoginModel loginModel)
         {
             var user = facade.Login(loginModel);
-            return new
+
+            var userToReturn = new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(user)
             };
+
+            //return new
+            //{
+            //    AuthResponseData = SecurityHelper.CreateLoginToken(user)
+            //};
+
+            var links = CreateLinksForUser(userToReturn.AuthResponseData.Id, null);
+
+            var linkedResourceToReturn = userToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetUser",
+                new { userId = linkedResourceToReturn["AuthResponseData"] },
+                linkedResourceToReturn);
+
         }
 
         [TokenAuthorize] //mora da bude ulogovan
-        [HttpGet]
+        [HttpGet(Name = "GetUser")]
         public UserModel GetUser(long id)
         {
             return facade.GetUser(id);
         }
-
+         
+        // ****************************************************************
+        // pagination, order by, filter... Can be included
         [TokenAuthorize]
         [HttpGet("allUsers")]
         public List<UserModel> GetAllUsers()
@@ -53,15 +89,31 @@ namespace FilmLoApp.API.Controllers
             return facade.GetAllUsers(CurrentUser.Id);  
         }
 
-        [TokenAuthorize]
-        [HttpPut]
-        public UserModel UpdateUser([FromBody] UpdateModel user)
-        {
-            return facade.Update(CurrentUser.Id, user);   
-        }
+        // ****************************************************************
 
         [TokenAuthorize]
-        [HttpPut("delete")]
+        [HttpPut(Name = "UpdateUser")]
+        public ActionResult<UserModel> UpdateUser([FromBody] UpdateModel user)
+        {
+           
+           // return facade.Update(CurrentUser.Id, user); 
+            var userToReturn = facade.Update(CurrentUser.Id, user);
+
+            var links = CreateLinksForUser(userToReturn.Id, null);
+
+            var linkedResourceToReturn = userToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetUser",
+                new { userId = linkedResourceToReturn["Id"] },
+                linkedResourceToReturn);
+
+        }
+
+
+        [TokenAuthorize]
+        [HttpPut("delete", Name ="DeleteUser")]
         public void DeleteUser()
         {
             facade.Delete(CurrentUser.Id);
@@ -82,6 +134,8 @@ namespace FilmLoApp.API.Controllers
             facade.DeleteFriend(id, CurrentUser.Id);
         }
 
+        // ****************************************************************
+        // pagination, order by, filter... Can be included
         [TokenAuthorize]
         [HttpGet("myFriends")]
         public List<UserModel> GetMyFriends()
@@ -89,6 +143,7 @@ namespace FilmLoApp.API.Controllers
             return facade.GetAllMyFriends(CurrentUser.Id);
             
         }
+        // ****************************************************************
 
         [TokenAuthorize]
         [HttpPost("myFriends/search")]
@@ -119,5 +174,43 @@ namespace FilmLoApp.API.Controllers
         {
             facade.DeclineRequest(CurrentUser.Id, id);
         }
+
+        #region PrivateMethods
+
+        private object CreateLinksForUser(long userId, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(
+                  new LinkDto(Url.Link("GetUser", new { userId }),
+                  "self",
+                  "GET"));
+            }
+            else
+            {
+                links.Add(
+                  new LinkDto(Url.Link("GetUser", new { userId, fields }),
+                  "self",
+                  "GET"));
+            }
+
+            links.Add(
+               new LinkDto(Url.Link("DeleteUser", new { id = "" }),
+               "Only current user can be deleted!",
+               "PUT"));
+
+            links.Add(
+              new LinkDto(Url.Link("UpdateUser", new { id = "" }),
+              "You must enter fields for update in the body!",
+              "PUT"));
+
+
+            return links;
+        }
+
+        #endregion
+
     }
 }
