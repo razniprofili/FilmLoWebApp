@@ -33,6 +33,27 @@ namespace Mapper
             };
         }
 
+        public static MovieJMDBApi Map(AddSavedMovieModel movieModel)
+        {
+            return new MovieJMDBApi
+            {
+                Id = movieModel.Id,
+                Name = movieModel.Name,
+                Poster = movieModel.Poster,
+                MovieDetailsJMDBApi = new MovieDetailsJMDBApi
+                {
+                    Actors = movieModel.Actors,
+                    Genre = movieModel.Genre,
+                    Duration = movieModel.Duration,
+                    Year = movieModel.Year,
+                    Country = movieModel.Country,
+                    Name = movieModel.Name,
+                    Director = movieModel.Director
+                }
+
+            };
+        }
+
         public static WatchedMovie MapUpdate(UpdateWatchedMovieModel updateModel)
         {
             return new WatchedMovie
@@ -130,6 +151,12 @@ namespace Mapper
                 Name = movie.Name,
                 Poster = movie.Poster,
                 UserId = userId,
+                Actors = movie.MovieDetailsJMDBApi.Actors,
+                Genre = movie.MovieDetailsJMDBApi.Genre,
+                Duration = movie.MovieDetailsJMDBApi.Duration,
+                Year = movie.MovieDetailsJMDBApi.Year,
+                Country = movie.MovieDetailsJMDBApi.Country,
+                Director = movie.MovieDetailsJMDBApi.Director
                 // User = AutoMap<User, UserModel>(userMovie)
             };
         }

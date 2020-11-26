@@ -203,7 +203,7 @@ namespace FilmLoApp.API.Controllers
 
             links.Add(
               new LinkDto(Url.Link("UpdateUser", new { id = "" }),
-              "You must enter fields for update in the body!",
+              "UPDATE- You must enter fields for update in the body!",
               "PUT"));
 
 

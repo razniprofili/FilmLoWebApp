@@ -62,7 +62,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("getMovie/{movieId}")]
+        [HttpGet("getMovie/{movieId}", Name = "GetWatchedMovie")]
         public WatchedMovieModel GetMovie(string movieId)
         {
             return facade.GetWatchedMovie(movieId, CurrentUser.Id);
@@ -70,7 +70,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPut("delete/{movieId}")]
+        [HttpPut("delete/{movieId}", Name = "DeleteWatchedMovie")]
         public void DeleteMovie(string movieId)
         {
             facade.DeleteWatchedMovie(movieId, CurrentUser.Id);
@@ -92,7 +92,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPut("updateWatchedMovie/{movieId}")]
+        [HttpPut("updateWatchedMovie/{movieId}", Name = "UpdateWatchedMovie")]
         public WatchedMovieModel Update([FromBody] UpdateWatchedMovieModel movie, string movieId)
         {
             return facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);

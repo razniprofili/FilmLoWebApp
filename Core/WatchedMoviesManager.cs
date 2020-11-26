@@ -1,11 +1,13 @@
 ﻿using Common.Helpers;
 using Data;
+using Data.Repositories;
 using Domain;
 using Microsoft.Data.SqlClient.Server;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -287,6 +289,16 @@ namespace Core
 
                 var addedMovie = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movieAPIid, "MovieDetailsJMDBApi");
                 addedMovie.WatchedUsers.Add(watchedMovie);
+
+                // we need to delete movie from saved list (if exists)
+
+                var savedMovie = uow.SavedMovieRepository.FirstOrDefault(m => m.MovieJMDBApiId == movieAPIid && m.UserId == userId);
+
+                if( savedMovie != null)
+                {
+                    uow.SavedMovieRepository.Delete(savedMovie);
+                    uow.Save();
+                }
 
                 return addedMovie;
             }

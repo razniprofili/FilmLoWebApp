@@ -2,6 +2,7 @@
 
 using FilmLoApp.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Models;
 using Models.SavedMovies;
 using System;
 using System.Collections.Generic;
@@ -16,14 +17,14 @@ namespace FilmLoApp.API.Controllers
     public class SavedMoviesController : BaseController
     {
         [TokenAuthorize]
-        [HttpPut("delete/{id}")]
+        [HttpPut("delete/{id}", Name = "DeleteSavedMovie")]
         public void DeleteSavedMovie(string id)
         {
             facade.DeleteSavedMovie(CurrentUser.Id, id);
         }
 
         [TokenAuthorize]
-        [HttpGet("{id}")] // user id
+        [HttpGet("{id}", Name = "GetAllSavedMovies")] // user id
         public List<SavedMovieModel> GetAllMovies(long id)
         {
             return facade.GetAllSavedMovies(id);
@@ -32,9 +33,21 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpPost("add")]
-        public AddSavedMovieModel AddSavedMovie([FromBody] AddSavedMovieModel savedMovieModel)
+        public object AddSavedMovie([FromBody] AddSavedMovieModel savedMovieModel)
         {
-            return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
+            // return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
+            var movieToReturn = facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
+
+            var links = CreateLinksForMovie(movieToReturn.UserId, movieToReturn.Id);
+
+            var linkedResourceToReturn = movieToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return new { 
+                          movieToReturn,
+                          linkedResourceToReturn
+                       };
         }
 
         // Ovo moze i na front delu :)
@@ -47,5 +60,26 @@ namespace FilmLoApp.API.Controllers
 
         //    return movies.Select(a => Mapper.Map(a, CurrentUser.Id)).ToList();
         //}
+
+        #region PrivateMethods
+
+        private object CreateLinksForMovie(long userId, string movieId)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+               new LinkDto(Url.Link("GetAllSavedMovies", new { userId }),
+               "all saved movies",
+               "GET"));
+
+            links.Add(
+               new LinkDto(Url.Link("DeleteSavedMovie", new { movieId }),
+               "Delete saved movie.",
+               "PUT"));
+
+            return links;
+        }
+
+        #endregion
     }
 }

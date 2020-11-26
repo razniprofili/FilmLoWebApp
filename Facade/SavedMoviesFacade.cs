@@ -22,7 +22,7 @@ namespace Facade
 
         public AddSavedMovieModel AddSavedMovie( long userId, AddSavedMovieModel addModel)
         {
-            var savedMovie = SavedMoviesManager.Add(userId, Mapper.Mapper.AutoMap<AddSavedMovieModel, MovieJMDBApi>(addModel));
+            var savedMovie = SavedMoviesManager.Add(userId, Mapper.Mapper.Map(addModel));
             return Mapper.Mapper.MapAdd(savedMovie, userId);
         }
 
