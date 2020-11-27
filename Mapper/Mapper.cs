@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Common.Helpers;
 using Domain;
 using Models.Friendship;
 using Models.SavedMovies;
 using Models.User;
 using Models.WatchedMovies;
 using System;
+using System.Collections.Generic;
+using System.Dynamic;
 
 namespace Mapper
 {
@@ -17,6 +20,28 @@ namespace Mapper
             var config = new MapperConfiguration(c => c.CreateMap<TSource, TDestination>());
             var mapper = config.CreateMapper();
             return mapper.Map<TDestination>(source);
+        }
+
+        public static IEnumerable<UserModel> Map(PagedList<User> users)
+        {
+            List<UserModel> usersToReturn = new List<UserModel>();
+
+            foreach(var user in users)
+            {
+                var userModel = new UserModel
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Name = user.Name,
+                    Surname = user.Surname,
+                    Picture = user.Picture
+                    
+                };
+
+                usersToReturn.Add(userModel);
+            }
+
+            return usersToReturn;
         }
 
         public static MovieDetailsJMDBApi MapWatchedMovie(AddWatchedMovieModel movieModel)

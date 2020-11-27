@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Common.Helpers;
+using Common.ResourceParameters;
+using Domain;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +15,7 @@ namespace Core
         public User Update(long id, User user);
         public void DeleteUser(long id);
         public List<User> GetAllUsers(long idUser);
+        public PagedList<User> GetAllUsers(long idUser, UsersResourceParameters usersResourceParameters);
 
     }
 }

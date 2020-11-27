@@ -1,7 +1,10 @@
 ﻿using Common.Exceptions;
 using Common.Helpers;
+using Common.ResourceParameters;
+using Core.Services;
 using Data;
 using Domain;
+using Models.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +15,29 @@ namespace Core
    public class UserManager: IUserManager
     {
 
+        #region PrivateFields
+
         //private readonly IUnitOfWork _uow;
+
+        private readonly IPropertyMappingService _propertyMappingService;
+
+        #endregion
+
+        #region Constructors
+        public UserManager(IPropertyMappingService propertyMappingService)
+        {
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
+        }
+
         //public UserManager(IUnitOfWork uow)
         //{
         //    _uow = uow;
         //}
+
+        #endregion
+
+        #region Methods
 
         public User Register(User user)
         {
@@ -92,7 +113,7 @@ namespace Core
                 return user;
             }
         }
-   
+
         public void DeleteUser(long id)
         {
             using (var uow = new UnitOfWork())
@@ -104,12 +125,12 @@ namespace Core
 
                 var friends = uow.FriendshipRepository.Find(f => f.UserRecipientId == id || f.UserSenderId == id);
 
-                if(friends != null)
+                if (friends != null)
                 {
-                    foreach(var friend in friends)
+                    foreach (var friend in friends)
                     {
                         uow.FriendshipRepository.Delete(friend);
-                       // uow.Save();
+                        // uow.Save();
                     }
 
                     uow.Save();
@@ -133,6 +154,38 @@ namespace Core
                 return allUsers;
             }
         }
+
+        public PagedList<User> GetAllUsers(long idUser, UsersResourceParameters usersResourceParameters)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(user);
+
+                var allUsers = uow.UserRepository.Find(x => x.Id != idUser); //as IQueryable<User> // necemo da nam vraca nas (crr usera)
+
+                if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+                {
+                    var searchQuery = usersResourceParameters.SearchQuery.Trim();
+                    allUsers = allUsers.Where(a => a.Name.Contains(searchQuery) || a.Surname.Contains(searchQuery));
+                }
+
+                if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
+                {
+                    // get property mapping dictionary
+                    var authorPropertyMappingDictionary =
+                        _propertyMappingService.GetPropertyMapping<UserModel, User>();
+
+                    allUsers = allUsers.ApplySort(usersResourceParameters.OrderBy,
+                        authorPropertyMappingDictionary);
+                }
+
+                return PagedList<User>.Create(allUsers, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
+            }
+        }
+
+        #endregion
 
 
     }

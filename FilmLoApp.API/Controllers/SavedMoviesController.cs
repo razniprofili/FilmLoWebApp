@@ -1,5 +1,7 @@
 ﻿
 
+using AutoMapper;
+using Core.Services;
 using FilmLoApp.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -16,6 +18,12 @@ namespace FilmLoApp.API.Controllers
     [Route("api/SavedMovies")]
     public class SavedMoviesController : BaseController
     {
+        public SavedMoviesController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        {
+
+        }
+
+
         [TokenAuthorize]
         [HttpPut("delete/{id}", Name = "DeleteSavedMovie")]
         public void DeleteSavedMovie(string id)

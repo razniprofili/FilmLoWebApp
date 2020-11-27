@@ -4,6 +4,8 @@ using System;
 using Mapper;
 using System.Collections.Generic;
 using System.Linq;
+using Common.Helpers;
+using Common.ResourceParameters;
 
 namespace Facade
 {
@@ -29,6 +31,11 @@ namespace Facade
         {
             var users = UserManager.GetAllUsers(currentUserId);
             return users.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
+        }
+
+        public PagedList<User> GetAllUsers(long currentUserId, UsersResourceParameters usersResourceParameters)
+        {
+            return UserManager.GetAllUsers(currentUserId, usersResourceParameters);
         }
 
         public UserModel Update(long currentUserId, UpdateModel updateUser)

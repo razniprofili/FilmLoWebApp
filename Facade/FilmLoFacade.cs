@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Core;
+using Core.Services;
 using Data;
 
 namespace Facade
@@ -16,12 +17,15 @@ namespace Facade
         //    _friendshipManager = friendshipManager;
         //}
 
+        private IPropertyMappingService _propertyMappingService;
+        internal IPropertyMappingService PropertyMappingService => _propertyMappingService ?? (_propertyMappingService = new PropertyMappingService());
+
         private IUnitOfWork _uow;
 
         public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
 
         private UserManager _userManager;
-        internal UserManager UserManager => _userManager ?? (_userManager = new UserManager());
+        internal UserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService));
 
         private SavedMoviesManager _savedMoviesManager;
         internal SavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager());

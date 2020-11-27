@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using Models.User;
 using Models.Friendship;
 using Models;
+using Common.ResourceParameters;
+using System.Text.Json;
+using Domain;
+using AutoMapper;
+using Core.Services;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -17,6 +22,16 @@ namespace FilmLoApp.API.Controllers
     [Route("api/User")]
     public class UserController : BaseController
     {
+        #region Constructors
+
+        public UserController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        {
+        }
+
+        #endregion
+
+        #region Routes
+
         [AllowAnonymous] // ne treba nam autorizacija
         [HttpPost("Register")]
         public object Register([FromBody] RegisterModel registerModel)
@@ -79,24 +94,61 @@ namespace FilmLoApp.API.Controllers
         {
             return facade.GetUser(id);
         }
-         
-        // ****************************************************************
+
+
         // pagination, order by, filter... Can be included
         [TokenAuthorize]
-        [HttpGet("allUsers")]
-        public List<UserModel> GetAllUsers()
+        [HttpGet("allUsers", Name = "GetUsers")]
+        [HttpHead]
+        public IActionResult GetAllUsers([FromQuery] UsersResourceParameters parameters)
         {
-            return facade.GetAllUsers(CurrentUser.Id);  
+            // return facade.GetAllUsers(CurrentUser.Id);  
+
+            var usersFromrepo = facade.GetAllUsers(CurrentUser.Id, parameters);
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromrepo.TotalCount,
+                pageSize = usersFromrepo.PageSize,
+                currentPage = usersFromrepo.CurrentPage,
+                totalPages = usersFromrepo.TotalPages
+                //previousPageLink,
+                //nextPageLink
+            };
+
+            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            //hateoas
+            var links = CreateLinksForUser(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
+
+            var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
+
+            var shapedUsersWithLinks = shapedUsers.Select(user =>
+            {
+                var userAsDictionary = user as IDictionary<string, object>;
+                var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
+                userAsDictionary.Add("links", userLinks);
+                return userAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = shapedUsersWithLinks,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
+
         }
 
-        // ****************************************************************
 
         [TokenAuthorize]
         [HttpPut(Name = "UpdateUser")]
         public ActionResult<UserModel> UpdateUser([FromBody] UpdateModel user)
         {
-           
-           // return facade.Update(CurrentUser.Id, user); 
+
+            // return facade.Update(CurrentUser.Id, user); 
             var userToReturn = facade.Update(CurrentUser.Id, user);
 
             var links = CreateLinksForUser(userToReturn.Id, null);
@@ -113,21 +165,21 @@ namespace FilmLoApp.API.Controllers
 
 
         [TokenAuthorize]
-        [HttpPut("delete", Name ="DeleteUser")]
+        [HttpPut("delete", Name = "DeleteUser")]
         public void DeleteUser()
         {
             facade.Delete(CurrentUser.Id);
         }
 
-        [TokenAuthorize] 
+        [TokenAuthorize]
         [HttpGet("friendInfo/{id}")]
         public UserModel GetFriendInfo(long id)
         {
             return facade.GetFriendInfo(id, CurrentUser.Id);
-            
+
         }
 
-        [TokenAuthorize] 
+        [TokenAuthorize]
         [HttpPut("deleteFriend/{id}")]
         public void DeleteFriend(long id)
         {
@@ -141,43 +193,45 @@ namespace FilmLoApp.API.Controllers
         public List<UserModel> GetMyFriends()
         {
             return facade.GetAllMyFriends(CurrentUser.Id);
-            
+
         }
         // ****************************************************************
 
         [TokenAuthorize]
         [HttpPost("myFriends/search")]
-        public List<UserModel> SearchMyFriends([FromBody]string searchCriteria)
+        public List<UserModel> SearchMyFriends([FromBody] string searchCriteria)
         {
-            return  facade.SearchMyFriends(CurrentUser.Id, searchCriteria);
-           
+            return facade.SearchMyFriends(CurrentUser.Id, searchCriteria);
+
         }
 
         [TokenAuthorize]
         [HttpPost("addFriend")]
-        public FriendshipModel AddFriend( [FromBody] AddFriendshipModel model)
+        public FriendshipModel AddFriend([FromBody] AddFriendshipModel model)
         {
-            return facade.Add(model, CurrentUser.Id);    
+            return facade.Add(model, CurrentUser.Id);
         }
 
-        [TokenAuthorize] 
+        [TokenAuthorize]
         [HttpPost("acceptRequest/{id}")]
         public FriendshipModel AcceptRequest(long id)
         {
             return facade.AcceptRequest(CurrentUser.Id, id);
-            
+
         }
 
-        [TokenAuthorize] 
+        [TokenAuthorize]
         [HttpPost("declineRequest/{id}")]
         public void DeclineRequest(long id)
         {
             facade.DeclineRequest(CurrentUser.Id, id);
         }
 
+        #endregion
+
         #region PrivateMethods
 
-        private object CreateLinksForUser(long userId, string fields)
+        private IEnumerable<LinkDto> CreateLinksForUser(long userId, string fields)
         {
             var links = new List<LinkDto>();
 
@@ -206,6 +260,73 @@ namespace FilmLoApp.API.Controllers
               "UPDATE- You must enter fields for update in the body!",
               "PUT"));
 
+
+            return links;
+        }
+
+        private string CreateUsersResourceUri(UsersResourceParameters usersResourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link("GetUsers",
+                      new
+                      {
+                          fields = usersResourceParameters.Fields,
+                          orderBy = usersResourceParameters.OrderBy,
+                          pageNumber = usersResourceParameters.PageNumber - 1,
+                          pageSize = usersResourceParameters.PageSize,
+                          searchQuery = usersResourceParameters.SearchQuery
+                      });
+                case ResourceUriType.NextPage:
+                    return Url.Link("GetUsers",
+                      new
+                      {
+                          fields = usersResourceParameters.Fields,
+                          orderBy = usersResourceParameters.OrderBy,
+                          pageNumber = usersResourceParameters.PageNumber + 1,
+                          pageSize = usersResourceParameters.PageSize,
+                          searchQuery = usersResourceParameters.SearchQuery
+                      });
+                case ResourceUriType.Current: //vazi isto sto i za def.
+                default:
+                    return Url.Link("GetUsers",
+                    new
+                    {
+                        fields = usersResourceParameters.Fields,
+                        orderBy = usersResourceParameters.OrderBy,
+                        pageNumber = usersResourceParameters.PageNumber,
+                        pageSize = usersResourceParameters.PageSize,
+                        searchQuery = usersResourceParameters.SearchQuery
+                    });
+            }
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForUser(UsersResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            // self 
+            links.Add(
+               new LinkDto(CreateUsersResourceUri(
+                   usersResourceParameters, ResourceUriType.Current)
+               , "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(
+                  new LinkDto(CreateUsersResourceUri(
+                      usersResourceParameters, ResourceUriType.NextPage),
+                  "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(CreateUsersResourceUri(
+                        usersResourceParameters, ResourceUriType.PreviousPage),
+                    "previousPage", "GET"));
+            }
 
             return links;
         }

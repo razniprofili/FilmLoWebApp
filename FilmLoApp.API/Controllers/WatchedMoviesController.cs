@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Models.WatchedMovies;
 using Models.User;
+using AutoMapper;
+using Core.Services;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -14,6 +16,12 @@ namespace FilmLoApp.API.Controllers
     [Route("api/WatchedMovies")]
     public class WatchedMoviesController : BaseController
     {
+
+        public WatchedMoviesController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        {
+
+        }
+
         [TokenAuthorize]
         [HttpGet("allMovies")]
         public List<WatchedMovieModel> GetAllMovies()
