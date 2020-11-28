@@ -17,7 +17,10 @@ namespace Core.Services
           new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
           {
                { "Id", new PropertyMappingValue(new List<string>() { "Id" } ) },
-               { "Name", new PropertyMappingValue(new List<string>() { "Name", "Surname" }) }
+               { "Name", new PropertyMappingValue(new List<string>() { "Name"}) }, // , "Surname"
+               { "Surname", new PropertyMappingValue(new List<string>() { "Surname"}) },
+               { "Email", new PropertyMappingValue(new List<string>() { "Email"}) }
+
           };
 
         private IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();

@@ -20,14 +20,18 @@ namespace Core
         //private readonly IUnitOfWork _uow;
 
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _servicePropertyChecker;
 
         #endregion
 
         #region Constructors
-        public UserManager(IPropertyMappingService propertyMappingService)
+        public UserManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
         {
             _propertyMappingService = propertyMappingService ??
                 throw new ArgumentNullException(nameof(propertyMappingService));
+
+            _servicePropertyChecker = checker ??
+                throw new ArgumentNullException(nameof(checker));
         }
 
         //public UserManager(IUnitOfWork uow)
@@ -162,6 +166,20 @@ namespace Core
                 //provera da li postoji user za svaki slucaj:
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
+
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
+                (usersResourceParameters.OrderBy))
+                {
+                    throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
+                }
+
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<UserModel>
+                  (usersResourceParameters.Fields))
+                {
+                    throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
+                }
 
                 var allUsers = uow.UserRepository.Find(x => x.Id != idUser); //as IQueryable<User> // necemo da nam vraca nas (crr usera)
 

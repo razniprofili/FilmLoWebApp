@@ -20,12 +20,16 @@ namespace Facade
         private IPropertyMappingService _propertyMappingService;
         internal IPropertyMappingService PropertyMappingService => _propertyMappingService ?? (_propertyMappingService = new PropertyMappingService());
 
+        private IPropertyCheckerService _propertyCheckerService;
+        internal IPropertyCheckerService PropertyCheckerService => _propertyCheckerService ?? (_propertyCheckerService = new PropertyCheckerService());
+
+
         private IUnitOfWork _uow;
 
         public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
 
         private UserManager _userManager;
-        internal UserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService));
+        internal UserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService, PropertyCheckerService));
 
         private SavedMoviesManager _savedMoviesManager;
         internal SavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager());
@@ -34,7 +38,7 @@ namespace Facade
         internal WatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager());
 
         private FriendshipManager _friendshipManager;
-        internal FriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager());
+        internal FriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));
 
     }
 }

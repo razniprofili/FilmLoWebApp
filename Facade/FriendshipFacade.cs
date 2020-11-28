@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Common.Helpers;
+using Common.ResourceParameters;
+using Domain;
 using Models.Friendship;
 using Models.User;
 using System;
@@ -25,6 +27,11 @@ namespace Facade
         {
             List<User> friends = FriendshipManager.GetAllMyFriends(currentUserId);
             return friends.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
+        }
+
+        public PagedList<User> GetAllMyFriends(long currentUserId, UsersResourceParameters usersResourceParameters)
+        {
+            return FriendshipManager.GetAllMyFriends(currentUserId, usersResourceParameters);
         }
 
         public List<UserModel> SearchMyFriends(long currentUserId, string criteria)

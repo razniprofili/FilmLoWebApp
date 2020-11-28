@@ -1,6 +1,10 @@
-﻿using Common.Helpers;
+﻿using Common.Exceptions;
+using Common.Helpers;
+using Common.ResourceParameters;
+using Core.Services;
 using Data;
 using Domain;
+using Models.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +14,33 @@ namespace Core
 {
     public class FriendshipManager
     {
+
+        #region PrivateFields
+
+        //private readonly IUnitOfWork _uow;
+
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _servicePropertyChecker;
+
+        #endregion
+
+        #region Constructors
+        public FriendshipManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
+        {
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
+
+            _servicePropertyChecker = checker ??
+               throw new ArgumentNullException(nameof(checker));
+        }
+
+        //public UserManager(IUnitOfWork uow)
+        //{
+        //    _uow = uow;
+        //}
+
+        #endregion
+
         public List<User> SearchMyFriends(long idUser, string searchCriteria)
         {
             using (var uow = new UnitOfWork())
@@ -44,6 +75,8 @@ namespace Core
             }
         }
 
+        // no parameters
+
         public List<User> GetAllMyFriends(long idUser)
         {
             using (var uow = new UnitOfWork())
@@ -71,6 +104,72 @@ namespace Core
                 }
 
                 return friends;
+            }
+        }
+
+        // with parameters
+
+        public PagedList<User> GetAllMyFriends(long idUser, UsersResourceParameters usersResourceParameters)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(user);
+
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
+                (usersResourceParameters.OrderBy))
+                {
+                    throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
+                }
+
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<UserModel>
+                  (usersResourceParameters.Fields))
+                {
+                    throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
+                }
+
+                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
+
+                List<User> friends = new List<User>();
+                
+
+                foreach (var friend in friendships)
+                {
+                    if (friend.UserSenderId == idUser)
+                    {
+                        var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
+                        friends.Add(userFriend);
+                        
+                    }
+                    else
+                    {
+                        var userFriend = uow.UserRepository.GetById(friend.UserSenderId);
+                        friends.Add(userFriend);
+                    }
+                }
+
+                IQueryable<User> fr = friends.AsQueryable<User>();
+
+                if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+                {
+                    var searchQuery = usersResourceParameters.SearchQuery.Trim().ToLower();
+                    fr = fr.Where(a => a.Name.ToLower().Contains(searchQuery) || a.Surname.ToLower().Contains(searchQuery)); // ako je pocetno slovo veliko T npr, a mi unesemo t
+                }
+
+                if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
+                {
+                    // get property mapping dictionary
+                    var userPropertyMappingDictionary =
+                        _propertyMappingService.GetPropertyMapping<UserModel, User>();
+
+                    fr = fr.ApplySort(usersResourceParameters.OrderBy,
+                        userPropertyMappingDictionary);
+                }
+
+                return PagedList<User>.Create(fr, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
             }
         }
 

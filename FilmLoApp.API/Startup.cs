@@ -41,81 +41,81 @@ namespace FilmLoApp.API
         public void ConfigureServices(IServiceCollection services)
         {
             //za kesiranje
-            services.AddHttpCacheHeaders((expirationModelOptions) =>
-            {
-                expirationModelOptions.MaxAge = 60;
-                expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
-            },
-            (validationModelOptions) =>
-            {
-                validationModelOptions.MustRevalidate = true;
-            });
+            //services.AddHttpCacheHeaders((expirationModelOptions) =>
+            //{
+            //    expirationModelOptions.MaxAge = 60;
+            //    expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
+            //},
+            //(validationModelOptions) =>
+            //{
+            //    validationModelOptions.MustRevalidate = true;
+            //});
 
-            services.AddResponseCaching();
+            //services.AddResponseCaching();
 
 
             services.AddMvc(options => options.EnableEndpointRouting = false);
-            services.AddControllers(setupAction =>
-            {
-                setupAction.ReturnHttpNotAcceptable = true; //ako npr xml nije podrzavajuc on ce vratiti gresku 406, a ne u JSON formatu koji je default
-                //za kesiranje, da bi se primelo isto pravilo nad razl resursima
-                setupAction.CacheProfiles.Add("240SecondsCacheProfile",
-                                                new CacheProfile()
-                                                {
-                                                    Duration = 240
-                                                });
-            })//dodajemo ovo da bi mogao da cita JSON patch doc kod partial updejtovanja
-            //dodati pre xla da se ne bi promenio defaltni tip
-            .AddNewtonsoftJson(setupAction =>
-            {
-                setupAction.SerializerSettings.ContractResolver =
-                   new CamelCasePropertyNamesContractResolver();
-            })
-            .AddXmlDataContractSerializerFormatters()
-            .ConfigureApiBehaviorOptions(setupAction =>
-            {
-                setupAction.InvalidModelStateResponseFactory = context =>
-                {
-                    // create a problem details object
-                    var problemDetailsFactory = context.HttpContext.RequestServices
-                        .GetRequiredService<ProblemDetailsFactory>();
-                    var problemDetails = problemDetailsFactory.CreateValidationProblemDetails(
-                            context.HttpContext,
-                            context.ModelState);
+            //services.AddControllers(setupAction =>
+            //{
+            //    setupAction.ReturnHttpNotAcceptable = true; //ako npr xml nije podrzavajuc on ce vratiti gresku 406, a ne u JSON formatu koji je default
+            //    //za kesiranje, da bi se primelo isto pravilo nad razl resursima
+            //    setupAction.CacheProfiles.Add("240SecondsCacheProfile",
+            //                                    new CacheProfile()
+            //                                    {
+            //                                        Duration = 240
+            //                                    });
+            //})//dodajemo ovo da bi mogao da cita JSON patch doc kod partial updejtovanja
+            ////dodati pre xla da se ne bi promenio defaltni tip
+            //.AddNewtonsoftJson(setupAction =>
+            //{
+            //    setupAction.SerializerSettings.ContractResolver =
+            //       new CamelCasePropertyNamesContractResolver();
+            //})
+            //.AddXmlDataContractSerializerFormatters().ConfigureApiBehaviorOptions(setupAction =>
+            //{
+            //    setupAction.InvalidModelStateResponseFactory = context =>
+            //    {
+            //        // create a problem details object
+            //        var problemDetailsFactory = context.HttpContext.RequestServices
+            //            .GetRequiredService<ProblemDetailsFactory>();
+            //        var problemDetails = problemDetailsFactory.CreateValidationProblemDetails(
+            //                context.HttpContext,
+            //                context.ModelState);
 
-                    // add additional info not added by default
-                    problemDetails.Detail = "See the errors field for details.";
-                    problemDetails.Instance = context.HttpContext.Request.Path;
+            //        // add additional info not added by default
+            //        problemDetails.Detail = "See the errors field for details.";
+            //        problemDetails.Instance = context.HttpContext.Request.Path;
 
-                    // find out which status code to use
-                    var actionExecutingContext =
-                          context as Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext;
+            //        // find out which status code to use
+            //        var actionExecutingContext =
+            //              context as Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext;
 
-                    // if there are modelstate errors & all keys were correctly
-                    // found/parsed we're dealing with validation errors
-                    if ((context.ModelState.ErrorCount > 0) &&
-                        (actionExecutingContext?.ActionArguments.Count == context.ActionDescriptor.Parameters.Count))
-                    {
-                        problemDetails.Type = "https://courselibrary.com/modelvalidationproblem";
-                        problemDetails.Status = StatusCodes.Status422UnprocessableEntity;
-                        problemDetails.Title = "One or more validation errors occurred.";
+            //        // if there are modelstate errors & all keys were correctly
+            //        // found/parsed we're dealing with validation errors
+            //        if ((context.ModelState.ErrorCount > 0) &&
+            //            (actionExecutingContext?.ActionArguments.Count == context.ActionDescriptor.Parameters.Count))
+            //        {
+            //            problemDetails.Type = "https://courselibrary.com/modelvalidationproblem";
+            //            problemDetails.Status = StatusCodes.Status422UnprocessableEntity;
+            //            problemDetails.Title = "One or more validation errors occurred.";
 
-                        return new UnprocessableEntityObjectResult(problemDetails)
-                        {
-                            ContentTypes = { "application/problem+json" }
-                        };
-                    }
+            //            return new UnprocessableEntityObjectResult(problemDetails)
+            //            {
+            //                ContentTypes = { "application/problem+json" }
+            //            };
+            //        }
 
-                    // if one of the keys wasn't correctly found / couldn't be parsed
-                    // we're dealing with null/unparsable input
-                    problemDetails.Status = StatusCodes.Status400BadRequest;
-                    problemDetails.Title = "One or more errors on input occurred.";
-                    return new BadRequestObjectResult(problemDetails)
-                    {
-                        ContentTypes = { "application/problem+json" }
-                    };
-                };
-            });
+            //        // if one of the keys wasn't correctly found / couldn't be parsed
+            //        // we're dealing with null/unparsable input
+            //        problemDetails.Status = StatusCodes.Status400BadRequest;
+            //        problemDetails.Title = "One or more errors on input occurred.";
+            //        return new BadRequestObjectResult(problemDetails)
+            //        {
+            //            ContentTypes = { "application/problem+json" }
+            //        };
+            //    };
+            //}
+            //);
 
             services.AddCors();
             //services.AddScoped<DbContext, FilmLoWebAppContext>();
@@ -161,7 +161,7 @@ namespace FilmLoApp.API
 
             );
 
-            app.UseHttpCacheHeaders(); //mora biti na ovom mestu
+          //  app.UseHttpCacheHeaders(); //mora biti na ovom mestu
 
             app.UseMvc();
 

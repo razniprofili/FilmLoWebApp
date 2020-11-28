@@ -95,10 +95,16 @@ namespace FilmLoApp.API.Controllers
             return facade.GetUser(id);
         }
 
+        [TokenAuthorize]
+        [HttpGet("allUsers")]
+        public List<UserModel> GetAllUsers()
+        {
+            return facade.GetAllUsers(CurrentUser.Id);
+        }
 
         // pagination, order by, filter... Can be included
         [TokenAuthorize]
-        [HttpGet("allUsers", Name = "GetUsers")]
+        [HttpGet("allUsersWithParameters", Name = "GetUsers")]
         [HttpHead]
         public IActionResult GetAllUsers([FromQuery] UsersResourceParameters parameters)
         {
@@ -134,7 +140,7 @@ namespace FilmLoApp.API.Controllers
 
             var linkedCollectionResource = new
             {
-                value = shapedUsersWithLinks,
+                users = shapedUsersWithLinks,
                 links
             };
 
@@ -195,6 +201,50 @@ namespace FilmLoApp.API.Controllers
             return facade.GetAllMyFriends(CurrentUser.Id);
 
         }
+
+        [TokenAuthorize]
+        [HttpGet("myFriendsWithParameters", Name = "GetFriends")]
+        [HttpHead]
+        public IActionResult GetMyFriends([FromQuery] UsersResourceParameters parameters)
+        {
+            var usersFromrepo = facade.GetAllMyFriends(CurrentUser.Id, parameters);
+
+            var paginationMetadata = new
+            {
+                totalCount = usersFromrepo.TotalCount,
+                pageSize = usersFromrepo.PageSize,
+                currentPage = usersFromrepo.CurrentPage,
+                totalPages = usersFromrepo.TotalPages
+                //previousPageLink,
+                //nextPageLink
+            };
+
+            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            //hateoas
+            var links = CreateLinksForFriends(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
+
+            var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
+
+            var shapedUsersWithLinks = shapedUsers.Select(user =>
+            {
+                var userAsDictionary = user as IDictionary<string, object>;
+                var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
+                userAsDictionary.Add("links", userLinks);
+                return userAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                friends = shapedUsersWithLinks,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
+
+        }
+
         // ****************************************************************
 
         [TokenAuthorize]
@@ -302,6 +352,44 @@ namespace FilmLoApp.API.Controllers
             }
         }
 
+        private string CreateFriendsResourceUri(UsersResourceParameters usersResourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link("GetFriends",
+                      new
+                      {
+                          fields = usersResourceParameters.Fields,
+                          orderBy = usersResourceParameters.OrderBy,
+                          pageNumber = usersResourceParameters.PageNumber - 1,
+                          pageSize = usersResourceParameters.PageSize,
+                          searchQuery = usersResourceParameters.SearchQuery
+                      });
+                case ResourceUriType.NextPage:
+                    return Url.Link("GetFriends",
+                      new
+                      {
+                          fields = usersResourceParameters.Fields,
+                          orderBy = usersResourceParameters.OrderBy,
+                          pageNumber = usersResourceParameters.PageNumber + 1,
+                          pageSize = usersResourceParameters.PageSize,
+                          searchQuery = usersResourceParameters.SearchQuery
+                      });
+                case ResourceUriType.Current: //vazi isto sto i za def.
+                default:
+                    return Url.Link("GetFriends",
+                    new
+                    {
+                        fields = usersResourceParameters.Fields,
+                        orderBy = usersResourceParameters.OrderBy,
+                        pageNumber = usersResourceParameters.PageNumber,
+                        pageSize = usersResourceParameters.PageSize,
+                        searchQuery = usersResourceParameters.SearchQuery
+                    });
+            }
+        }
+
         private IEnumerable<LinkDto> CreateLinksForUser(UsersResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
         {
             var links = new List<LinkDto>();
@@ -324,6 +412,35 @@ namespace FilmLoApp.API.Controllers
             {
                 links.Add(
                     new LinkDto(CreateUsersResourceUri(
+                        usersResourceParameters, ResourceUriType.PreviousPage),
+                    "previousPage", "GET"));
+            }
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForFriends(UsersResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            // self 
+            links.Add(
+               new LinkDto(CreateFriendsResourceUri(
+                   usersResourceParameters, ResourceUriType.Current)
+               , "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(
+                  new LinkDto(CreateFriendsResourceUri(
+                      usersResourceParameters, ResourceUriType.NextPage),
+                  "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(CreateFriendsResourceUri(
                         usersResourceParameters, ResourceUriType.PreviousPage),
                     "previousPage", "GET"));
             }
