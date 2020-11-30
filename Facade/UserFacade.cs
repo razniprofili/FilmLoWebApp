@@ -33,7 +33,7 @@ namespace Facade
             return users.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 
-        public PagedList<User> GetAllUsers(long currentUserId, UsersResourceParameters usersResourceParameters)
+        public PagedList<User> GetAllUsers(long currentUserId, ResourceParameters usersResourceParameters)
         {
             return UserManager.GetAllUsers(currentUserId, usersResourceParameters);
         }

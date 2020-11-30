@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Common.ResourceParameters
 {
-    public class UsersResourceParameters
+    public class ResourceParameters
     {
         //za pretragu
         public string SearchQuery { get; set; }

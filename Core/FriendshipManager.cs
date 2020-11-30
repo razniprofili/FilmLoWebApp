@@ -41,6 +41,8 @@ namespace Core
 
         #endregion
 
+        #region Methods
+
         public List<User> SearchMyFriends(long idUser, string searchCriteria)
         {
             using (var uow = new UnitOfWork())
@@ -55,17 +57,17 @@ namespace Core
 
                 foreach (var friend in friendships)
                 {
-                    if(friend.UserRecipientId == idUser)
+                    if (friend.UserRecipientId == idUser)
                     {
-                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserSenderId && (f.Name.Contains(searchCriteria)  || f.Surname.Contains(searchCriteria) ));
-                       
-                        if(userFriend != null)
+                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserSenderId && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
+
+                        if (userFriend != null)
                             friends.Add(userFriend);
-                    } 
+                    }
                     else
                     {
-                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserRecipientId && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria) ));
-                        
+                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserRecipientId && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
+
                         if (userFriend != null)
                             friends.Add(userFriend);
                     }
@@ -109,7 +111,7 @@ namespace Core
 
         // with parameters
 
-        public PagedList<User> GetAllMyFriends(long idUser, UsersResourceParameters usersResourceParameters)
+        public PagedList<User> GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters)
         {
             using (var uow = new UnitOfWork())
             {
@@ -134,7 +136,7 @@ namespace Core
                 var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
 
                 List<User> friends = new List<User>();
-                
+
 
                 foreach (var friend in friendships)
                 {
@@ -142,7 +144,7 @@ namespace Core
                     {
                         var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
                         friends.Add(userFriend);
-                        
+
                     }
                     else
                     {
@@ -191,7 +193,7 @@ namespace Core
                 ValidationHelper.ValidateEntityExists(exist);
 
 
-                friendship.StatusCodeID ='R';
+                friendship.StatusCodeID = 'R';
                 friendship.FriendshipDate = DateTime.Now;
                 friendship.UserSender = userSender;
                 friendship.UserRecipient = userRecipient;
@@ -278,5 +280,7 @@ namespace Core
 
             }
         }
+
+        #endregion
     }
 }

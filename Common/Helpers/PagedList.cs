@@ -7,12 +7,19 @@ namespace Common.Helpers
 {
     public class PagedList<T> : List<T>
     {
+        #region Fields
+
         public int CurrentPage { get; private set; }
         public int TotalPages { get; private set; }
         public int PageSize { get; private set; }
         public int TotalCount { get; private set; }
         public bool HasPrevious => (CurrentPage > 1); //true ako je curent page >1
         public bool HasNext => (CurrentPage < TotalPages); //true ako je ispunjen ovaj uslov
+
+        #endregion
+
+        #region Constructor
+
         //konstruktor
         public PagedList(List<T> items, int count, int pageNumber, int pageSize)
         {
@@ -23,6 +30,10 @@ namespace Common.Helpers
             AddRange(items);
         }
 
+        #endregion
+
+        #region Methods
+
         //kreira paged list
         public static PagedList<T> Create(IQueryable<T> source, int pageNumber, int pageSize)
         {
@@ -30,5 +41,7 @@ namespace Common.Helpers
             var items = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
             return new PagedList<T>(items, count, pageNumber, pageSize);
         }
+
+        #endregion
     }
 }

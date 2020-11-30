@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Common.Helpers;
+using Common.ResourceParameters;
+using Domain;
 using Models.SavedMovies;
 using System;
 using System.Collections.Generic;
@@ -18,6 +20,11 @@ namespace Facade
         {
             List<MovieJMDBApi> movies = SavedMoviesManager.GetAllMovies(currentUserId);
             return movies.Select(a => Mapper.Mapper.Map(a, currentUserId)).ToList();
+        }
+
+        public PagedList<MovieJMDBApi> GetAllSavedMovies(long currentUserId, ResourceParameters usersResourceParameters)
+        {
+            return SavedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters);
         }
 
         public AddSavedMovieModel AddSavedMovie( long userId, AddSavedMovieModel addModel)

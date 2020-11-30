@@ -106,9 +106,8 @@ namespace FilmLoApp.API.Controllers
         [TokenAuthorize]
         [HttpGet("allUsersWithParameters", Name = "GetUsers")]
         [HttpHead]
-        public IActionResult GetAllUsers([FromQuery] UsersResourceParameters parameters)
-        {
-            // return facade.GetAllUsers(CurrentUser.Id);  
+        public IActionResult GetAllUsers([FromQuery] ResourceParameters parameters)
+        { 
 
             var usersFromrepo = facade.GetAllUsers(CurrentUser.Id, parameters);
 
@@ -192,8 +191,6 @@ namespace FilmLoApp.API.Controllers
             facade.DeleteFriend(id, CurrentUser.Id);
         }
 
-        // ****************************************************************
-        // pagination, order by, filter... Can be included
         [TokenAuthorize]
         [HttpGet("myFriends")]
         public List<UserModel> GetMyFriends()
@@ -202,10 +199,11 @@ namespace FilmLoApp.API.Controllers
 
         }
 
+        // pagination, order by, filter... Can be included
         [TokenAuthorize]
         [HttpGet("myFriendsWithParameters", Name = "GetFriends")]
         [HttpHead]
-        public IActionResult GetMyFriends([FromQuery] UsersResourceParameters parameters)
+        public IActionResult GetMyFriends([FromQuery] ResourceParameters parameters)
         {
             var usersFromrepo = facade.GetAllMyFriends(CurrentUser.Id, parameters);
 
@@ -245,7 +243,6 @@ namespace FilmLoApp.API.Controllers
 
         }
 
-        // ****************************************************************
 
         [TokenAuthorize]
         [HttpPost("myFriends/search")]
@@ -314,7 +311,7 @@ namespace FilmLoApp.API.Controllers
             return links;
         }
 
-        private string CreateUsersResourceUri(UsersResourceParameters usersResourceParameters, ResourceUriType type)
+        private string CreateUsersResourceUri(ResourceParameters usersResourceParameters, ResourceUriType type)
         {
             switch (type)
             {
@@ -352,7 +349,7 @@ namespace FilmLoApp.API.Controllers
             }
         }
 
-        private string CreateFriendsResourceUri(UsersResourceParameters usersResourceParameters, ResourceUriType type)
+        private string CreateFriendsResourceUri(ResourceParameters usersResourceParameters, ResourceUriType type)
         {
             switch (type)
             {
@@ -390,7 +387,7 @@ namespace FilmLoApp.API.Controllers
             }
         }
 
-        private IEnumerable<LinkDto> CreateLinksForUser(UsersResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
+        private IEnumerable<LinkDto> CreateLinksForUser(ResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
         {
             var links = new List<LinkDto>();
 
@@ -419,7 +416,7 @@ namespace FilmLoApp.API.Controllers
             return links;
         }
 
-        private IEnumerable<LinkDto> CreateLinksForFriends(UsersResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
+        private IEnumerable<LinkDto> CreateLinksForFriends(ResourceParameters usersResourceParameters, bool hasNext, bool hasPrevious)
         {
             var links = new List<LinkDto>();
 

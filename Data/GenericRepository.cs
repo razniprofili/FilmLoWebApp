@@ -9,12 +9,22 @@ namespace Data
 {
     public abstract class GenericRepository<T> : IRepository<T> where T : class
     {
+        #region Fields
+
         protected DbContext _context;
+
+        #endregion
+
+        #region Constructor
 
         public GenericRepository(DbContext context)
         {
             _context = context;
         }
+
+        #endregion
+
+        #region Methods
 
         //pisemo genericke funkcije koje mozemo da primenimo nad svim repozitorijumima
 
@@ -141,5 +151,7 @@ namespace Data
             Dispose(true);
             GC.SuppressFinalize(this); //poziva garbige collector da se izbrise iz memorije
         }
+
+        #endregion
     }
 }

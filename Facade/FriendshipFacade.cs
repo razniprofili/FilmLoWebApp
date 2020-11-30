@@ -29,7 +29,7 @@ namespace Facade
             return friends.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 
-        public PagedList<User> GetAllMyFriends(long currentUserId, UsersResourceParameters usersResourceParameters)
+        public PagedList<User> GetAllMyFriends(long currentUserId, ResourceParameters usersResourceParameters)
         {
             return FriendshipManager.GetAllMyFriends(currentUserId, usersResourceParameters);
         }

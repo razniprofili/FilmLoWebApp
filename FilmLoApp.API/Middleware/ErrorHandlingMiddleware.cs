@@ -11,13 +11,21 @@ namespace FilmLoApp.API.Middleware
 {
     public class ErrorHandlingMiddleware
     {
+
+        #region Fields
+
         private RequestDelegate _next;
 
+        #endregion
+
+        #region Constructor
         public ErrorHandlingMiddleware(RequestDelegate next)
         {
             _next = next;
         }
+        #endregion
 
+        #region Methods
         public async Task Invoke(HttpContext context)
         {
             try
@@ -51,5 +59,8 @@ namespace FilmLoApp.API.Middleware
             return context.Response.WriteAsync(result);
 
         }
+
+        #endregion
+
     }
 }

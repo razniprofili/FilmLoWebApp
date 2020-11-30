@@ -159,7 +159,7 @@ namespace Core
             }
         }
 
-        public PagedList<User> GetAllUsers(long idUser, UsersResourceParameters usersResourceParameters)
+        public PagedList<User> GetAllUsers(long idUser, ResourceParameters usersResourceParameters)
         {
             using (var uow = new UnitOfWork())
             {
@@ -204,7 +204,6 @@ namespace Core
         }
 
         #endregion
-
 
     }
 }

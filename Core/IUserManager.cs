@@ -15,7 +15,7 @@ namespace Core
         public User Update(long id, User user);
         public void DeleteUser(long id);
         public List<User> GetAllUsers(long idUser);
-        public PagedList<User> GetAllUsers(long idUser, UsersResourceParameters usersResourceParameters);
+        public PagedList<User> GetAllUsers(long idUser, ResourceParameters usersResourceParameters);
 
     }
 }

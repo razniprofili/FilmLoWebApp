@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Models.SavedMovies;
 using Models.User;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,25 @@ namespace Core.Services
           new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
           {
                { "Id", new PropertyMappingValue(new List<string>() { "Id" } ) },
-               { "Name", new PropertyMappingValue(new List<string>() { "Name"}) }, // , "Surname"
+               { "Name", new PropertyMappingValue(new List<string>() { "Name"}) },
                { "Surname", new PropertyMappingValue(new List<string>() { "Surname"}) },
                { "Email", new PropertyMappingValue(new List<string>() { "Email"}) }
+
+          };
+
+        private Dictionary<string, PropertyMappingValue> _moviePropertyMapping =
+          new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
+          {
+               { "Id", new PropertyMappingValue(new List<string>() { "Id" } ) },
+               { "Name", new PropertyMappingValue(new List<string>() { "Name"}) }
+               //{ "UserId", new PropertyMappingValue(new List<string>() { "UserId"}) },
+               //{ "Actors", new PropertyMappingValue(new List<string>() { "Actors"}) },
+               //{ "Year", new PropertyMappingValue(new List<string>() { "Year"}) },
+               //{ "Director", new PropertyMappingValue(new List<string>() { "Director"}) },
+               //{ "Duration", new PropertyMappingValue(new List<string>() { "Duration"}) },
+               //{ "Genre", new PropertyMappingValue(new List<string>() { "Genre"}) },
+               //{ "Country", new PropertyMappingValue(new List<string>() { "Country"}) }
+
 
           };
 
@@ -32,6 +49,7 @@ namespace Core.Services
         public PropertyMappingService()
         {
             _propertyMappings.Add(new PropertyMapping<UserModel, User>(_userPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<AddSavedMovieModel, MovieJMDBApi>(_moviePropertyMapping));
         }
 
         #endregion

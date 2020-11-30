@@ -8,6 +8,8 @@ namespace Common.Helpers
     // postupak hesiranja passworda i citanje passworda
     public static class PasswordHelper
     {
+        #region Fields
+
         private const int SALT_BYTE_SIZE = 24;
         private const int HASH_BYTE_SIZE = 24;
         private const int PBKDF2_ITERATIONS = 1000;
@@ -15,6 +17,10 @@ namespace Common.Helpers
         private const int ITERATION_INDEX = 0;
         private const int SALT_INDEX = 1;
         private const int PBKDF2_INDEX = 2;
+
+        #endregion
+
+        #region Methods
 
         public static string CreateHash(string password)
         {
@@ -40,6 +46,10 @@ namespace Common.Helpers
             return SlowEquals(hash, testHash);
         }
 
+
+        #endregion
+
+        #region PrivateMethods
         private static bool SlowEquals(byte[] a, byte[] b)
         {
             uint diff = (uint)a.Length ^ (uint)b.Length;
@@ -53,5 +63,7 @@ namespace Common.Helpers
             Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, salt) { IterationCount = iterations };
             return pbkdf2.GetBytes(outputBytes);
         }
+
+        #endregion
     }
 }

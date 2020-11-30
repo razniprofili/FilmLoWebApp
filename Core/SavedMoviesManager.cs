@@ -1,6 +1,10 @@
-﻿using Common.Helpers;
+﻿using Common.Exceptions;
+using Common.Helpers;
+using Common.ResourceParameters;
+using Core.Services;
 using Data;
 using Domain;
+using Models.SavedMovies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +14,28 @@ namespace Core
 {
    public class SavedMoviesManager
     {
+
+        #region Fields
+
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _servicePropertyChecker;
+
+        #endregion
+
+        #region Constructor
+
+        public SavedMoviesManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
+        {
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
+
+            _servicePropertyChecker = checker ??
+                throw new ArgumentNullException(nameof(checker));
+        }
+
+        #endregion
+
+        #region Methods
         public MovieJMDBApi Add(long userId, MovieJMDBApi movie)
         {
             using (var uow = new UnitOfWork())
@@ -47,7 +73,7 @@ namespace Core
                     uow.Save();
 
                     //provera da li je vec unet film za tog usera:
-                    var exist = uow.SavedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId  == movie.Id);
+                    var exist = uow.SavedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movie.Id);
                     ValidationHelper.ValidateEntityExists(exist);
 
                     // ako nije dodajemo ga
@@ -75,7 +101,7 @@ namespace Core
 
                 // proveravamo da li postoji sacuvan film, po idju usera i idju filma koji se brise
                 var movieToDelete = uow.SavedMovieRepository.FirstOrDefault(p => p.UserId == userId && p.MovieJMDBApiId == movieId);
-                ValidationHelper.ValidateNotNull(movieToDelete); 
+                ValidationHelper.ValidateNotNull(movieToDelete);
 
                 uow.SavedMovieRepository.Delete(movieToDelete);
                 uow.Save();
@@ -87,7 +113,7 @@ namespace Core
             using (var uow = new UnitOfWork())
             {
                 //provera da li postoji user za svaki slucaj:
-                var user= uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
                 var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
@@ -97,11 +123,68 @@ namespace Core
                 foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
                 {
                     var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
-                   // var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId);
+                    // var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId);
                     usersSavedMovies.Add(movieAPI);
                 }
 
                 return usersSavedMovies;
+            }
+        }
+
+        public PagedList<MovieJMDBApi> GetAllMovies(long userId, ResourceParameters parameters)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<AddSavedMovieModel, MovieJMDBApi>
+                (parameters.OrderBy))
+                {
+                    throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
+                }
+
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<AddSavedMovieModel>
+                  (parameters.Fields))
+                {
+                    throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                }
+
+                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog usera
+
+                List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
+
+                foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                {
+                    // var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
+                    usersSavedMovies.Add(movie.MovieJMDBApi);
+                }
+
+                IQueryable<MovieJMDBApi> savedMoviesToReturn = usersSavedMovies.AsQueryable<MovieJMDBApi>();
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+                {
+                    var searchQuery = parameters.SearchQuery.Trim();
+                    savedMoviesToReturn = savedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+                {
+                    // get property mapping dictionary
+                    var moviePropertyMappingDictionary =
+                        _propertyMappingService.GetPropertyMapping<AddSavedMovieModel, MovieJMDBApi>();
+
+                    // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
+                    //  moviePropertyMappingDictionary);
+
+                    savedMoviesToReturn = savedMoviesToReturn.ApplySort(parameters.OrderBy,
+                        moviePropertyMappingDictionary);
+                }
+
+                return PagedList<MovieJMDBApi>.Create(savedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
             }
         }
 
@@ -119,13 +202,15 @@ namespace Core
 
                 foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
                 {
-                    var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault( m => m.Id == movie.MovieJMDBApiId && m.Name==critearia);
+                    var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId && m.Name == critearia);
                     usersSavedMovies.Add(movieAPI);
                 }
 
                 return usersSavedMovies;
             }
         }
+
+        #endregion
 
     }
 }
