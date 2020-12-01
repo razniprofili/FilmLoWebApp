@@ -38,10 +38,10 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("{id}", Name = "GetAllSavedMovies")] // user id
-        public List<SavedMovieModel> GetAllSavedMovies(long id)
+        [HttpGet( Name = "GetAllSavedMovies")]
+        public List<SavedMovieModel> GetAllSavedMovies()
         {
-            return facade.GetAllSavedMovies(id);
+            return facade.GetAllSavedMovies(CurrentUser.Id);
 
         }
 
@@ -92,6 +92,9 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("add")]
         public object AddSavedMovie([FromBody] AddSavedMovieModel savedMovieModel)
         {
+            if (savedMovieModel.UserId != CurrentUser.Id)
+                return BadRequest($"Movie can be added only for current user: {CurrentUser.Name} {CurrentUser.Surname}({CurrentUser.Mail})");
+
             // return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
             var movieToReturn = facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
 

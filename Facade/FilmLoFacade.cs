@@ -35,7 +35,7 @@ namespace Facade
         internal SavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager(PropertyMappingService, PropertyCheckerService));
 
         private WatchedMoviesManager _watchedMoviesManager;
-        internal WatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager());
+        internal WatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager(PropertyMappingService, PropertyCheckerService));
 
         private FriendshipManager _friendshipManager;
         internal FriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));

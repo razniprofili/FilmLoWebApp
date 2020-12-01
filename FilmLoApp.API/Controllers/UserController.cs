@@ -99,7 +99,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allUsers")]
         public List<UserModel> GetAllUsers()
         {
-            return facade.GetAllUsers(CurrentUser.Id);
+            return facade.GetAllUsers(CurrentUser.Id); // jer zelimo da nam prikaze sve korisnike osim ulogovaog
         }
 
         // pagination, order by, filter... Can be included
@@ -177,7 +177,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("friendInfo/{id}")]
+        [HttpGet("friendInfo/{id}")] //friend id
         public UserModel GetFriendInfo(long id)
         {
             return facade.GetFriendInfo(id, CurrentUser.Id);
@@ -185,7 +185,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPut("deleteFriend/{id}")]
+        [HttpPut("deleteFriend/{id}")] // friend id
         public void DeleteFriend(long id)
         {
             facade.DeleteFriend(id, CurrentUser.Id);
@@ -260,7 +260,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPost("acceptRequest/{id}")]
+        [HttpPost("acceptRequest/{id}")] // friend id
         public FriendshipModel AcceptRequest(long id)
         {
             return facade.AcceptRequest(CurrentUser.Id, id);
@@ -268,7 +268,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpPost("declineRequest/{id}")]
+        [HttpPost("declineRequest/{id}")] // friend id
         public void DeclineRequest(long id)
         {
             facade.DeclineRequest(CurrentUser.Id, id);
@@ -304,7 +304,7 @@ namespace FilmLoApp.API.Controllers
 
             links.Add(
               new LinkDto(Url.Link("UpdateUser", new { id = "" }),
-              "UPDATE- You must enter fields for update in the body!",
+              "UPDATE- You must enter fields for update in the body! ONLY current user can be updated!",
               "PUT"));
 
 

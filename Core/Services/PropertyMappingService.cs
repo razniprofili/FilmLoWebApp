@@ -1,6 +1,7 @@
 ﻿using Domain;
 using Models.SavedMovies;
 using Models.User;
+using Models.WatchedMovies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +51,7 @@ namespace Core.Services
         {
             _propertyMappings.Add(new PropertyMapping<UserModel, User>(_userPropertyMapping));
             _propertyMappings.Add(new PropertyMapping<AddSavedMovieModel, MovieJMDBApi>(_moviePropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<WatchedMovieModel, MovieJMDBApi>(_moviePropertyMapping));
         }
 
         #endregion

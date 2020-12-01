@@ -1,8 +1,12 @@
-﻿using Common.Helpers;
+﻿using Common.Exceptions;
+using Common.Helpers;
+using Common.ResourceParameters;
+using Core.Services;
 using Data;
 using Data.Repositories;
 using Domain;
 using Microsoft.Data.SqlClient.Server;
+using Models.WatchedMovies;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,6 +19,27 @@ namespace Core
 {
     public class WatchedMoviesManager
     {
+
+        #region Fields
+
+        private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _servicePropertyChecker;
+
+        #endregion
+
+        #region Constructor
+
+        public WatchedMoviesManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
+        {
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
+
+            _servicePropertyChecker = checker ??
+                throw new ArgumentNullException(nameof(checker));
+        }
+
+        #endregion
+       
         public List<MovieJMDBApi> GetAllMovies(long userId)
         {
             using (var uow = new UnitOfWork())
@@ -32,6 +57,62 @@ namespace Core
                     usersWatchedMovies.Add(movie.MovieJMDBApi);
                 }
                 return usersWatchedMovies;
+            }
+        }
+
+        public PagedList<MovieJMDBApi> GetAllMovies(long userId, ResourceParameters parameters)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<WatchedMovieModel, MovieJMDBApi>
+                (parameters.OrderBy))
+                {
+                    throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
+                }
+
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<WatchedMovieModel>
+                  (parameters.Fields))
+                {
+                    throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                }
+
+                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve odgledane filmove za tog usera
+
+                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
+
+                foreach (var movie in watchedMovies) // za sve te odgledane filmove uzima njihove detalje
+                {
+                    usersWatchedMovies.Add(movie.MovieJMDBApi);
+                }
+
+                IQueryable<MovieJMDBApi> watchedMoviesToReturn = usersWatchedMovies.AsQueryable<MovieJMDBApi>();
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+                {
+                    var searchQuery = parameters.SearchQuery.Trim();
+                    watchedMoviesToReturn = watchedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+                {
+                    // get property mapping dictionary
+                    var moviePropertyMappingDictionary =
+                        _propertyMappingService.GetPropertyMapping<WatchedMovieModel, MovieJMDBApi>();
+
+                    // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
+                    //  moviePropertyMappingDictionary);
+
+                    watchedMoviesToReturn = watchedMoviesToReturn.ApplySort(parameters.OrderBy,
+                        moviePropertyMappingDictionary);
+                }
+
+                return PagedList<MovieJMDBApi>.Create(watchedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
             }
         }
 

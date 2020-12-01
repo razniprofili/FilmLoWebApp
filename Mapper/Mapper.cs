@@ -71,6 +71,41 @@ namespace Mapper
             return moviesToReturn;
         }
 
+        public static IEnumerable<WatchedMovieModel> MapEnumerableWatchedMovies(PagedList<MovieJMDBApi> movies, long currentUserId)
+        {
+            List<WatchedMovieModel> moviesToReturn = new List<WatchedMovieModel>();
+
+            foreach(var movie in movies)
+            {
+                var watchedMovie = new WatchedMovie();
+                foreach (var movieIter in movie.WatchedUsers)
+                {
+                    if (movieIter.MovieJMDBApiId == movie.Id)
+                        watchedMovie = movieIter;
+                }
+                var movieToadd =  new WatchedMovieModel
+                {
+                    Id = movie.Id,
+                    Name = movie.Name,
+                    Actors = movie.MovieDetailsJMDBApi.Actors,
+                    Year = movie.MovieDetailsJMDBApi.Year,
+                    Director = movie.MovieDetailsJMDBApi.Director,
+                    Duration = movie.MovieDetailsJMDBApi.Duration,
+                    Genre = movie.MovieDetailsJMDBApi.Genre,
+                    Country = movie.MovieDetailsJMDBApi.Country,
+                    Rate = watchedMovie.Rating,
+                    Comment = watchedMovie.Comment,
+                    DateTimeWatched = watchedMovie.WatchingDate,
+                    UserId = watchedMovie.UserId,
+                    User = AutoMap<User, UserModel>(watchedMovie.User)
+                };
+                moviesToReturn.Add(movieToadd);
+            }
+
+            return moviesToReturn;
+
+        }
+
         public static MovieDetailsJMDBApi MapWatchedMovie(AddWatchedMovieModel movieModel)
         {
             return new MovieDetailsJMDBApi

@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Common.Helpers;
+using Common.ResourceParameters;
+using Domain;
 using Models.User;
 using Models.WatchedMovies;
 using System;
@@ -16,7 +18,12 @@ namespace Facade
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
         }
 
-       public List<WatchedMovieModel> GetAllFriendMovies(long cureentUserId, long friendId)
+        public PagedList<MovieJMDBApi> GetAllWatchedMovies(long currentUserId, ResourceParameters usersResourceParameters)
+        {
+            return WatchedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters);
+        }
+
+        public List<WatchedMovieModel> GetAllFriendMovies(long cureentUserId, long friendId)
         {
             List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId);
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
