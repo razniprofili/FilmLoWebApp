@@ -144,6 +144,56 @@ namespace Core
             }
         }
 
+        // with hateoas, fields, orderBy, search, pagination ...
+        public PagedList<MovieJMDBApi> GetAllFriendMovies(long userId, long friendId, ResourceParameters parameters)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                //provera da li postoji user za svaki slucaj:
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == friendId);
+                ValidationHelper.ValidateNotNull(userFriend);
+
+                //provera prijateljstva:
+                var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
+                ValidationHelper.ValidateNotNull(exist);
+
+                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
+
+                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
+
+                foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                {
+                    usersWatchedMovies.Add(movie.MovieJMDBApi);
+                }
+
+                IQueryable<MovieJMDBApi> watchedMoviesToReturn = usersWatchedMovies.AsQueryable<MovieJMDBApi>();
+
+                if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+                {
+                    var searchQuery = parameters.SearchQuery.Trim();
+                    watchedMoviesToReturn = watchedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
+                }
+
+                if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+                {
+                    // get property mapping dictionary
+                    var moviePropertyMappingDictionary =
+                        _propertyMappingService.GetPropertyMapping<WatchedMovieModel, MovieJMDBApi>();
+
+                    // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
+                    //  moviePropertyMappingDictionary);
+
+                    watchedMoviesToReturn = watchedMoviesToReturn.ApplySort(parameters.OrderBy,
+                        moviePropertyMappingDictionary);
+                }
+
+                return PagedList<MovieJMDBApi>.Create(watchedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
+            }
+        }
+
         // odgledani filmovi svih mojih prijatelja:
 
         public List<MovieJMDBApi> GetAllFriendsMovies(long userId)

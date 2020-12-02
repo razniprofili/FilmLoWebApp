@@ -59,7 +59,7 @@ namespace FilmLoApp.API.Controllers
             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
             //hateoas
-            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious);
+            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesWithParameters");
 
             var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
 
@@ -90,12 +90,57 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("allFriendsMovies")]
+        [HttpGet("friendMoviesWithParameters/{friendId}", Name = "GetAllWatchedMoviesForFriendWithParameters")]
+        public IActionResult GetAllFriendMovies(long friendId, [FromQuery] ResourceParameters parameters)
+        {
+            // return facade.GetAllFriendMovies(CurrentUser.Id, friendId);
+            var moviesFromrepo = facade.GetAllFriendMovies(CurrentUser.Id, friendId, parameters);
+
+            var paginationMetadata = new
+            {
+                totalCount = moviesFromrepo.TotalCount,
+                pageSize = moviesFromrepo.PageSize,
+                currentPage = moviesFromrepo.CurrentPage,
+                totalPages = moviesFromrepo.TotalPages
+                //previousPageLink,
+                //nextPageLink
+            };
+
+            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            //hateoas
+            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesForFriendWithParameters");
+
+            var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            {
+                var movieAsDictionary = movie as IDictionary<string, object>;
+               // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+               // movieAsDictionary.Add("links", userLinks);
+                return movieAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                movies = shapedMoviessWithLinks,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
+
+        }
+
+
+        [TokenAuthorize]
+        [HttpGet("allFriendsMovies")] // TO DO, HATEOAS, ORDER, FIELDS....
         public List<WatchedMovieModel> GetAllFriendsMovies()
         {
             return facade.GetAllFriendsMovies(CurrentUser.Id);
 
         }
+
 
         [TokenAuthorize]
         [HttpPost("friendWatched")]
@@ -122,10 +167,22 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("getMovie/{movieId}", Name = "GetWatchedMovie")]
-        public WatchedMovieModel GetMovie(string movieId)
+        public ActionResult<WatchedMovieModel> GetMovie(string movieId)
         {
-            return facade.GetWatchedMovie(movieId, CurrentUser.Id);
+          //  return facade.GetWatchedMovie(movieId, CurrentUser.Id);
 
+            var movieToReturn = facade.GetWatchedMovie(movieId, CurrentUser.Id);
+            var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
+
+            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
+            //    as IDictionary<string, object>;
+            //linkedResourceToReturn.Add("links", links);
+
+            //return CreatedAtRoute("GetWatchedMovie",
+            //    new { movieId = linkedResourceToReturn["Id"] },
+            //    linkedResourceToReturn);
+
+            return generateResult(movieToReturn, links);
         }
 
         [TokenAuthorize]
@@ -136,7 +193,7 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("countMovies")]
+        [HttpGet("countMovies", Name = "CountWatchedMovies")]
         public long CountMovies()
         {
             return facade.CountWatchedMovies(CurrentUser.Id);
@@ -144,23 +201,58 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpPost("addWatchedMovie")]
-        public WatchedMovieModel Add([FromBody] AddWatchedMovieModel movie)
+        public ActionResult<WatchedMovieModel> Add([FromBody] AddWatchedMovieModel movie)
         {
-            return facade.AddWatchedMovie(movie, CurrentUser.Id);
+            //return facade.AddWatchedMovie(movie, CurrentUser.Id);
 
+            var movieToReturn = facade.AddWatchedMovie(movie, CurrentUser.Id);
+            var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
+
+            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
+            //    as IDictionary<string, object>;
+            //linkedResourceToReturn.Add("links", links);
+
+            //return CreatedAtRoute("GetWatchedMovie",
+            //    new { movieId = linkedResourceToReturn["Id"] },
+            //    linkedResourceToReturn);
+
+            return generateResult(movieToReturn, links);
         }
 
         [TokenAuthorize]
         [HttpPut("updateWatchedMovie/{movieId}", Name = "UpdateWatchedMovie")]
-        public WatchedMovieModel Update([FromBody] UpdateWatchedMovieModel movie, string movieId)
+        public ActionResult<WatchedMovieModel> Update([FromBody] UpdateWatchedMovieModel movie, string movieId)
         {
-            return facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
+            //  return facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
+            var movieToReturn = facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
+            var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
+
+            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
+            //    as IDictionary<string, object>;
+            //linkedResourceToReturn.Add("links", links);
+
+            //return CreatedAtRoute("GetWatchedMovie",
+            //    new { movieId = linkedResourceToReturn["Id"] },
+            //    linkedResourceToReturn);
+
+            return generateResult(movieToReturn, links);
 
         }
 
         #endregion
 
         #region Private Methods
+
+        private ActionResult<WatchedMovieModel> generateResult(WatchedMovieModel movieToReturn, IEnumerable<LinkDto> links)
+        {
+            var linkedResourceToReturn = movieToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetWatchedMovie",
+                new { movieId = linkedResourceToReturn["Id"] },
+                linkedResourceToReturn);
+        }
 
         private IEnumerable<LinkDto> CreateLinksForMovie(long userId, string movieId)
         {
@@ -176,6 +268,17 @@ namespace FilmLoApp.API.Controllers
                "Delete watched movie.",
                "PUT"));
 
+            links.Add(
+               new LinkDto(Url.Link("UpdateWatchedMovie", new { movieId = movieId }),
+               "Update watched movie. You must enter fields for update in the body! Empty body -> no update",
+               "PUT"));
+
+            links.Add(
+               new LinkDto(Url.Link("CountWatchedMovies", new { id = "" }),
+               "Number of watched movies for current user.",
+               "GET"));
+
+
             return links;
         }
 
@@ -185,27 +288,27 @@ namespace FilmLoApp.API.Controllers
 
             links.Add(
                 new LinkDto(Url.Link("DeleteWatchedMovie", new { movieId = movieId }),
-                "Delete saved movie.",
+                "Delete watched movie.",
                 "PUT"));
 
             return links;
         }
 
-        private IEnumerable<LinkDto> CreateLinksForMovie(ResourceParameters movieResourceParameters, bool hasNext, bool hasPrevious)
+        private IEnumerable<LinkDto> CreateLinksForMovie(ResourceParameters movieResourceParameters, bool hasNext, bool hasPrevious, string routeName)
         {
             var links = new List<LinkDto>();
 
             // self 
             links.Add(
                new LinkDto(CreateMovieResourceUri(
-                   movieResourceParameters, ResourceUriType.Current)
+                   movieResourceParameters, ResourceUriType.Current, routeName)
                , "self", "GET"));
 
             if (hasNext)
             {
                 links.Add(
                   new LinkDto(CreateMovieResourceUri(
-                      movieResourceParameters, ResourceUriType.NextPage),
+                      movieResourceParameters, ResourceUriType.NextPage, routeName),
                   "nextPage", "GET"));
             }
 
@@ -213,19 +316,57 @@ namespace FilmLoApp.API.Controllers
             {
                 links.Add(
                     new LinkDto(CreateMovieResourceUri(
-                        movieResourceParameters, ResourceUriType.PreviousPage),
+                        movieResourceParameters, ResourceUriType.PreviousPage, routeName),
                     "previousPage", "GET"));
             }
 
             return links;
         }
 
-        private string CreateMovieResourceUri(ResourceParameters movieResourceParameters, ResourceUriType type)
+        //private string CreateMovieResourceUri(ResourceParameters movieResourceParameters, ResourceUriType type)
+        //{
+        //    switch (type)
+        //    {
+        //        case ResourceUriType.PreviousPage:
+        //            return Url.Link("GetAllWatchedMoviesWithParameters",
+        //              new
+        //              {
+        //                  fields = movieResourceParameters.Fields,
+        //                  orderBy = movieResourceParameters.OrderBy,
+        //                  pageNumber = movieResourceParameters.PageNumber - 1,
+        //                  pageSize = movieResourceParameters.PageSize,
+        //                  searchQuery = movieResourceParameters.SearchQuery
+        //              });
+        //        case ResourceUriType.NextPage:
+        //            return Url.Link("GetAllWatchedMoviesWithParameters",
+        //              new
+        //              {
+        //                  fields = movieResourceParameters.Fields,
+        //                  orderBy = movieResourceParameters.OrderBy,
+        //                  pageNumber = movieResourceParameters.PageNumber + 1,
+        //                  pageSize = movieResourceParameters.PageSize,
+        //                  searchQuery = movieResourceParameters.SearchQuery
+        //              });
+        //        case ResourceUriType.Current: //vazi isto sto i za def.
+        //        default:
+        //            return Url.Link("GetAllWatchedMoviesWithParameters",
+        //            new
+        //            {
+        //                fields = movieResourceParameters.Fields,
+        //                orderBy = movieResourceParameters.OrderBy,
+        //                pageNumber = movieResourceParameters.PageNumber,
+        //                pageSize = movieResourceParameters.PageSize,
+        //                searchQuery = movieResourceParameters.SearchQuery
+        //            });
+        //    }
+        //}
+
+        private string CreateMovieResourceUri(ResourceParameters movieResourceParameters, ResourceUriType type, string routeName)
         {
             switch (type)
             {
                 case ResourceUriType.PreviousPage:
-                    return Url.Link("GetAllWatchedMoviesWithParameters",
+                    return Url.Link(routeName,
                       new
                       {
                           fields = movieResourceParameters.Fields,
@@ -235,7 +376,7 @@ namespace FilmLoApp.API.Controllers
                           searchQuery = movieResourceParameters.SearchQuery
                       });
                 case ResourceUriType.NextPage:
-                    return Url.Link("GetAllWatchedMoviesWithParameters",
+                    return Url.Link(routeName,
                       new
                       {
                           fields = movieResourceParameters.Fields,
@@ -246,7 +387,7 @@ namespace FilmLoApp.API.Controllers
                       });
                 case ResourceUriType.Current: //vazi isto sto i za def.
                 default:
-                    return Url.Link("GetAllWatchedMoviesWithParameters",
+                    return Url.Link(routeName,
                     new
                     {
                         fields = movieResourceParameters.Fields,

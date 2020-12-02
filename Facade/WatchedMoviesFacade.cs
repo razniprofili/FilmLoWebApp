@@ -18,15 +18,21 @@ namespace Facade
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
         }
 
-        public PagedList<MovieJMDBApi> GetAllWatchedMovies(long currentUserId, ResourceParameters usersResourceParameters)
+        public PagedList<MovieJMDBApi> GetAllWatchedMovies(long currentUserId, ResourceParameters moviesResourceParameters)
         {
-            return WatchedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters);
+            return WatchedMoviesManager.GetAllMovies(currentUserId, moviesResourceParameters);
         }
 
         public List<WatchedMovieModel> GetAllFriendMovies(long cureentUserId, long friendId)
         {
             List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId);
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
+        }
+
+        public PagedList<MovieJMDBApi> GetAllFriendMovies(long cureentUserId, long friendId, ResourceParameters moviesResourceParameters)
+        {
+            return WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId, moviesResourceParameters);
+            
         }
 
         public List<WatchedMovieModel> GetAllFriendsMovies(long currentUserId)
