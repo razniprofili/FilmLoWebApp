@@ -12,32 +12,34 @@ namespace Facade
 {
     public partial class FilmLoFacade
     {
+        #region Get All
+
         public List<WatchedMovieModel> GetAllWatchedMovies(long currentUserId)
         {
-            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllMovies(currentUserId);
+            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllMovies(currentUserId) as List<MovieJMDBApi>;
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
         }
 
         public PagedList<MovieJMDBApi> GetAllWatchedMovies(long currentUserId, ResourceParameters moviesResourceParameters)
         {
-            return WatchedMoviesManager.GetAllMovies(currentUserId, moviesResourceParameters);
+            return WatchedMoviesManager.GetAllMovies(currentUserId, moviesResourceParameters) as PagedList<MovieJMDBApi>;
         }
 
         public List<WatchedMovieModel> GetAllFriendMovies(long cureentUserId, long friendId)
         {
-            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId);
+            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId) as List<MovieJMDBApi>;
             return movies.Select(a => Mapper.Mapper.Map(a)).ToList();
         }
 
         public PagedList<MovieJMDBApi> GetAllFriendMovies(long cureentUserId, long friendId, ResourceParameters moviesResourceParameters)
         {
-            return WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId, moviesResourceParameters);
-            
+            return WatchedMoviesManager.GetAllFriendMovies(cureentUserId, friendId, moviesResourceParameters) as PagedList<MovieJMDBApi>;
+
         }
 
         public List<WatchedMovieModel> GetAllFriendsMovies(long currentUserId)
         {
-            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendsMovies(currentUserId);
+            List<MovieJMDBApi> movies = WatchedMoviesManager.GetAllFriendsMovies(currentUserId) as List<MovieJMDBApi>;
 
             List<WatchedMovieModel> moviesToReturn = new List<WatchedMovieModel>();
 
@@ -56,6 +58,12 @@ namespace Facade
 
             return moviesToReturn;
         }
+
+        public PagedList<MovieJMDBApi> GetAllFriendsMovies(long currentUserId, ResourceParameters parameters)
+        {
+            return WatchedMoviesManager.GetAllFriendsMovies(currentUserId, parameters) as PagedList<MovieJMDBApi>;
+        }
+        #endregion
 
         public List<UserModel> FriendsWatchThatMovie(long currentUserId, string moiveName)
         {

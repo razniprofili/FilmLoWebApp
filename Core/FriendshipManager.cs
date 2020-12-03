@@ -77,9 +77,8 @@ namespace Core
             }
         }
 
-        // no parameters
 
-        public List<User> GetAllMyFriends(long idUser)
+        public object GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters = null)
         {
             using (var uow = new UnitOfWork())
             {
@@ -87,50 +86,21 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
-
-                List<User> friends = new List<User>();
-
-                foreach (var friend in friendships)
+                if (usersResourceParameters != null)
                 {
-                    if (friend.UserSenderId == idUser)
+                    // provera da li postoje polja za sort
+                    if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
+                    (usersResourceParameters.OrderBy))
                     {
-                        var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
-                        friends.Add(userFriend);
+                        throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
                     }
-                    else
+
+                    //provera da li postoji properti za data shaping
+                    if (!_servicePropertyChecker.TypeHasProperties<UserModel>
+                      (usersResourceParameters.Fields))
                     {
-                        var userFriend = uow.UserRepository.GetById(friend.UserSenderId);
-                        friends.Add(userFriend);
+                        throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
                     }
-                }
-
-                return friends;
-            }
-        }
-
-        // with parameters
-
-        public PagedList<User> GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters)
-        {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
-                ValidationHelper.ValidateNotNull(user);
-
-                // provera da li postoje polja za sort
-                if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
-                (usersResourceParameters.OrderBy))
-                {
-                    throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
-                }
-
-                //provera da li postoji properti za data shaping
-                if (!_servicePropertyChecker.TypeHasProperties<UserModel>
-                  (usersResourceParameters.Fields))
-                {
-                    throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
                 }
 
                 var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
@@ -153,25 +123,11 @@ namespace Core
                     }
                 }
 
-                IQueryable<User> fr = friends.AsQueryable<User>();
-
-                if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
-                {
-                    var searchQuery = usersResourceParameters.SearchQuery.Trim().ToLower();
-                    fr = fr.Where(a => a.Name.ToLower().Contains(searchQuery) || a.Surname.ToLower().Contains(searchQuery)); // ako je pocetno slovo veliko T npr, a mi unesemo t
-                }
-
-                if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
-                {
-                    // get property mapping dictionary
-                    var userPropertyMappingDictionary =
-                        _propertyMappingService.GetPropertyMapping<UserModel, User>();
-
-                    fr = fr.ApplySort(usersResourceParameters.OrderBy,
-                        userPropertyMappingDictionary);
-                }
-
-                return PagedList<User>.Create(fr, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
+                if (usersResourceParameters != null)
+                    return generateResult(friends, usersResourceParameters);
+                else
+                    return friends;
+                
             }
         }
 
@@ -282,5 +238,33 @@ namespace Core
         }
 
         #endregion
+
+        #region Private Methods
+
+        private PagedList<User> generateResult(List<User> friends, ResourceParameters usersResourceParameters)
+        {
+            IQueryable<User> fr = friends.AsQueryable<User>();
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+            {
+                var searchQuery = usersResourceParameters.SearchQuery.Trim().ToLower();
+                fr = fr.Where(a => a.Name.ToLower().Contains(searchQuery) || a.Surname.ToLower().Contains(searchQuery)); // ako je pocetno slovo veliko T npr, a mi unesemo t
+            }
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
+            {
+                // get property mapping dictionary
+                var userPropertyMappingDictionary =
+                    _propertyMappingService.GetPropertyMapping<UserModel, User>();
+
+                fr = fr.ApplySort(usersResourceParameters.OrderBy,
+                    userPropertyMappingDictionary);
+            }
+
+            return PagedList<User>.Create(fr, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
+        }
+
+        #endregion
+
     }
 }

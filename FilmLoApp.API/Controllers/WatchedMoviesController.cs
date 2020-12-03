@@ -141,6 +141,48 @@ namespace FilmLoApp.API.Controllers
 
         }
 
+        [TokenAuthorize]
+        [HttpGet("allFriendsMoviesWithParameters", Name = "GetAllFriendsMovies")]
+        public IActionResult GetAllFriendsMovies([FromQuery] ResourceParameters parameters)
+        {
+            // return facade.GetAllFriendsMovies(CurrentUser.Id);
+            var moviesFromrepo = facade.GetAllFriendsMovies(CurrentUser.Id, parameters);
+
+            var paginationMetadata = new
+            {
+                totalCount = moviesFromrepo.TotalCount,
+                pageSize = moviesFromrepo.PageSize,
+                currentPage = moviesFromrepo.CurrentPage,
+                totalPages = moviesFromrepo.TotalPages
+                //previousPageLink,
+                //nextPageLink
+            };
+
+            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            //hateoas
+            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllFriendsMovies");
+
+            var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            {
+                var movieAsDictionary = movie as IDictionary<string, object>;
+                // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+                // movieAsDictionary.Add("links", userLinks);
+                return movieAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                movies = shapedMoviessWithLinks,
+                links
+            };
+
+            return Ok(linkedCollectionResource);
+        }
+
 
         [TokenAuthorize]
         [HttpPost("friendWatched")]
@@ -322,44 +364,6 @@ namespace FilmLoApp.API.Controllers
 
             return links;
         }
-
-        //private string CreateMovieResourceUri(ResourceParameters movieResourceParameters, ResourceUriType type)
-        //{
-        //    switch (type)
-        //    {
-        //        case ResourceUriType.PreviousPage:
-        //            return Url.Link("GetAllWatchedMoviesWithParameters",
-        //              new
-        //              {
-        //                  fields = movieResourceParameters.Fields,
-        //                  orderBy = movieResourceParameters.OrderBy,
-        //                  pageNumber = movieResourceParameters.PageNumber - 1,
-        //                  pageSize = movieResourceParameters.PageSize,
-        //                  searchQuery = movieResourceParameters.SearchQuery
-        //              });
-        //        case ResourceUriType.NextPage:
-        //            return Url.Link("GetAllWatchedMoviesWithParameters",
-        //              new
-        //              {
-        //                  fields = movieResourceParameters.Fields,
-        //                  orderBy = movieResourceParameters.OrderBy,
-        //                  pageNumber = movieResourceParameters.PageNumber + 1,
-        //                  pageSize = movieResourceParameters.PageSize,
-        //                  searchQuery = movieResourceParameters.SearchQuery
-        //              });
-        //        case ResourceUriType.Current: //vazi isto sto i za def.
-        //        default:
-        //            return Url.Link("GetAllWatchedMoviesWithParameters",
-        //            new
-        //            {
-        //                fields = movieResourceParameters.Fields,
-        //                orderBy = movieResourceParameters.OrderBy,
-        //                pageNumber = movieResourceParameters.PageNumber,
-        //                pageSize = movieResourceParameters.PageSize,
-        //                searchQuery = movieResourceParameters.SearchQuery
-        //            });
-        //    }
-        //}
 
         private string CreateMovieResourceUri(ResourceParameters movieResourceParameters, ResourceUriType type, string routeName)
         {

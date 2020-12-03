@@ -39,8 +39,10 @@ namespace Core
         }
 
         #endregion
-       
-        public List<MovieJMDBApi> GetAllMovies(long userId)
+
+        #region Methods
+
+        public object GetAllMovies(long userId, ResourceParameters parameters = null)
         {
             using (var uow = new UnitOfWork())
             {
@@ -48,38 +50,21 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve odgledane filmove za tog usera
-
-                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
-
-                foreach (var movie in watchedMovies) // za sve te odgledane filmove uzima njihove detalje
+                if( parameters != null)
                 {
-                    usersWatchedMovies.Add(movie.MovieJMDBApi);
-                }
-                return usersWatchedMovies;
-            }
-        }
+                    // provera da li postoje polja za sort
+                    if (!_propertyMappingService.ValidMappingExistsFor<WatchedMovieModel, MovieJMDBApi>
+                    (parameters.OrderBy))
+                    {
+                        throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
+                    }
 
-        public PagedList<MovieJMDBApi> GetAllMovies(long userId, ResourceParameters parameters)
-        {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
-
-                // provera da li postoje polja za sort
-                if (!_propertyMappingService.ValidMappingExistsFor<WatchedMovieModel, MovieJMDBApi>
-                (parameters.OrderBy))
-                {
-                    throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
-                }
-
-                //provera da li postoji properti za data shaping
-                if (!_servicePropertyChecker.TypeHasProperties<WatchedMovieModel>
-                  (parameters.Fields))
-                {
-                    throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                    //provera da li postoji properti za data shaping
+                    if (!_servicePropertyChecker.TypeHasProperties<WatchedMovieModel>
+                      (parameters.Fields))
+                    {
+                        throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                    }
                 }
 
                 var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve odgledane filmove za tog usera
@@ -91,61 +76,16 @@ namespace Core
                     usersWatchedMovies.Add(movie.MovieJMDBApi);
                 }
 
-                IQueryable<MovieJMDBApi> watchedMoviesToReturn = usersWatchedMovies.AsQueryable<MovieJMDBApi>();
+                if (parameters != null)
+                    return generateResult(usersWatchedMovies, parameters);
+                else
+                    return usersWatchedMovies;
 
-                if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
-                {
-                    var searchQuery = parameters.SearchQuery.Trim();
-                    watchedMoviesToReturn = watchedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
-                }
-
-                if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
-                {
-                    // get property mapping dictionary
-                    var moviePropertyMappingDictionary =
-                        _propertyMappingService.GetPropertyMapping<WatchedMovieModel, MovieJMDBApi>();
-
-                    // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
-                    //  moviePropertyMappingDictionary);
-
-                    watchedMoviesToReturn = watchedMoviesToReturn.ApplySort(parameters.OrderBy,
-                        moviePropertyMappingDictionary);
-                }
-
-                return PagedList<MovieJMDBApi>.Create(watchedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
-            }
-        }
-
-        public List<MovieJMDBApi> GetAllFriendMovies(long userId, long friendId)
-        {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
-
-                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == friendId);
-                ValidationHelper.ValidateNotNull(userFriend);
-
-                //provera prijateljstva:
-                var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
-                ValidationHelper.ValidateNotNull(exist);
-
-                var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
-
-                List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
-
-                foreach (var movie in watchedMovies) // za sve te sacuvane filmove uzima njihove detalje
-                {
-                    usersWatchedMovies.Add(movie.MovieJMDBApi);
-                }
-
-                return usersWatchedMovies;
             }
         }
 
         // with hateoas, fields, orderBy, search, pagination ...
-        public PagedList<MovieJMDBApi> GetAllFriendMovies(long userId, long friendId, ResourceParameters parameters)
+        public object GetAllFriendMovies(long userId, long friendId, ResourceParameters parameters = null)
         {
             using (var uow = new UnitOfWork())
             {
@@ -160,6 +100,23 @@ namespace Core
                 var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
                 ValidationHelper.ValidateNotNull(exist);
 
+                if(parameters != null)
+                {
+                    // provera da li postoje polja za sort
+                    if (!_propertyMappingService.ValidMappingExistsFor<WatchedMovieModel, MovieJMDBApi>
+                    (parameters.OrderBy))
+                    {
+                        throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
+                    }
+
+                    //provera da li postoji properti za data shaping
+                    if (!_servicePropertyChecker.TypeHasProperties<WatchedMovieModel>
+                      (parameters.Fields))
+                    {
+                        throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                    }
+                }
+                
                 var watchedMovies = uow.WatchedMovieRepository.Find(m => m.UserId == friendId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog prijatelja
 
                 List<MovieJMDBApi> usersWatchedMovies = new List<MovieJMDBApi>();
@@ -169,34 +126,15 @@ namespace Core
                     usersWatchedMovies.Add(movie.MovieJMDBApi);
                 }
 
-                IQueryable<MovieJMDBApi> watchedMoviesToReturn = usersWatchedMovies.AsQueryable<MovieJMDBApi>();
+                if (parameters != null)
+                    return generateResult(usersWatchedMovies, parameters);
+                else
+                    return usersWatchedMovies;
 
-                if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
-                {
-                    var searchQuery = parameters.SearchQuery.Trim();
-                    watchedMoviesToReturn = watchedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
-                }
-
-                if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
-                {
-                    // get property mapping dictionary
-                    var moviePropertyMappingDictionary =
-                        _propertyMappingService.GetPropertyMapping<WatchedMovieModel, MovieJMDBApi>();
-
-                    // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
-                    //  moviePropertyMappingDictionary);
-
-                    watchedMoviesToReturn = watchedMoviesToReturn.ApplySort(parameters.OrderBy,
-                        moviePropertyMappingDictionary);
-                }
-
-                return PagedList<MovieJMDBApi>.Create(watchedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
             }
         }
 
-        // odgledani filmovi svih mojih prijatelja:
-
-        public List<MovieJMDBApi> GetAllFriendsMovies(long userId)
+        public object GetAllFriendsMovies(long userId, ResourceParameters parameters = null)
         {
             using (var uow = new UnitOfWork())
             {
@@ -207,6 +145,23 @@ namespace Core
                 //pretraga prijateljstva:
                 var friendships = uow.FriendshipRepository.Find(f => (f.UserSenderId == userId && f.StatusCodeID == 'A') || (f.UserRecipientId == userId && f.StatusCodeID == 'A')).ToList();
                 ValidationHelper.ValidateNotNull(friendships);
+
+               if( parameters != null)
+                {
+                    // provera da li postoje polja za sort
+                    if (!_propertyMappingService.ValidMappingExistsFor<WatchedMovieModel, MovieJMDBApi>
+                    (parameters.OrderBy))
+                    {
+                        throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
+                    }
+
+                    //provera da li postoji properti za data shaping
+                    if (!_servicePropertyChecker.TypeHasProperties<WatchedMovieModel>
+                      (parameters.Fields))
+                    {
+                        throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
+                    }
+                }
 
                 List<MovieJMDBApi> friendsWatchedMovies = new List<MovieJMDBApi>();
 
@@ -233,8 +188,11 @@ namespace Core
                         }
                     }
                 }
+                if (parameters != null)
+                    return generateResult(friendsWatchedMovies, parameters);
+                else
+                    return friendsWatchedMovies;
 
-                return friendsWatchedMovies;
             }
         }
 
@@ -270,7 +228,7 @@ namespace Core
 
                 foreach (var friend in friends)
                 {
-                    friendsWatchedMovies = GetAllFriendMovies(userId, friend.Id); // za svakog usera prijatelja uzimamo sve njegove odgledane filmove
+                    friendsWatchedMovies = GetAllFriendMovies(userId, friend.Id) as List<MovieJMDBApi>; // za svakog usera prijatelja uzimamo sve njegove odgledane filmove
 
                     foreach (var movie in friendsWatchedMovies)
                     {
@@ -349,7 +307,7 @@ namespace Core
                 ValidationHelper.ValidateNotNull(watchedMovieDelete);
 
                 uow.WatchedMovieRepository.Delete(watchedMovieDelete); // samo brise iz odgledanih, detalji i movieAPI ostaju!
-                uow.Save(); 
+                uow.Save();
             }
         }
 
@@ -397,9 +355,9 @@ namespace Core
 
                     // ne moze ovako, mora preko glavnog entitija, svaki film mora da ima detalje!!
                     // dodaju se i detalji jer i oni ne postoje:
-                   // var newMovie = uow.MovieDetailsJMDBApiRepository.Add(movie);
-                   // uow.Save();
-                } 
+                    // var newMovie = uow.MovieDetailsJMDBApiRepository.Add(movie);
+                    // uow.Save();
+                }
 
                 //provera da li je vec unet film za tog usera (za svaki slucaj):
                 var exist = uow.WatchedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movieAPIid);
@@ -425,7 +383,7 @@ namespace Core
 
                 var savedMovie = uow.SavedMovieRepository.FirstOrDefault(m => m.MovieJMDBApiId == movieAPIid && m.UserId == userId);
 
-                if( savedMovie != null)
+                if (savedMovie != null)
                 {
                     uow.SavedMovieRepository.Delete(savedMovie);
                     uow.Save();
@@ -459,12 +417,44 @@ namespace Core
                 if (!string.IsNullOrEmpty(movie.WatchingDate))
                     watchedMovie.WatchingDate = movie.WatchingDate;
 
-                uow.WatchedMovieRepository.Update(watchedMovie,  userId, watchedMovie.MovieJMDBApiId);
+                uow.WatchedMovieRepository.Update(watchedMovie, userId, watchedMovie.MovieJMDBApiId);
                 uow.Save();
 
                 return movieExists;
 
             }
         }
+        #endregion
+
+        #region Private Methods
+
+        public PagedList<MovieJMDBApi> generateResult(List<MovieJMDBApi> moviesList, ResourceParameters parameters)
+        {
+            IQueryable<MovieJMDBApi> watchedMoviesToReturn = moviesList.AsQueryable<MovieJMDBApi>();
+
+            if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+            {
+                var searchQuery = parameters.SearchQuery.Trim();
+                watchedMoviesToReturn = watchedMoviesToReturn.Where(a => a.Name.Contains(searchQuery));
+            }
+
+            if (!string.IsNullOrWhiteSpace(parameters.OrderBy))
+            {
+                // get property mapping dictionary
+                var moviePropertyMappingDictionary =
+                    _propertyMappingService.GetPropertyMapping<WatchedMovieModel, MovieJMDBApi>();
+
+                // var m = savedMoviesToReturn.Select(movie => movie.MovieDetailsJMDBApi).ApplySort(parameters.OrderBy,
+                //  moviePropertyMappingDictionary);
+
+                watchedMoviesToReturn = watchedMoviesToReturn.ApplySort(parameters.OrderBy,
+                    moviePropertyMappingDictionary);
+            }
+
+            return PagedList<MovieJMDBApi>.Create(watchedMoviesToReturn, parameters.PageNumber, parameters.PageSize);
+        }
+
+        #endregion
+
     }
 }

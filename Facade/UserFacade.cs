@@ -29,13 +29,13 @@ namespace Facade
 
         public List<UserModel> GetAllUsers (long currentUserId)
         {
-            var users = UserManager.GetAllUsers(currentUserId);
+            var users = UserManager.GetAllUsers(currentUserId) as List<User>;
             return users.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 
         public PagedList<User> GetAllUsers(long currentUserId, ResourceParameters usersResourceParameters)
         {
-            return UserManager.GetAllUsers(currentUserId, usersResourceParameters);
+            return UserManager.GetAllUsers(currentUserId, usersResourceParameters) as PagedList<User>;
         }
 
         public UserModel Update(long currentUserId, UpdateModel updateUser)

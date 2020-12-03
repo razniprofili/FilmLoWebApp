@@ -145,7 +145,7 @@ namespace Core
             }
         }
 
-        public List<User> GetAllUsers(long idUser)
+        public object GetAllUsers(long idUser, ResourceParameters usersResourceParameters = null)
         {
             using (var uow = new UnitOfWork())
             {
@@ -153,57 +153,57 @@ namespace Core
                 var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var allUsers = uow.UserRepository.Find(x => x.Id != idUser).ToList(); // necemo da nam vraca nas (crr usera)
-
-                return allUsers;
-            }
-        }
-
-        public PagedList<User> GetAllUsers(long idUser, ResourceParameters usersResourceParameters)
-        {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
-                ValidationHelper.ValidateNotNull(user);
-
-                // provera da li postoje polja za sort
-                if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
-                (usersResourceParameters.OrderBy))
+                if(usersResourceParameters != null)
                 {
-                    throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
-                }
+                    // provera da li postoje polja za sort
+                    if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
+                    (usersResourceParameters.OrderBy))
+                    {
+                        throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
+                    }
 
-                //provera da li postoji properti za data shaping
-                if (!_servicePropertyChecker.TypeHasProperties<UserModel>
-                  (usersResourceParameters.Fields))
-                {
-                    throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
+                    //provera da li postoji properti za data shaping
+                    if (!_servicePropertyChecker.TypeHasProperties<UserModel>
+                      (usersResourceParameters.Fields))
+                    {
+                        throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
+                    }
                 }
 
                 var allUsers = uow.UserRepository.Find(x => x.Id != idUser); //as IQueryable<User> // necemo da nam vraca nas (crr usera)
 
-                if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
-                {
-                    var searchQuery = usersResourceParameters.SearchQuery.Trim();
-                    allUsers = allUsers.Where(a => a.Name.Contains(searchQuery) || a.Surname.Contains(searchQuery));
-                }
-
-                if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
-                {
-                    // get property mapping dictionary
-                    var authorPropertyMappingDictionary =
-                        _propertyMappingService.GetPropertyMapping<UserModel, User>();
-
-                    allUsers = allUsers.ApplySort(usersResourceParameters.OrderBy,
-                        authorPropertyMappingDictionary);
-                }
-
-                return PagedList<User>.Create(allUsers, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
+                if (usersResourceParameters != null)
+                    return generateResult(allUsers, usersResourceParameters);
+                else
+                    return allUsers.ToList();
+               
             }
         }
 
         #endregion
 
+        #region Private Methods
+        private PagedList<User> generateResult(IQueryable<User> allUsers, ResourceParameters usersResourceParameters)
+        {
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.SearchQuery))
+            {
+                var searchQuery = usersResourceParameters.SearchQuery.Trim();
+                allUsers = allUsers.Where(a => a.Name.Contains(searchQuery) || a.Surname.Contains(searchQuery));
+            }
+
+            if (!string.IsNullOrWhiteSpace(usersResourceParameters.OrderBy))
+            {
+                // get property mapping dictionary
+                var authorPropertyMappingDictionary =
+                    _propertyMappingService.GetPropertyMapping<UserModel, User>();
+
+                allUsers = allUsers.ApplySort(usersResourceParameters.OrderBy,
+                    authorPropertyMappingDictionary);
+            }
+
+            return PagedList<User>.Create(allUsers, usersResourceParameters.PageNumber, usersResourceParameters.PageSize);
+        }
+
+        #endregion
     }
 }

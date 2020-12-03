@@ -18,13 +18,13 @@ namespace Facade
 
         public List<SavedMovieModel> GetAllSavedMovies(long currentUserId)
         {
-            List<MovieJMDBApi> movies = SavedMoviesManager.GetAllMovies(currentUserId);
+            List<MovieJMDBApi> movies = SavedMoviesManager.GetAllMovies(currentUserId) as List<MovieJMDBApi>;
             return movies.Select(a => Mapper.Mapper.Map(a, currentUserId)).ToList();
         }
 
         public PagedList<MovieJMDBApi> GetAllSavedMovies(long currentUserId, ResourceParameters usersResourceParameters)
         {
-            return SavedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters);
+            return SavedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters) as PagedList<MovieJMDBApi>;
         }
 
         public AddSavedMovieModel AddSavedMovie( long userId, AddSavedMovieModel addModel)
