@@ -14,12 +14,16 @@ using System.Text.Json;
 using Domain;
 using AutoMapper;
 using Core.Services;
+using Marvin.Cache.Headers;
 
 namespace FilmLoApp.API.Controllers
 {
     [ValidateModel]
     [Produces("application/json")]
     [Route("api/User")]
+    // [HttpCacheExpiration(CacheLocation = CacheLocation.Public)] //marvin.cache.headers
+    // [HttpCacheValidation(MustRevalidate = true)]
+    //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class UserController : BaseController
     {
         #region Constructors
@@ -97,6 +101,9 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("allUsers")]
+        //[ResponseCache(Duration = 120)]
+        //[HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)] //marvin.cache.headers
+        //[HttpCacheValidation(MustRevalidate = false)]
         public List<UserModel> GetAllUsers()
         {
             return facade.GetAllUsers(CurrentUser.Id); // jer zelimo da nam prikaze sve korisnike osim ulogovaog

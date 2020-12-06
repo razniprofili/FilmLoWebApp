@@ -40,7 +40,7 @@ namespace FilmLoApp.API
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            //za kesiranje
+            // za kesiranje
             //services.AddHttpCacheHeaders((expirationModelOptions) =>
             //{
             //    expirationModelOptions.MaxAge = 60;
@@ -51,9 +51,19 @@ namespace FilmLoApp.API
             //    validationModelOptions.MustRevalidate = true;
             //});
 
-            //services.AddResponseCaching();
+            // services.AddResponseCaching();
 
-
+            //services.AddControllers(setupAction =>
+            //{
+            //    setupAction.ReturnHttpNotAcceptable = true; //ako npr xml nije podrzavajuc on ce vratiti gresku 406, a ne u JSON formatu koji je default
+            //    //za kesiranje, da bi se primelo isto pravilo nad razl resursima
+            //    setupAction.CacheProfiles.Add("240SecondsCacheProfile",
+            //                                    new CacheProfile()
+            //                                    {
+            //                                        Duration = 240
+            //                                    });
+            //});
+          //  services.AddResponseCompression();
             services.AddMvc(options => options.EnableEndpointRouting = false);
             //services.AddControllers(setupAction =>
             //{
@@ -160,9 +170,11 @@ namespace FilmLoApp.API
             .AllowAnyMethod()
 
             );
+            //za kesiranje:
+            // app.UseResponseCaching();
 
-          //  app.UseHttpCacheHeaders(); //mora biti na ovom mestu
-
+            // app.UseHttpCacheHeaders(); //mora biti na ovom mestu
+           // app.UseResponseCompression();
             app.UseMvc();
 
             //app.UseRouting();
