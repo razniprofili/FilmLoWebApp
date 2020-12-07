@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Core
 {
-    public class FriendshipManager
+    public class FriendshipManager : IFriendshipManager
     {
 
         #region PrivateFields

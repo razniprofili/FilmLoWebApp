@@ -12,7 +12,7 @@ using System.Text;
 
 namespace Core
 {
-   public class SavedMoviesManager
+   public class SavedMoviesManager : ISavedMoviesManager
     {
 
         #region Fields

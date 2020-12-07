@@ -24,21 +24,20 @@ namespace Facade
         internal IPropertyCheckerService PropertyCheckerService => _propertyCheckerService ?? (_propertyCheckerService = new PropertyCheckerService());
 
 
-        private IUnitOfWork _uow;
+       // private IUnitOfWork _uow;
+       // public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
 
-        public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
+        private IUserManager _userManager;
+        internal IUserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService, PropertyCheckerService));
 
-        private UserManager _userManager;
-        internal UserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService, PropertyCheckerService));
+        private ISavedMoviesManager _savedMoviesManager;
+        internal ISavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager(PropertyMappingService, PropertyCheckerService));
 
-        private SavedMoviesManager _savedMoviesManager;
-        internal SavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager(PropertyMappingService, PropertyCheckerService));
+        private IWatchedMoviesManager _watchedMoviesManager;
+        internal IWatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager(PropertyMappingService, PropertyCheckerService));
 
-        private WatchedMoviesManager _watchedMoviesManager;
-        internal WatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager(PropertyMappingService, PropertyCheckerService));
-
-        private FriendshipManager _friendshipManager;
-        internal FriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));
+        private IFriendshipManager _friendshipManager;
+        internal IFriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));
 
     }
 }

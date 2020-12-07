@@ -17,7 +17,7 @@ using System.Text;
 
 namespace Core
 {
-    public class WatchedMoviesManager
+    public class WatchedMoviesManager : IWatchedMoviesManager
     {
 
         #region Fields
