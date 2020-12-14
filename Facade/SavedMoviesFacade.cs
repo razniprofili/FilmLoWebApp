@@ -27,6 +27,12 @@ namespace Facade
             return SavedMoviesManager.GetAllMovies(currentUserId, usersResourceParameters) as PagedList<MovieJMDBApi>;
         }
 
+        public SavedMovieModel GetMovie(long currentUserId, string movieId)
+        {
+            var savedMovie = SavedMoviesManager.GetMovie(currentUserId, movieId);
+            return Mapper.Mapper.Map(savedMovie, currentUserId);
+        }
+
         public AddSavedMovieModel AddSavedMovie( long userId, AddSavedMovieModel addModel)
         {
             var savedMovie = SavedMoviesManager.Add(userId, Mapper.Mapper.Map(addModel));

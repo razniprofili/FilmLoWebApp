@@ -12,6 +12,7 @@ namespace Core
         public object GetAllMovies(long userId, ResourceParameters parameters = null);
         public void Delete(long userId, string movieId);
         public MovieJMDBApi Add(long userId, MovieJMDBApi movie);
+        public MovieJMDBApi GetMovie(long userId, string movieId);
 
     }
 }

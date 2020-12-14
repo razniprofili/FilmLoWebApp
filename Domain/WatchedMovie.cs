@@ -15,6 +15,7 @@ namespace Domain
         public MovieJMDBApi MovieJMDBApi { get; set; }
         [NotNull]
         public string WatchingDate { get; set; } // na front delu se bira datum, i mora da bude posebog formata, pa je lakse sacuvatikao string
+        public DateTime DateTimeAdded { get; set; }
         [NotNull]
         public int Rating { get; set; }
         [NotNull]

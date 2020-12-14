@@ -370,7 +370,9 @@ namespace Core
                     MovieJMDBApiId = movieAPIid,
                     Comment = comment,
                     Rating = rate,
-                    WatchingDate = date
+                    WatchingDate = date,
+                    DateTimeAdded = DateTime.Now
+                    
                 };
 
                 var watchedMovie = uow.WatchedMovieRepository.Add(watchedMoive);

@@ -89,6 +89,17 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
+        [HttpGet("{movieId}", Name = "GetMovie")]
+        public ActionResult<SavedMovieModel> GetMovie(string movieId)
+        {
+           // return facade.GetMovie(CurrentUser.Id, movieId);
+            var movieIdToReturn = facade.GetMovie(CurrentUser.Id, movieId);
+            var links = CreateLinksForMovie(CurrentUser.Id, movieId);
+
+            return generateResult(movieIdToReturn, links);
+        }
+
+        [TokenAuthorize]
         [HttpPost("add")]
         public object AddSavedMovie([FromBody] AddSavedMovieModel savedMovieModel)
         {
@@ -125,12 +136,23 @@ namespace FilmLoApp.API.Controllers
 
         #region Private Methods
 
+        private ActionResult<SavedMovieModel> generateResult(SavedMovieModel movieToReturn, IEnumerable<LinkDto> links)
+        {
+            var linkedResourceToReturn = movieToReturn.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetMovie",
+                new { movieId = linkedResourceToReturn["Id"] },
+                linkedResourceToReturn);
+        }
+
         private IEnumerable<LinkDto> CreateLinksForMovie(long userId, string movieId)
         {
             var links = new List<LinkDto>();
 
             links.Add(
-               new LinkDto(Url.Link("GetAllSavedMovies", new { id = userId }),
+               new LinkDto(Url.Link("GetAllSavedMovies", new { id = "" }),
                "All saved movies for current user.",
                "GET"));
 

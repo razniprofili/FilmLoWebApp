@@ -14,6 +14,7 @@ namespace Models.SavedMovies
         public string Name { get; set; }
         [Required]
         public string Poster { get; set; }
+        public DateTime DateTimeSaved { get; set; }
         [Required]
         public long UserId { get; set; }
 

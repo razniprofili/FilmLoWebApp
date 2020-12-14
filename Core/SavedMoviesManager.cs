@@ -59,7 +59,7 @@ namespace Core
                     {
                         UserId = userId,
                         MovieJMDBApiId = movie.Id,
-                        SavingDate = DateTime.UtcNow
+                        SavingDate = DateTime.Now
                     };
 
                     uow.SavedMovieRepository.Add(savedMovie);
@@ -147,6 +147,23 @@ namespace Core
                     return generateResult(usersSavedMovies, parameters);
                 else
                     return usersSavedMovies;
+            }
+        }
+
+        public MovieJMDBApi GetMovie (long userId, string movieId)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var movie = uow.MovieJMDBApiRepository.FirstOrDefault(a => a.Id == movieId);
+                ValidationHelper.ValidateNotNull(movie);
+
+                var savedMovie = uow.SavedMovieRepository.FirstOrDefault(m => m.UserId == userId && m.MovieJMDBApiId == movieId, "MovieJMDBApi");
+                ValidationHelper.ValidateNotNull(savedMovie);
+
+                return savedMovie.MovieJMDBApi;
             }
         }
 

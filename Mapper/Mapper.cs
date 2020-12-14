@@ -93,9 +93,11 @@ namespace Mapper
                     Duration = movie.MovieDetailsJMDBApi.Duration,
                     Genre = movie.MovieDetailsJMDBApi.Genre,
                     Country = movie.MovieDetailsJMDBApi.Country,
+                    Poster = movie.Poster,
                     Rate = watchedMovie.Rating,
                     Comment = watchedMovie.Comment,
                     DateTimeWatched = watchedMovie.WatchingDate,
+                    DateTimeAdded = watchedMovie.DateTimeAdded,
                     UserId = watchedMovie.UserId,
                     User = AutoMap<User, UserModel>(watchedMovie.User)
                 };
@@ -169,9 +171,11 @@ namespace Mapper
                 Duration = movie.MovieDetailsJMDBApi.Duration,
                 Genre = movie.MovieDetailsJMDBApi.Genre,
                 Country = movie.MovieDetailsJMDBApi.Country,
+                Poster = movie.Poster,
                 Rate = watchedMovie.Rating,
                 Comment = watchedMovie.Comment,
                 DateTimeWatched = watchedMovie.WatchingDate,
+                DateTimeAdded = watchedMovie.DateTimeAdded,
                 UserId = watchedMovie.UserId,
                 User = AutoMap<User, UserModel>(watchedMovie.User)
             };
@@ -181,11 +185,13 @@ namespace Mapper
         public static SavedMovieModel Map(MovieJMDBApi movie, long userId)
         {
             var userMovie = new User();
+            DateTime dateTimeSaved = new DateTime();
             foreach (var movie1 in movie.SavedUsers)
             {
                 if (movie1.UserId == userId)
                 {
                     userMovie = movie1.User;
+                    dateTimeSaved = movie1.SavingDate;
                     break;
                 }
 
@@ -195,6 +201,7 @@ namespace Mapper
                 Id = movie.Id,
                 Name = movie.Name,
                 Poster = movie.Poster,
+                DateTimeSaved = dateTimeSaved,
                 UserId = userId,
                 User = AutoMap<User, UserModel>(userMovie)
             };
@@ -221,9 +228,11 @@ namespace Mapper
                 Duration = movie.MovieDetailsJMDBApi.Duration,
                 Genre = movie.MovieDetailsJMDBApi.Genre,
                 Country = movie.MovieDetailsJMDBApi.Country,
+                Poster = movie.Poster,
                 Rate = watchedMovie.Rating,
                 Comment = watchedMovie.Comment,
                 DateTimeWatched = watchedMovie.WatchingDate,
+                DateTimeAdded = watchedMovie.DateTimeAdded,
                 UserId = watchedMovie.UserId,
                 User = AutoMap<User, UserModel>(watchedMovie.User)
             };
