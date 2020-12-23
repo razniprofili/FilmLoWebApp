@@ -12,10 +12,10 @@ namespace Facade
 {
     public partial class FilmLoFacade
     {
-        public UserModel GetFriendInfo (long friendId, long currentUserId)
+        public FriendshipModel GetFriendInfo (long friendId, long currentUserId)
         {
-            var user = FriendshipManager.GetFriendInfo(friendId, currentUserId);
-            return Mapper.Mapper.AutoMap<User, UserModel>(user);
+            var friendInfo = FriendshipManager.GetFriendInfo(friendId, currentUserId);
+            return Mapper.Mapper.Map(friendInfo);
         }
 
         public void DeleteFriend(long friendId, long currentUserId)
@@ -55,6 +55,13 @@ namespace Facade
         public void DeclineRequest(long currentUserId, long friendId)
         {
             FriendshipManager.DeclineRequest(currentUserId, friendId);
+        }
+
+        public List<FriendshipModel> FriendRequests(long currentUserId)
+        {
+            var friendRequests = FriendshipManager.FriendRequests(currentUserId);
+
+            return friendRequests.Select(request => Mapper.Mapper.Map(request)).ToList();
         }
     }
 }

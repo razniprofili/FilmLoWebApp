@@ -164,7 +164,7 @@ namespace Core
 
         }
 
-        public User GetFriendInfo(long idFriend, long idUser)
+        public Friendship GetFriendInfo(long idFriend, long idUser)
         {
 
             using (var uow = new UnitOfWork())
@@ -175,7 +175,22 @@ namespace Core
 
                 var myFriend = uow.UserRepository.FirstOrDefault(a => a.Id == idFriend);
                 ValidationHelper.ValidateNotNull(myFriend);
-                return myFriend;
+
+                var userSender = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                ValidationHelper.ValidateNotNull(userSender);
+
+                if(friendship.UserSenderId == idUser)
+                    friendship.UserSender = userSender;
+                else
+                    friendship.UserSender = myFriend;
+
+                if (friendship.UserRecipientId == idFriend)
+                    friendship.UserRecipient = myFriend;
+                else
+                    friendship.UserRecipient = userSender;
+
+
+                return friendship;
             }
         }
 
@@ -237,6 +252,25 @@ namespace Core
             }
         }
 
+        public List<Friendship> FriendRequests(long currentUserId)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var requests = uow.FriendshipRepository.Find(f => f.UserRecipientId == currentUserId && f.StatusCodeID=='R').ToList();
+
+                foreach(var request in requests)
+                {
+                    var sender = uow.UserRepository.FirstOrDefault(u => u.Id == request.UserSenderId);
+                    request.UserSender = sender;
+                }
+
+                return requests;
+            }
+
+        }
         #endregion
 
         #region Private Methods

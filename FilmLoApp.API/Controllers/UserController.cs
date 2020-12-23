@@ -185,7 +185,7 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("friendInfo/{id}")] //friend id
-        public UserModel GetFriendInfo(long id)
+        public FriendshipModel GetFriendInfo(long id)
         {
             return facade.GetFriendInfo(id, CurrentUser.Id);
 
@@ -279,6 +279,13 @@ namespace FilmLoApp.API.Controllers
         public void DeclineRequest(long id)
         {
             facade.DeclineRequest(CurrentUser.Id, id);
+        }
+
+        [TokenAuthorize]
+        [HttpGet("friendRequests")]
+        public List<FriendshipModel> FriendshipRequests()
+        {
+            return facade.FriendRequests(CurrentUser.Id);
         }
 
         #endregion
