@@ -272,6 +272,26 @@ namespace Core
             }
 
         }
+
+        public List<Friendship> SentFriendRequests(long currentUserId)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
+                ValidationHelper.ValidateNotNull(user);
+
+                var requests = uow.FriendshipRepository.Find(f => f.UserSenderId == currentUserId && f.StatusCodeID == 'R').ToList();
+
+                foreach (var request in requests)
+                {
+                    var recipient = uow.UserRepository.FirstOrDefault(u => u.Id == request.UserRecipientId);
+                    request.UserRecipient = recipient;
+                }
+
+                return requests;
+            }
+
+        }
         #endregion
 
         #region Private Methods

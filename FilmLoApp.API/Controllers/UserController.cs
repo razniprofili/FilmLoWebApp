@@ -288,6 +288,14 @@ namespace FilmLoApp.API.Controllers
             return facade.FriendRequests(CurrentUser.Id);
         }
 
+        [TokenAuthorize]
+        [HttpGet("sentFriendRequests")]
+        public List<FriendshipModel> SentFriendshipRequests()
+        {
+            return facade.SentFriendRequests(CurrentUser.Id);
+        }
+
+
         #endregion
 
         #region PrivateMethods

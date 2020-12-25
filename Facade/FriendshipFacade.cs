@@ -63,5 +63,14 @@ namespace Facade
 
             return friendRequests.Select(request => Mapper.Mapper.Map(request)).ToList();
         }
+
+
+        public List<FriendshipModel> SentFriendRequests(long currentUserId)
+        {
+            var sentRequests = FriendshipManager.SentFriendRequests(currentUserId);
+
+            return sentRequests.Select(request => Mapper.Mapper.Map(request)).ToList();
+        }
+
     }
 }
