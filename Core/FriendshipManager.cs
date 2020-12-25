@@ -223,6 +223,7 @@ namespace Core
                 ValidationHelper.ValidateNotNull(friendship);
 
                 friendship.StatusCodeID = 'A';
+                friendship.FriendshipDate = DateTime.Now;
 
                 uow.FriendshipRepository.Update(friendship, requestUserId, userId);
                 uow.Save();
