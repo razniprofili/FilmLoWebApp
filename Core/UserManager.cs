@@ -97,7 +97,11 @@ namespace Core
                 ValidationHelper.ValidateNotNull(userExists);
 
                 user.Id = id;
-                user.Picture = userExists.Picture;
+
+                if (user.Picture == null)
+                    user.Picture = userExists.Picture;
+
+
                 if (user.Name == null)
                     user.Name = userExists.Name;
 
