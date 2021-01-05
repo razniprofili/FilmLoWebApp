@@ -15,7 +15,8 @@ namespace Domain
         public virtual DbSet<MovieJMDBApi> MovieJMDBApi { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<StatusCode> StatusCode { get; set; }
-
+        public virtual DbSet<WatchedMoviesStats> WatchedMoviesStats { get; set; }
+        public virtual DbSet<PopularMovies> PopularMovies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -55,6 +56,23 @@ namespace Domain
 
                 entity.HasOne(u => u.UserSender).WithMany(t => t.FriendsSent).HasForeignKey(t => t.UserSenderId).OnDelete(DeleteBehavior.Restrict);
 
+            });
+
+            modelBuilder.Entity<WatchedMoviesStats>(stats => {
+                stats.HasNoKey();
+                stats.ToView("WatchedMoviestStats");
+                stats.Property(s => s.UserId).HasColumnName("userId");
+                stats.Property(s => s.TotalCount).HasColumnName("totalCount");
+                stats.Property(s => s.TotalTime).HasColumnName("totalTime");
+                stats.Property(s => s.AverageRate).HasColumnName("averageRate");
+            });
+
+            modelBuilder.Entity<PopularMovies>(popmovies => {
+                popmovies.HasNoKey();
+                popmovies.ToView("PopularMovies");
+                popmovies.Property(s => s.UserId).HasColumnName("Id");
+                popmovies.Property(s => s.MovieId).HasColumnName("MovieJMDBApiId");
+                popmovies.Property(s => s.MovieName).HasColumnName("Name");
             });
 
         }

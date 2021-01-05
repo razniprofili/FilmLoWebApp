@@ -39,5 +39,10 @@ namespace Facade
         private IFriendshipManager _friendshipManager;
         internal IFriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));
 
+        private IPopularMoviesManager _popularMoviesManager;
+        internal IPopularMoviesManager PopularMoviesManager => _popularMoviesManager ?? (_popularMoviesManager = new PopularMoviesManager());
+
+        private IWatchedMoviesStatsManager _watchedMoviesStatsManager;
+        internal IWatchedMoviesStatsManager WatchedMoviesStatsManager => _watchedMoviesStatsManager ?? (_watchedMoviesStatsManager = new WatchedMoviesStatsManager());
     }
 }

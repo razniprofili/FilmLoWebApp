@@ -110,5 +110,17 @@ namespace Facade
             var updatedMovie = WatchedMoviesManager.Update(Mapper.Mapper.MapUpdate(movieModel), movieId, currentUserid);
             return Mapper.Mapper.Map(updatedMovie);
         }
+
+        public List<PopularMoviesModel> GetPopularMovies(long currentUserId)
+        {
+            var popularMovies = PopularMoviesManager.GetPopularMovies(currentUserId);
+
+            return popularMovies.Select(m => Mapper.Mapper.AutoMap<PopularMovies, PopularMoviesModel>(m)).ToList();
+        }
+
+        public WatchedMoviesStatsModel GetWatchedMoviesStats (long currentUserId)
+        {
+            return Mapper.Mapper.AutoMap<WatchedMoviesStats, WatchedMoviesStatsModel>(WatchedMoviesStatsManager.GetWatchedMoviesStats(currentUserId));
+        }
     }
 }

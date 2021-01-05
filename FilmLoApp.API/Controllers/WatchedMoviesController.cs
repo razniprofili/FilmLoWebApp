@@ -281,6 +281,20 @@ namespace FilmLoApp.API.Controllers
 
         }
 
+        [TokenAuthorize]
+        [HttpGet("popularMovies")]
+        public List<PopularMoviesModel> GetPopularMovies()
+        {
+            return facade.GetPopularMovies(CurrentUser.Id);
+        }
+
+        [TokenAuthorize]
+        [HttpGet("watchedMoviesStats")]
+        public WatchedMoviesStatsModel GetWatchedMoviesStats()
+        {
+            return facade.GetWatchedMoviesStats(CurrentUser.Id);
+        }
+
         #endregion
 
         #region Private Methods
