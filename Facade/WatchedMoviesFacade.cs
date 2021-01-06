@@ -122,5 +122,13 @@ namespace Facade
         {
             return Mapper.Mapper.AutoMap<WatchedMoviesStats, WatchedMoviesStatsModel>(WatchedMoviesStatsManager.GetWatchedMoviesStats(currentUserId));
         }
+
+        public List<YearStatisticModel> GetYearStatistic(long currentUserId)
+        {
+            var yearStatistic = YearStatisticManager.GetYearStatistic(currentUserId);
+
+            return yearStatistic.Select(m => Mapper.Mapper.AutoMap<YearStatistic, YearStatisticModel>(m)).ToList();
+        }
+
     }
 }

@@ -17,6 +17,7 @@ namespace Domain
         public virtual DbSet<StatusCode> StatusCode { get; set; }
         public virtual DbSet<WatchedMoviesStats> WatchedMoviesStats { get; set; }
         public virtual DbSet<PopularMovies> PopularMovies { get; set; }
+        public virtual DbSet<YearStatistic> YearStatistic { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -73,6 +74,14 @@ namespace Domain
                 popmovies.Property(s => s.UserId).HasColumnName("Id");
                 popmovies.Property(s => s.MovieId).HasColumnName("MovieJMDBApiId");
                 popmovies.Property(s => s.MovieName).HasColumnName("Name");
+            });
+
+            modelBuilder.Entity<YearStatistic>(yearStat => {
+                yearStat.HasNoKey();
+                yearStat.ToView("YearStatistic");
+                yearStat.Property(s => s.UserId).HasColumnName("userId");
+                yearStat.Property(s => s.Year).HasColumnName("watchingYear");
+                yearStat.Property(s => s.Count).HasColumnName("totalMovies");
             });
 
         }

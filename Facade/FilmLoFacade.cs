@@ -44,5 +44,8 @@ namespace Facade
 
         private IWatchedMoviesStatsManager _watchedMoviesStatsManager;
         internal IWatchedMoviesStatsManager WatchedMoviesStatsManager => _watchedMoviesStatsManager ?? (_watchedMoviesStatsManager = new WatchedMoviesStatsManager());
+
+        private IYearStatisticManager _yearStatisticManager;
+        internal IYearStatisticManager YearStatisticManager => _yearStatisticManager ?? (_yearStatisticManager = new YearStatisticManager());
     }
 }

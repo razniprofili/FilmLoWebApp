@@ -295,6 +295,13 @@ namespace FilmLoApp.API.Controllers
             return facade.GetWatchedMoviesStats(CurrentUser.Id);
         }
 
+        [TokenAuthorize]
+        [HttpGet("yearStatistic")]
+        public List<YearStatisticModel> GetYearStatistic()
+        {
+            return facade.GetYearStatistic(CurrentUser.Id);
+        }
+
         #endregion
 
         #region Private Methods
