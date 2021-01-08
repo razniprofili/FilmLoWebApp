@@ -10,6 +10,7 @@ using Core.Services;
 using Data;
 using Domain;
 using FilmLoApp.API.Helpers;
+using FilmLoApp.API.Hubs;
 using FilmLoApp.API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -149,6 +150,8 @@ namespace FilmLoApp.API
             services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddSignalR();
         }
       
 
@@ -165,9 +168,11 @@ namespace FilmLoApp.API
             // app.UseCors(options => options.WithOrigins("http://localhost:8100"));
 
             app.UseCors(builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod()
+            //.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .SetIsOriginAllowed((hosts) => true)
 
             );
             //za kesiranje:
@@ -177,15 +182,12 @@ namespace FilmLoApp.API
            // app.UseResponseCompression();
             app.UseMvc();
 
-            //app.UseRouting();
+            app.UseRouting();
 
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapGet("/", async context =>
-            //    {
-            //        await context.Response.WriteAsync("Hello World!");
-            //    });
-            //});
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<SendFriendRequestHub>("/sendRequest");
+            });
         }
     }
 }
