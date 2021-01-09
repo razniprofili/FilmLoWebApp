@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FilmLoApp.API.Hubs
 {
-    //[TokenAuthorize]
+    
     public class SendFriendRequestHub : Hub
     {
         private FilmLoFacade _facade;
@@ -18,9 +18,10 @@ namespace FilmLoApp.API.Hubs
 
         public async Task AddFriend(long currentUserId, AddFriendshipModel model)
         {
-            facade.Add(model, currentUserId);
+            var friendship = facade.Add(model, currentUserId);
 
-            await Clients.Others.SendAsync("RequestReceived");
+
+            await Clients.Others.SendAsync("RequestReceived", friendship);
             await Clients.Caller.SendAsync("RequestSent");
         }
 
