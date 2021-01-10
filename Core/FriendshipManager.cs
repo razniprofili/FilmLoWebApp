@@ -292,7 +292,7 @@ namespace Core
 
         }
         
-        public List<User> MultualFriends(long currentUserId, long userId)
+        public List<User> MutualFriends(long currentUserId, long userId)
         {
 
             using (var uow = new UnitOfWork())
@@ -307,9 +307,9 @@ namespace Core
                 var myFriends = GetAllMyFriends(currentUserId) as List<User>;
                 var userFriends = GetAllMyFriends(userId) as List<User>;
 
-                var multualFriends = myFriends.Intersect(userFriends).ToList();
+                var mutualFriends = myFriends.Intersect(userFriends).ToList();
 
-                return multualFriends;
+                return mutualFriends;
 
             }
         }

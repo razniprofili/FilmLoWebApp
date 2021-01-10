@@ -72,11 +72,11 @@ namespace Facade
             return sentRequests.Select(request => Mapper.Mapper.Map(request)).ToList();
         }
 
-        public List<UserModel> MultualFriends(long currentUserId, long userId)
+        public List<UserModel> MutualFriends(long currentUserId, long userId)
         {
-            List<User> multualFriends = FriendshipManager.MultualFriends(currentUserId, userId) as List<User>;
+            List<User> mutualFriends = FriendshipManager.MutualFriends(currentUserId, userId) as List<User>;
 
-            return multualFriends.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
+            return mutualFriends.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 
     }

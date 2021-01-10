@@ -296,10 +296,10 @@ namespace FilmLoApp.API.Controllers
         }
 
         [TokenAuthorize]
-        [HttpGet("multualFriends/{userId}")]
-        public List<UserModel> GetMultualFriends(long userId)
+        [HttpGet("mutualFriends/{userId}")]
+        public List<UserModel> GetMutualFriends(long userId)
         {
-            return facade.MultualFriends(CurrentUser.Id, userId);
+            return facade.MutualFriends(CurrentUser.Id, userId);
         }
 
 
