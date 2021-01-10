@@ -301,8 +301,8 @@ namespace Core
                 var currUser = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
                 ValidationHelper.ValidateNotNull(currUser);
 
-                var myFriend = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(myFriend);
+                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(user);
 
                 var myFriends = GetAllMyFriends(currentUserId) as List<User>;
                 var userFriends = GetAllMyFriends(userId) as List<User>;
