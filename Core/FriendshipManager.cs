@@ -77,7 +77,6 @@ namespace Core
             }
         }
 
-
         public object GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters = null)
         {
             using (var uow = new UnitOfWork())
@@ -291,6 +290,28 @@ namespace Core
                 return requests;
             }
 
+        }
+        
+        public List<User> MultualFriends(long currentUserId, long userId)
+        {
+
+            using (var uow = new UnitOfWork())
+            {
+
+                var currUser = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
+                ValidationHelper.ValidateNotNull(currUser);
+
+                var myFriend = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                ValidationHelper.ValidateNotNull(myFriend);
+
+                var myFriends = GetAllMyFriends(currentUserId) as List<User>;
+                var userFriends = GetAllMyFriends(userId) as List<User>;
+
+                var multualFriends = myFriends.Intersect(userFriends).ToList();
+
+                return multualFriends;
+
+            }
         }
         #endregion
 

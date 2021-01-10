@@ -18,6 +18,23 @@ namespace Domain
         public List<SavedMovie> SavedMovies { get; set; }       
         public List<Friendship> FriendsSent { get; set; }        
         public List<Friendship> FriendsReceived { get; set; }
-   
+
+        #region overridden methods
+        public override bool Equals(object obj)
+        {
+            if (obj is User u)
+            {
+                return u.Id == this.Id;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
+        }
+
+        #endregion
+
     }
 }

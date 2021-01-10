@@ -295,6 +295,13 @@ namespace FilmLoApp.API.Controllers
             return facade.SentFriendRequests(CurrentUser.Id);
         }
 
+        [TokenAuthorize]
+        [HttpGet("multualFriends/{userId}")]
+        public List<UserModel> GetMultualFriends(long userId)
+        {
+            return facade.MultualFriends(CurrentUser.Id, userId);
+        }
+
 
         #endregion
 

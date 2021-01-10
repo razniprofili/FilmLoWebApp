@@ -17,5 +17,6 @@ namespace Core
         public void DeclineRequest(long userId, long requestUserId);
         public List<Friendship> FriendRequests(long currentUserId);
         public List<Friendship> SentFriendRequests(long currentUserId);
+        public List<User> MultualFriends(long currentUserId, long friendId);
     }
 }
