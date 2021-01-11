@@ -65,9 +65,9 @@ namespace Facade
         }
         #endregion
 
-        public List<UserModel> FriendsWatchThatMovie(long currentUserId, string moiveName)
+        public List<UserModel> FriendsWatchThatMovie(long currentUserId, string movieId)
         {
-            List<User> friends = WatchedMoviesManager.FriendsWatchThatMovie(currentUserId, moiveName);
+            List<User> friends = WatchedMoviesManager.FriendsWatchThatMovie(currentUserId, movieId);
             return friends.Select(a => Mapper.Mapper.AutoMap<User, UserModel>(a)).ToList();
         }
 

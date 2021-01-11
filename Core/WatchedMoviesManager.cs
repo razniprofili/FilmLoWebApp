@@ -198,7 +198,7 @@ namespace Core
 
         //prijatelji koji su takodje odgledali taj film:
 
-        public List<User> FriendsWatchThatMovie(long userId, string movieName)
+        public List<User> FriendsWatchThatMovie(long userId, string movieId)
         {
             using (var uow = new UnitOfWork())
             {
@@ -232,7 +232,7 @@ namespace Core
 
                     foreach (var movie in friendsWatchedMovies)
                     {
-                        if (movie.Name.ToLower() == movieName.ToLower())
+                        if (movie.Id == movieId)
                         { // ukoliko je neki prijatelj odgledao taj film dodajemo ga u listu
                             friendsWatched.Add(friend);
                             break;

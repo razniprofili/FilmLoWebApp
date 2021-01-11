@@ -15,7 +15,7 @@ namespace Core
         public MovieJMDBApi GetMovie(string movieId, long userId);
         public WatchedMovie GetFriendCommentRate(string movieId, long userId, long friendId);
         public WatchedMovie GetCommentRate(string movieId, long userId);
-        public List<User> FriendsWatchThatMovie(long userId, string movieName);
+        public List<User> FriendsWatchThatMovie(long userId, string movieId);
         public object GetAllFriendsMovies(long userId, ResourceParameters parameters = null);
         public object GetAllFriendMovies(long userId, long friendId, ResourceParameters parameters = null);
         public object GetAllMovies(long userId, ResourceParameters parameters = null);

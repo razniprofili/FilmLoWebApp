@@ -185,10 +185,10 @@ namespace FilmLoApp.API.Controllers
 
 
         [TokenAuthorize]
-        [HttpPost("friendWatched")]
-        public List<UserModel> FriendsWatchThatMovie([FromBody] string moiveName)
+        [HttpGet("friendWatched/{movieId}")]
+        public List<UserModel> FriendsWatchThatMovie(string movieId)
         {
-            return facade.FriendsWatchThatMovie(CurrentUser.Id, moiveName);
+            return facade.FriendsWatchThatMovie(CurrentUser.Id, movieId);
 
         }
 
