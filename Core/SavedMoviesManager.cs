@@ -81,7 +81,7 @@ namespace Core
                     {
                         UserId = userId,
                         MovieJMDBApiId = movie.Id,
-                        SavingDate = DateTime.UtcNow
+                        SavingDate = DateTime.Now
                     };
 
                     uow.SavedMovieRepository.Add(savedMovie);
