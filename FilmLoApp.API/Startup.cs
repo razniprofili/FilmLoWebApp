@@ -187,6 +187,7 @@ namespace FilmLoApp.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<SendFriendRequestHub>("/sendRequest");
+                endpoints.MapHub<NotifyHub>("/sendNotification");
             });
         }
     }

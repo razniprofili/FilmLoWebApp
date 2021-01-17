@@ -18,6 +18,9 @@ namespace Domain
         public List<SavedMovie> SavedMovies { get; set; }       
         public List<Friendship> FriendsSent { get; set; }        
         public List<Friendship> FriendsReceived { get; set; }
+        public List<Notification> NotificationsSent { get; set; }
+        public List<Notification> NotificationsReceived { get; set; }
+
 
         #region overridden methods
         public override bool Equals(object obj)

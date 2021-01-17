@@ -2,6 +2,7 @@
 using Common.Helpers;
 using Domain;
 using Models.Friendship;
+using Models.Notification;
 using Models.SavedMovies;
 using Models.User;
 using Models.WatchedMovies;
@@ -142,6 +143,23 @@ namespace Mapper
 
             };
         }
+
+        public static NotificationModel Map(Notification notification)
+        {
+            return new NotificationModel
+            {
+                Id = notification.Id,
+                Text = notification.Text,
+                SendingDate = notification.SendingDate,
+                UserRecipient = AutoMap<User, UserModel>(notification.UserRecipient),
+                UserRecipientId = notification.UserRecipientId,
+                UserSender = AutoMap<User, UserModel>(notification.UserSender),
+                UserSenderId = notification.UserSenderId,
+
+            };
+        }
+
+      //  public static 
 
         public static WatchedMovie MapUpdate(UpdateWatchedMovieModel updateModel)
         {

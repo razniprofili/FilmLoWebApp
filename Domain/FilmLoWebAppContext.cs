@@ -18,6 +18,7 @@ namespace Domain
         public virtual DbSet<WatchedMoviesStats> WatchedMoviesStats { get; set; }
         public virtual DbSet<PopularMovies> PopularMovies { get; set; }
         public virtual DbSet<YearStatistic> YearStatistic { get; set; }
+        public virtual DbSet<Notification> Notification { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,6 +57,17 @@ namespace Domain
                 entity.HasOne(u => u.UserRecipient).WithMany(t => t.FriendsReceived).HasForeignKey(t => t.UserRecipientId).OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(u => u.UserSender).WithMany(t => t.FriendsSent).HasForeignKey(t => t.UserSenderId).OnDelete(DeleteBehavior.Restrict);
+
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+
+                entity.HasKey(m => m.Id);
+
+                entity.HasOne(u => u.UserRecipient).WithMany(t => t.NotificationsReceived).HasForeignKey(t => t.UserRecipientId).OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(u => u.UserSender).WithMany(t => t.NotificationsSent).HasForeignKey(t => t.UserSenderId).OnDelete(DeleteBehavior.Restrict);
 
             });
 

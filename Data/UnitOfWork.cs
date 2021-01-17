@@ -27,6 +27,7 @@ namespace Data
         public IPopularMoviesRepository PopularMovies { get; set; }
         public IWatchedMoviesStatsRepository WatchedMoviesStats { get; set; }
         public IYearStatisticRepository YearStatistic { get; set; }
+        public INotificationRepository Notification { get; set; }
 
         // private UserRepository _userRepository;
         public IUserRepository UserRepository => Users ?? (Users = new UserRepository(DataContext));
@@ -51,6 +52,7 @@ namespace Data
         public IWatchedMoviesStatsRepository WatchedMoviesStatsRepository => WatchedMoviesStats ?? (WatchedMoviesStats = new WatchedMoviesStatsRepository(DataContext));
         public IYearStatisticRepository YearStatisticRepository => YearStatistic ?? (YearStatistic = new YearStatisticRepository(DataContext));
 
+        public INotificationRepository NotificationRepository => Notification ?? (Notification = new NotificationRepository(DataContext));
         #endregion
 
         public virtual void Save()
