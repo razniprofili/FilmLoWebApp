@@ -1,9 +1,10 @@
-﻿using Domain;
+﻿//using Domain;
 //using FilmLoApp.API.Models;
 using JWT;
 using JWT.Algorithms;
 using JWT.Serializers;
 using Models;
+using Models.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace FilmLoApp.API.Helpers
 
         }
 
-        public static UserJwtModel CreateLoginToken(User user)
+        public static UserJwtModel CreateLoginToken(UserModel user)
         {
             var userJwtModel = new UserJwtModel
             {

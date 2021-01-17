@@ -11,7 +11,7 @@ using Models.Friendship;
 using Models;
 using Common.ResourceParameters;
 using System.Text.Json;
-using Domain;
+//using Domain;
 using AutoMapper;
 using Core.Services;
 using Marvin.Cache.Headers;
@@ -42,9 +42,18 @@ namespace FilmLoApp.API.Controllers
         {
             var user = facade.Register(registerModel);
 
+            var userModel = new UserModel
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                Email = user.Email,
+                Picture = user.Picture
+            };
+
             var userToReturn = new
             {
-                AuthResponseData = SecurityHelper.CreateLoginToken(user)
+                AuthResponseData = SecurityHelper.CreateLoginToken(userModel)
             };
 
             //return new
@@ -70,9 +79,18 @@ namespace FilmLoApp.API.Controllers
         {
             var user = facade.Login(loginModel);
 
+            var userModel = new UserModel
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                Email = user.Email,
+                Picture = user.Picture
+            };
+
             var userToReturn = new
             {
-                AuthResponseData = SecurityHelper.CreateLoginToken(user)
+                AuthResponseData = SecurityHelper.CreateLoginToken(userModel)
             };
 
             //return new
