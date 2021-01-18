@@ -48,5 +48,19 @@ namespace Core
                 return notification;
             }
         }
+    
+        public void DeleteNotification(long currentUserId, long notificationId)
+        {
+            using (var uow = new UnitOfWork())
+            {
+                // proveravamo da li postoji notifikacija, po idju usera i idju notifikacije koji se brise
+                var notificationToDelete = uow.NotificationRepository.FirstOrDefault(p => p.UserRecipientId == currentUserId && p.Id == notificationId);
+                ValidationHelper.ValidateNotNull(notificationToDelete);
+
+                uow.NotificationRepository.Delete(notificationToDelete);
+                uow.Save();
+            }
+        }
+    
     }
 }

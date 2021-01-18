@@ -11,16 +11,21 @@ namespace Facade
     {
         public List<NotificationModel> GetAllMyNotifications(long currentUserId)
         {
-            List<Notification> notifications = NotificationcManager.GetNotifications(currentUserId) as List<Notification>;
+            List<Notification> notifications = NotificationManager.GetNotifications(currentUserId) as List<Notification>;
           
             return notifications.Select(a => Mapper.Mapper.Map(a)).ToList();
         }
 
         public NotificationModel SendNotification(SendNotificationModel notificationModel, long currentUserId)
         {
-            var addedNotification = NotificationcManager.SendNotification(Mapper.Mapper.AutoMap<SendNotificationModel, Notification>(notificationModel), currentUserId);
+            var addedNotification = NotificationManager.SendNotification(Mapper.Mapper.AutoMap<SendNotificationModel, Notification>(notificationModel), currentUserId);
 
             return Mapper.Mapper.Map(addedNotification);
+        }
+
+        public void DeleteNotification(long currentUserId, long notificationId)
+        {
+            NotificationManager.DeleteNotification(currentUserId, notificationId);
         }
     }
 }

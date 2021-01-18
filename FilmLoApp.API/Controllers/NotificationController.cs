@@ -41,6 +41,13 @@ namespace FilmLoApp.API.Controllers
 
         }
 
+        [TokenAuthorize]
+        [HttpPut("delete/{id}", Name = "DeleteNotification")]
+        public void DeleteNotification(long id)
+        {
+            facade.DeleteNotification(CurrentUser.Id, id);
+        }
+
         #endregion
 
     }

@@ -18,7 +18,7 @@ namespace FilmLoApp.API.Hubs
             var notification = facade.SendNotification(notificationModel, currentUserId);
 
             await Clients.Others.SendAsync("NotificationReceived", notification);
-            await Clients.Caller.SendAsync("NotificationtSent");
+            await Clients.Caller.SendAsync("NotificationSent");
         }
     }
 }

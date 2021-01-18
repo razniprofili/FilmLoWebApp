@@ -9,5 +9,6 @@ namespace Core
     {
         public List<Notification> GetNotifications(long userId);
         public Notification SendNotification(Notification notification, long currentUserId);
+        public void DeleteNotification(long currentUserId, long notificationId);
     }
 }

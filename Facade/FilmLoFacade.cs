@@ -49,6 +49,6 @@ namespace Facade
         internal IYearStatisticManager YearStatisticManager => _yearStatisticManager ?? (_yearStatisticManager = new YearStatisticManager());
 
         private INotificationManager _notificationManager;
-        internal INotificationManager NotificationcManager => _notificationManager ?? (_notificationManager = new NotificationManager());
+        internal INotificationManager NotificationManager => _notificationManager ?? (_notificationManager = new NotificationManager());
     }
 }
