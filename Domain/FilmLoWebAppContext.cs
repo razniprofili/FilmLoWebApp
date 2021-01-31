@@ -1,4 +1,5 @@
 ﻿//using Common.Helpers;
+using Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -24,9 +25,9 @@ namespace Domain
         {
            //  base.OnConfiguring(optionsBuilder);
 
-             // optionsBuilder.UseSqlServer(Helper.ConnectionString);
+             optionsBuilder.UseSqlServer(Helper.ConnectionString);
            // optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=Test1Database;Trusted_Connection=True");
-             optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=Test1Database;Trusted_Connection=True");
+            // optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=Test1Database;Trusted_Connection=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
