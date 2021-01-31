@@ -5,7 +5,7 @@ using System;
 
 namespace Data
 {
-    public class UnitOfWork : IDisposable, IUnitOfWork
+    public class UnitOfWork :  IUnitOfWork
     {
 
         private DbContext _context;

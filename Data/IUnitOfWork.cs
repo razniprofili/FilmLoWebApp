@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Data
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
         public IFriendshipRepository Friendships { get; set; }
         public IMovieDetailsJMDBApiRepository MoviesDetails { get; set; }
