@@ -10,17 +10,21 @@ namespace Core
 {
     public class PopularMoviesManager : IPopularMoviesManager
     {
+        private readonly IUnitOfWork _uow;
+        public PopularMoviesManager(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
         public List<PopularMovies> GetPopularMovies(long userId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var popularMovies = uow.PopularMoviesRepository.Find(x => x.UserId == userId);
+            var popularMovies = _uow.PopularMovies.Find(x => x.UserId == userId, "");
 
-                return popularMovies.ToList();
-            }
+            return popularMovies.ToList();
+
         }
     }
 }

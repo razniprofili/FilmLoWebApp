@@ -19,18 +19,23 @@ namespace Core
 
         private readonly IPropertyMappingService _propertyMappingService;
         private readonly IPropertyCheckerService _servicePropertyChecker;
+        private readonly IUnitOfWork _uow;
 
         #endregion
 
         #region Constructor
 
-        public SavedMoviesManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
+        public SavedMoviesManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker, IUnitOfWork uow)
         {
-            _propertyMappingService = propertyMappingService ??
-                throw new ArgumentNullException(nameof(propertyMappingService));
+            //_propertyMappingService = propertyMappingService ??
+            //    throw new ArgumentNullException(nameof(propertyMappingService));
 
-            _servicePropertyChecker = checker ??
-                throw new ArgumentNullException(nameof(checker));
+            //_servicePropertyChecker = checker ??
+            //    throw new ArgumentNullException(nameof(checker));
+
+            _propertyMappingService = propertyMappingService;
+            _servicePropertyChecker = checker;
+            _uow = uow;
         }
 
         #endregion
@@ -38,155 +43,152 @@ namespace Core
         #region Methods
         public MovieJMDBApi Add(long userId, MovieJMDBApi movie)
         {
-            using (var uow = new UnitOfWork())
+
+            // user mora da postoji
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
+
+            // film mora postojati u bazi da bi se dodala asocijativna klasa, ako ne postoji dodajemo ga
+            // film postoji ako vec ima taj ID
+
+            var movieExist = _uow.MoviesJMDBApi.FirstOrDefault(a => a.Id == movie.Id, ""); // ovo je izgenerisan id iz jmdb APIa a ne iz nase baze!
+
+            if (movieExist != null)
             {
-                // user mora da postoji
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
+                //provera da li je vec unet film za tog usera:
+                var exist = _uow.SavedMovies.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movie.Id, "");
+                ValidationHelper.ValidateEntityExists(exist);
 
-                // film mora postojati u bazi da bi se dodala asocijativna klasa, ako ne postoji dodajemo ga
-                // film postoji ako vec ima taj naziv, poredimo mala slova imena
-
-                var movieExist = uow.MovieJMDBApiRepository.FirstOrDefault(a => a.Id == movie.Id); // ovo je izgenerisan id iz jmdb APIa a ne iz nase baze!
-
-                if (movieExist != null)
+                SavedMovie savedMovie = new SavedMovie
                 {
-                    //provera da li je vec unet film za tog usera:
-                    var exist = uow.SavedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movie.Id);
-                    ValidationHelper.ValidateEntityExists(exist);
+                    UserId = userId,
+                    MovieJMDBApiId = movie.Id,
+                    SavingDate = DateTime.Now
+                };
 
-                    SavedMovie savedMovie = new SavedMovie
-                    {
-                        UserId = userId,
-                        MovieJMDBApiId = movie.Id,
-                        SavingDate = DateTime.Now
-                    };
-
-                    uow.SavedMovieRepository.Add(savedMovie);
-                    uow.Save();
-
-                }
-                else
-                {
-                    //moramo da ga dodamo a nakon toga i asocijativnu klasu
-                    var newMovie = uow.MovieJMDBApiRepository.Add(movie);
-                    uow.Save();
-
-                    //provera da li je vec unet film za tog usera:
-                    var exist = uow.SavedMovieRepository.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movie.Id);
-                    ValidationHelper.ValidateEntityExists(exist);
-
-                    // ako nije dodajemo ga
-                    SavedMovie savedMovie = new SavedMovie
-                    {
-                        UserId = userId,
-                        MovieJMDBApiId = movie.Id,
-                        SavingDate = DateTime.Now
-                    };
-
-                    uow.SavedMovieRepository.Add(savedMovie);
-                    uow.Save();
-
-
-                }
-                return movie;
+                var savedMovieAdded = _uow.SavedMovies.Add(savedMovie, "");
+                _uow.Save();
 
             }
+            else
+            {
+                //moramo da ga dodamo a nakon toga i asocijativnu klasu
+                var newMovie = _uow.MoviesJMDBApi.Add(movie, "");
+                _uow.Save();
+
+                //provera da li je vec unet film za tog usera:
+                var exist = _uow.SavedMovies.FirstOrDefault(f => f.UserId == userId && f.MovieJMDBApiId == movie.Id, "");
+                ValidationHelper.ValidateEntityExists(exist);
+
+                // ako nije dodajemo ga
+                SavedMovie savedMovie = new SavedMovie
+                {
+                    UserId = userId,
+                    MovieJMDBApiId = movie.Id,
+                    SavingDate = DateTime.Now
+                };
+
+                _uow.SavedMovies.Add(savedMovie, "");
+                _uow.Save();
+
+
+            }
+            return movie;
         }
 
         public void Delete(long userId, string movieId)
         {
-            using (var uow = new UnitOfWork())
-            {
+            //provera da li postoji user za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                // proveravamo da li postoji sacuvan film, po idju usera i idju filma koji se brise
-                var movieToDelete = uow.SavedMovieRepository.FirstOrDefault(p => p.UserId == userId && p.MovieJMDBApiId == movieId);
-                ValidationHelper.ValidateNotNull(movieToDelete);
+            // proveravamo da li postoji sacuvan film, po idju usera i idju filma koji se brise
+            var movieToDelete = _uow.SavedMovies.FirstOrDefault(p => p.UserId == userId && p.MovieJMDBApiId == movieId, "");
+            ValidationHelper.ValidateNotNull(movieToDelete);
 
-                uow.SavedMovieRepository.Delete(movieToDelete);
-                uow.Save();
-            }
+            _uow.SavedMovies.Delete(movieToDelete);
+            _uow.Save();
         }
 
         public object GetAllMovies(long userId, ResourceParameters parameters = null)
         {
-            using (var uow = new UnitOfWork())
+            //provera da li postoji user za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
+
+            if(parameters != null)
             {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
-
-                if(parameters != null)
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<AddSavedMovieModel, MovieJMDBApi>
+                (parameters.OrderBy))
                 {
-                    // provera da li postoje polja za sort
-                    if (!_propertyMappingService.ValidMappingExistsFor<AddSavedMovieModel, MovieJMDBApi>
-                    (parameters.OrderBy))
-                    {
-                        throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
-                    }
-
-                    //provera da li postoji properti za data shaping
-                    if (!_servicePropertyChecker.TypeHasProperties<AddSavedMovieModel>
-                      (parameters.Fields))
-                    {
-                        throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
-                    }
+                    throw new ValidationException($"{parameters.OrderBy} fields for ordering do not exist!");
                 }
 
-                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog usera
-
-                List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
-
-                foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<AddSavedMovieModel>
+                    (parameters.Fields))
                 {
-                    // var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
-                    usersSavedMovies.Add(movie.MovieJMDBApi);
+                    throw new ValidationException($"{parameters.Fields} fields for shaping do not exist!");
                 }
-
-                if (parameters != null)
-                    return generateResult(usersSavedMovies, parameters);
-                else
-                    return usersSavedMovies;
             }
+
+            var savedMovies = _uow.SavedMovies.Find(m => m.UserId == userId, "MovieJMDBApi").ToList(); //pronalazi sve sacuvane filmove za tog usera
+
+            List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
+
+            foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
+            {
+                // var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
+                usersSavedMovies.Add(movie.MovieJMDBApi);
+            }
+
+            if (parameters != null) {
+                var res =  generateResult(usersSavedMovies, parameters);
+
+                return res;
+            }
+                
+            else
+                return usersSavedMovies;
         }
 
         public MovieJMDBApi GetMovie (long userId, string movieId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
 
-                var movie = uow.MovieJMDBApiRepository.FirstOrDefault(a => a.Id == movieId);
-                ValidationHelper.ValidateNotNull(movie);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var savedMovie = uow.SavedMovieRepository.FirstOrDefault(m => m.UserId == userId && m.MovieJMDBApiId == movieId, "MovieJMDBApi");
-                ValidationHelper.ValidateNotNull(savedMovie);
+            var movie = _uow.MoviesJMDBApi.FirstOrDefault(a => a.Id == movieId, "");
+            ValidationHelper.ValidateNotNull(movie);
 
-                return savedMovie.MovieJMDBApi;
-            }
+            var savedMovie = _uow.SavedMovies.FirstOrDefault(m => m.UserId == userId && m.MovieJMDBApiId == movieId, "MovieJMDBApi");
+            ValidationHelper.ValidateNotNull(savedMovie);
+
+            return savedMovie.MovieJMDBApi;
+
         }
 
         public List<MovieJMDBApi> SearchMovies(long userId, string critearia)
         {
-            using (var uow = new UnitOfWork())
-            {
+            //using (var uow = new UnitOfWork())
+            //{
                 //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
+                var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
                 ValidationHelper.ValidateNotNull(user);
 
-                var savedMovies = uow.SavedMovieRepository.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
+                var savedMovies = _uow.SavedMovies.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
 
                 List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
 
                 foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
                 {
-                    var movieAPI = uow.MovieJMDBApiRepository.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId && m.Name == critearia);
+                    var movieAPI = _uow.MoviesJMDBApi.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId && m.Name == critearia);
                     usersSavedMovies.Add(movieAPI);
                 }
 
                 return usersSavedMovies;
-            }
+            //}
         }
 
         #endregion

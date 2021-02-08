@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Core;
 using Core.Services;
 using FilmLoApp.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,8 @@ namespace FilmLoApp.API.Controllers
     {
         #region Constructors
 
-        public NotificationController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        public NotificationController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker, 
+            INotificationManager notificationManager) : base(mapper, service, checker, notificationManager)
         {
         }
 
@@ -29,7 +31,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet(Name = "GetMyNotifications")]
         public List<NotificationModel> GetMyNotifications()
         {
-            return facade.GetAllMyNotifications(CurrentUser.Id);
+            return facadeNotification.GetAllMyNotifications(CurrentUser.Id);
 
         }
 
@@ -37,7 +39,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("sendNotification")]
         public NotificationModel AddSavedMovie([FromBody] SendNotificationModel notificationModel)
         {
-            return facade.SendNotification(notificationModel, CurrentUser.Id);
+            return facadeNotification.SendNotification(notificationModel, CurrentUser.Id);
 
         }
 
@@ -45,7 +47,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("delete/{id}", Name = "DeleteNotification")]
         public void DeleteNotification(long id)
         {
-            facade.DeleteNotification(CurrentUser.Id, id);
+            facadeNotification.DeleteNotification(CurrentUser.Id, id);
         }
 
         #endregion

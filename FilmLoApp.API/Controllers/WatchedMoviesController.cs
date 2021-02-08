@@ -11,6 +11,7 @@ using Core.Services;
 using Common.ResourceParameters;
 using Models;
 using System.Text.Json;
+using Core;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -20,7 +21,12 @@ namespace FilmLoApp.API.Controllers
     public class WatchedMoviesController : BaseController
     {
         #region Constructor
-        public WatchedMoviesController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        public WatchedMoviesController(IMapper mapper, IPropertyMappingService service, 
+            IPropertyCheckerService checker, IYearStatisticManager yearStatisticManager,
+            IWatchedMoviesStatsManager watchedMoviesStatsManager, IPopularMoviesManager popularMoviesManager,
+            IWatchedMoviesManager watchedMoviesManager) 
+            : base(mapper, service, checker, yearStatisticManager, watchedMoviesStatsManager, popularMoviesManager,
+                  watchedMoviesManager)
         {
 
         }
@@ -33,7 +39,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allMovies", Name = "GetAllWatchedMovies")]
         public List<WatchedMovieModel> GetAllMovies()
         {
-            return facade.GetAllWatchedMovies(CurrentUser.Id);
+            return facadeWatchedMovies.GetAllWatchedMovies(CurrentUser.Id);
 
         }
 
@@ -43,7 +49,7 @@ namespace FilmLoApp.API.Controllers
         {
             // return facade.GetAllWatchedMovies(CurrentUser.Id);
 
-            var moviesFromrepo = facade.GetAllWatchedMovies(CurrentUser.Id, parameters);
+            var moviesFromrepo = facadeWatchedMovies.GetAllWatchedMovies(CurrentUser.Id, parameters);
 
             var paginationMetadata = new
             {
@@ -85,7 +91,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("friendMovies/{friendId}")]
         public List<WatchedMovieModel> GetAllFriendMovies(long friendId)
         {
-            return facade.GetAllFriendMovies(CurrentUser.Id, friendId);
+            return facadeWatchedMovies.GetAllFriendMovies(CurrentUser.Id, friendId);
 
         }
 
@@ -94,7 +100,7 @@ namespace FilmLoApp.API.Controllers
         public IActionResult GetAllFriendMovies(long friendId, [FromQuery] ResourceParameters parameters)
         {
             // return facade.GetAllFriendMovies(CurrentUser.Id, friendId);
-            var moviesFromrepo = facade.GetAllFriendMovies(CurrentUser.Id, friendId, parameters);
+            var moviesFromrepo = facadeWatchedMovies.GetAllFriendMovies(CurrentUser.Id, friendId, parameters);
 
             var paginationMetadata = new
             {
@@ -137,7 +143,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allFriendsMovies")] // TO DO, HATEOAS, ORDER, FIELDS....
         public List<WatchedMovieModel> GetAllFriendsMovies()
         {
-            return facade.GetAllFriendsMovies(CurrentUser.Id);
+            return facadeWatchedMovies.GetAllFriendsMovies(CurrentUser.Id);
 
         }
 
@@ -146,7 +152,7 @@ namespace FilmLoApp.API.Controllers
         public IActionResult GetAllFriendsMovies([FromQuery] ResourceParameters parameters)
         {
             // return facade.GetAllFriendsMovies(CurrentUser.Id);
-            var moviesFromrepo = facade.GetAllFriendsMovies(CurrentUser.Id, parameters);
+            var moviesFromrepo = facadeWatchedMovies.GetAllFriendsMovies(CurrentUser.Id, parameters);
 
             var paginationMetadata = new
             {
@@ -188,7 +194,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("friendWatched/{movieId}")]
         public List<UserModel> FriendsWatchThatMovie(string movieId)
         {
-            return facade.FriendsWatchThatMovie(CurrentUser.Id, movieId);
+            return facadeWatchedMovies.FriendsWatchThatMovie(CurrentUser.Id, movieId);
 
         }
 
@@ -196,7 +202,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("commentRate/{movieId}")]
         public CommentRateModel GetCommentRate(string movieId)
         {
-            return facade.GetCommentRate(movieId, CurrentUser.Id);
+            return facadeWatchedMovies.GetCommentRate(movieId, CurrentUser.Id);
 
         }
 
@@ -204,7 +210,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("commentRate/{friendId}/{movieId}")]
         public CommentRateModel GetFriendCommentRate(string movieId, long friendId)
         {
-            return facade.GetFriendCommentRate(movieId, CurrentUser.Id, friendId);
+            return facadeWatchedMovies.GetFriendCommentRate(movieId, CurrentUser.Id, friendId);
         }
 
         [TokenAuthorize]
@@ -213,7 +219,7 @@ namespace FilmLoApp.API.Controllers
         {
           //  return facade.GetWatchedMovie(movieId, CurrentUser.Id);
 
-            var movieToReturn = facade.GetWatchedMovie(movieId, CurrentUser.Id);
+            var movieToReturn = facadeWatchedMovies.GetWatchedMovie(movieId, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
 
             //var linkedResourceToReturn = movieToReturn.ShapeData(null)
@@ -231,14 +237,14 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("delete/{movieId}", Name = "DeleteWatchedMovie")]
         public void DeleteMovie(string movieId)
         {
-            facade.DeleteWatchedMovie(movieId, CurrentUser.Id);
+            facadeWatchedMovies.DeleteWatchedMovie(movieId, CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("countMovies", Name = "CountWatchedMovies")]
         public long CountMovies()
         {
-            return facade.CountWatchedMovies(CurrentUser.Id);
+            return facadeWatchedMovies.CountWatchedMovies(CurrentUser.Id);
         }
 
         [TokenAuthorize]
@@ -247,7 +253,7 @@ namespace FilmLoApp.API.Controllers
         {
             //return facade.AddWatchedMovie(movie, CurrentUser.Id);
 
-            var movieToReturn = facade.AddWatchedMovie(movie, CurrentUser.Id);
+            var movieToReturn = facadeWatchedMovies.AddWatchedMovie(movie, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
 
             //var linkedResourceToReturn = movieToReturn.ShapeData(null)
@@ -266,7 +272,7 @@ namespace FilmLoApp.API.Controllers
         public ActionResult<WatchedMovieModel> Update([FromBody] UpdateWatchedMovieModel movie, string movieId)
         {
             //  return facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
-            var movieToReturn = facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
+            var movieToReturn = facadeWatchedMovies.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
 
             //var linkedResourceToReturn = movieToReturn.ShapeData(null)
@@ -285,21 +291,21 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("popularMovies")]
         public List<PopularMoviesModel> GetPopularMovies()
         {
-            return facade.GetPopularMovies(CurrentUser.Id);
+            return facadePopularMovies.GetPopularMovies(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("watchedMoviesStats")]
         public WatchedMoviesStatsModel GetWatchedMoviesStats()
         {
-            return facade.GetWatchedMoviesStats(CurrentUser.Id);
+            return facadeWatchedMoviesStats.GetWatchedMoviesStats(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("yearStatistic")]
         public List<YearStatisticModel> GetYearStatistic()
         {
-            return facade.GetYearStatistic(CurrentUser.Id);
+            return facadeYearStats.GetYearStatistic(CurrentUser.Id);
         }
 
         #endregion

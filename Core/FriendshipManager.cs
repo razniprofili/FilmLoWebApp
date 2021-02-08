@@ -17,27 +17,22 @@ namespace Core
 
         #region PrivateFields
 
-        //private readonly IUnitOfWork _uow;
-
         private readonly IPropertyMappingService _propertyMappingService;
         private readonly IPropertyCheckerService _servicePropertyChecker;
+        private readonly IUnitOfWork _uow;
 
         #endregion
 
         #region Constructors
-        public FriendshipManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker)
-        {
-            _propertyMappingService = propertyMappingService ??
-                throw new ArgumentNullException(nameof(propertyMappingService));
 
-            _servicePropertyChecker = checker ??
-               throw new ArgumentNullException(nameof(checker));
+        public FriendshipManager(IPropertyMappingService propertyMappingService, IPropertyCheckerService checker,
+            IUnitOfWork uow)
+        {
+            _propertyMappingService = propertyMappingService;
+            _servicePropertyChecker = checker;
+            _uow = uow;
         }
 
-        //public UserManager(IUnitOfWork uow)
-        //{
-        //    _uow = uow;
-        //}
 
         #endregion
 
@@ -45,13 +40,14 @@ namespace Core
 
         public List<User> SearchMyFriends(long idUser, string searchCriteria)
         {
-            using (var uow = new UnitOfWork())
-            {
+            //using (var uow = new UnitOfWork())
+            //{
                 //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
+                var user = _uow.Users.FirstOrDefault(a => a.Id == idUser);
                 ValidationHelper.ValidateNotNull(user);
 
-                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList(); // ali mora i da bude prihvaceno prijateljstvo
+                var friendships = _uow.Friendships.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') 
+                || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList(); // ali mora i da bude prihvaceno prijateljstvo
 
                 List<User> friends = new List<User>();
 
@@ -59,14 +55,17 @@ namespace Core
                 {
                     if (friend.UserRecipientId == idUser)
                     {
-                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserSenderId && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
+                        var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserSenderId 
+                        && (f.Name.Contains(searchCriteria) 
+                        || f.Surname.Contains(searchCriteria)));
 
                         if (userFriend != null)
                             friends.Add(userFriend);
                     }
                     else
                     {
-                        var userFriend = uow.UserRepository.FirstOrDefault(f => f.Id == friend.UserRecipientId && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
+                        var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserRecipientId 
+                        && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
 
                         if (userFriend != null)
                             friends.Add(userFriend);
@@ -74,245 +73,213 @@ namespace Core
                 }
 
                 return friends;
-            }
+           // }
         }
 
         public object GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters = null)
         {
-            using (var uow = new UnitOfWork())
+
+            //provera da li postoji user za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == idUser, "");
+            ValidationHelper.ValidateNotNull(user);
+
+            if (usersResourceParameters != null)
             {
-                //provera da li postoji user za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
-                ValidationHelper.ValidateNotNull(user);
-
-                if (usersResourceParameters != null)
+                // provera da li postoje polja za sort
+                if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
+                (usersResourceParameters.OrderBy))
                 {
-                    // provera da li postoje polja za sort
-                    if (!_propertyMappingService.ValidMappingExistsFor<UserModel, User>
-                    (usersResourceParameters.OrderBy))
-                    {
-                        throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
-                    }
-
-                    //provera da li postoji properti za data shaping
-                    if (!_servicePropertyChecker.TypeHasProperties<UserModel>
-                      (usersResourceParameters.Fields))
-                    {
-                        throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
-                    }
+                    throw new ValidationException($"{usersResourceParameters.OrderBy} fields for ordering do not exist!");
                 }
 
-                var friendships = uow.FriendshipRepository.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList();
-
-                List<User> friends = new List<User>();
-
-
-                foreach (var friend in friendships)
+                //provera da li postoji properti za data shaping
+                if (!_servicePropertyChecker.TypeHasProperties<UserModel>
+                    (usersResourceParameters.Fields))
                 {
-                    if (friend.UserSenderId == idUser)
-                    {
-                        var userFriend = uow.UserRepository.GetById(friend.UserRecipientId);
-                        friends.Add(userFriend);
-
-                    }
-                    else
-                    {
-                        var userFriend = uow.UserRepository.GetById(friend.UserSenderId);
-                        friends.Add(userFriend);
-                    }
+                    throw new ValidationException($"{usersResourceParameters.Fields} fields for shaping do not exist!");
                 }
-
-                if (usersResourceParameters != null)
-                    return generateResult(friends, usersResourceParameters);
-                else
-                    return friends;
-                
             }
+
+            var friendships = _uow.Friendships.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') 
+            || (m.UserRecipientId == idUser && m.StatusCodeID == 'A'), "").ToList();
+
+            List<User> friends = new List<User>();
+
+
+            foreach (var friend in friendships)
+            {
+                if (friend.UserSenderId == idUser)
+                {
+                    var userFriend = _uow.Users.GetById(friend.UserRecipientId);
+                    friends.Add(userFriend);
+
+                }
+                else
+                {
+                    var userFriend = _uow.Users.GetById(friend.UserSenderId);
+                    friends.Add(userFriend);
+                }
+            }
+
+            if (usersResourceParameters != null)
+                return generateResult(friends, usersResourceParameters);
+            else
+                return friends;
+                
         }
 
         public Friendship Add(Friendship friendship, long userId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                // proveravamo da li postoje useri za kje se unosi prijateljstvo:
+            // proveravamo da li postoje useri za kje se unosi prijateljstvo:
+            var userSender = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(userSender);
 
-                var userSender = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(userSender);
+            var userRecipient = _uow.Users.FirstOrDefault(a => a.Id == friendship.UserRecipientId, "");
+            ValidationHelper.ValidateNotNull(userRecipient);
 
-                var userRecipient = uow.UserRepository.FirstOrDefault(a => a.Id == friendship.UserRecipientId);
-                ValidationHelper.ValidateNotNull(userRecipient);
+            //proveravamo da li vec postoji prijateljstvo:
 
-                //proveravamo da li vec postoji prijateljstvo:
-
-                var exist = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendship.UserRecipientId) || (f.UserSenderId == friendship.UserRecipientId && f.UserRecipientId == userId));
-                ValidationHelper.ValidateEntityExists(exist);
+            var exist = _uow.Friendships.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendship.UserRecipientId) 
+            || (f.UserSenderId == friendship.UserRecipientId && f.UserRecipientId == userId), "");
+            ValidationHelper.ValidateEntityExists(exist);
 
 
-                friendship.StatusCodeID = 'R';
-                friendship.FriendshipDate = DateTime.Now;
-                friendship.UserSender = userSender;
-                friendship.UserRecipient = userRecipient;
+            friendship.StatusCodeID = 'R';
+            friendship.FriendshipDate = DateTime.Now;
+            friendship.UserSender = userSender;
+            friendship.UserRecipient = userRecipient;
 
-                //dodajemo prijateljstvo
-                uow.FriendshipRepository.Add(friendship);
-                uow.Save();
+            //dodajemo prijateljstvo
+            _uow.Friendships.Add(friendship, "");
+            _uow.Save();
 
-                return friendship;
-
-            }
-
+            return friendship;
         }
 
         public Friendship GetFriendInfo(long idFriend, long idUser)
         {
 
-            using (var uow = new UnitOfWork())
-            {
-                //prvo provera da li mi je prijatelj:
-                var friendship = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == idUser && f.UserRecipientId == idFriend && f.StatusCodeID == 'A') || (f.UserSenderId == idFriend && f.UserRecipientId == idUser && f.StatusCodeID == 'A'));
-                ValidationHelper.ValidateNotNull(friendship);
+            //prvo provera da li mi je prijatelj:
+            var friendship = _uow.Friendships.FirstOrDefault(f => (f.UserSenderId == idUser && f.UserRecipientId == idFriend && f.StatusCodeID == 'A') || (f.UserSenderId == idFriend && f.UserRecipientId == idUser && f.StatusCodeID == 'A'));
+            ValidationHelper.ValidateNotNull(friendship);
 
-                var myFriend = uow.UserRepository.FirstOrDefault(a => a.Id == idFriend);
-                ValidationHelper.ValidateNotNull(myFriend);
+            var myFriend = _uow.Users.FirstOrDefault(a => a.Id == idFriend);
+            ValidationHelper.ValidateNotNull(myFriend);
 
-                var userSender = uow.UserRepository.FirstOrDefault(a => a.Id == idUser);
-                ValidationHelper.ValidateNotNull(userSender);
+            var userSender = _uow.Users.FirstOrDefault(a => a.Id == idUser);
+            ValidationHelper.ValidateNotNull(userSender);
 
-                if(friendship.UserSenderId == idUser)
-                    friendship.UserSender = userSender;
-                else
-                    friendship.UserSender = myFriend;
+            if(friendship.UserSenderId == idUser)
+                friendship.UserSender = userSender;
+            else
+                friendship.UserSender = myFriend;
 
-                if (friendship.UserRecipientId == idFriend)
-                    friendship.UserRecipient = myFriend;
-                else
-                    friendship.UserRecipient = userSender;
+            if (friendship.UserRecipientId == idFriend)
+                friendship.UserRecipient = myFriend;
+            else
+                friendship.UserRecipient = userSender;
 
-
-                return friendship;
-            }
+            return friendship;
         }
 
         public void DeleteFriend(long idFriend, long idUser)
         {
-            using (var uow = new UnitOfWork())
-            {
+            //prvo provera da li mi je prijatelj za svaki slucaj:
+            var friendship = _uow.Friendships.FirstOrDefault(f => (f.UserSenderId == idUser && f.UserRecipientId == idFriend && f.StatusCodeID == 'A') 
+            || (f.UserSenderId == idFriend && f.UserRecipientId == idUser && f.StatusCodeID == 'A'), "");
+            ValidationHelper.ValidateNotNull(friendship);
 
-                //prvo provera da li mi je prijatelj za svaki slucaj:
-                var friendship = uow.FriendshipRepository.FirstOrDefault(f => (f.UserSenderId == idUser && f.UserRecipientId == idFriend && f.StatusCodeID == 'A') || (f.UserSenderId == idFriend && f.UserRecipientId == idUser && f.StatusCodeID == 'A'));
-                ValidationHelper.ValidateNotNull(friendship);
-
-                uow.FriendshipRepository.Delete(friendship);
-                uow.Save();
-            }
+            _uow.Friendships.Delete(friendship);
+            _uow.Save();
         }
 
         public Friendship AcceptRequest(long userId, long requestUserId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji useri i prijateljstvo za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
+            //provera da li postoji useri i prijateljstvo za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == requestUserId);
-                ValidationHelper.ValidateNotNull(user);
+            var userFriend = _uow.Users.FirstOrDefault(a => a.Id == requestUserId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var friendship = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId && f.StatusCodeID == 'R'); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient, i ako je zahtev u statusu Requested
-                ValidationHelper.ValidateNotNull(friendship);
+            var friendship = _uow.Friendships.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId 
+                    && f.StatusCodeID == 'R', ""); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient, i ako je zahtev u statusu Requested
+            ValidationHelper.ValidateNotNull(friendship);
 
-                friendship.StatusCodeID = 'A';
-                friendship.FriendshipDate = DateTime.Now;
+            friendship.StatusCodeID = 'A';
+            friendship.FriendshipDate = DateTime.Now;
 
-                uow.FriendshipRepository.Update(friendship, requestUserId, userId);
-                uow.Save();
+            _uow.Friendships.Update(friendship, requestUserId, userId);
+            _uow.Save();
 
-                return friendship;
-            }
-
+            return friendship;
         }
 
         public void DeclineRequest(long userId, long requestUserId) // kao delete metoda, obrisace friendship
         {
-            using (var uow = new UnitOfWork())
-            {
-                //provera da li postoji useri i prijateljstvo za svaki slucaj:
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
+            //provera da li postoji useri i prijateljstvo za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var userFriend = uow.UserRepository.FirstOrDefault(a => a.Id == requestUserId);
-                ValidationHelper.ValidateNotNull(user);
+            var userFriend = _uow.Users.FirstOrDefault(a => a.Id == requestUserId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var friendship = uow.FriendshipRepository.FirstOrDefault(f => f.UserSenderId == requestUserId && f.UserRecipientId == userId && f.StatusCodeID == 'R'); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient
-                ValidationHelper.ValidateNotNull(friendship);
+            var friendship = _uow.Friendships.FirstOrDefault(f => f.UserSenderId == requestUserId 
+            && f.UserRecipientId == userId && f.StatusCodeID == 'R', ""); // prihvata zahtev onaj ko je trenutno ulogovan tj on je recipient
+            ValidationHelper.ValidateNotNull(friendship);
 
-                uow.FriendshipRepository.Delete(friendship);
-                uow.Save();
-
-            }
+            _uow.Friendships.Delete(friendship);
+            _uow.Save();
         }
 
         public List<Friendship> FriendRequests(long currentUserId)
         {
-            using (var uow = new UnitOfWork())
+            var user = _uow.Users.FirstOrDefault(a => a.Id == currentUserId, "");
+            ValidationHelper.ValidateNotNull(user);
+
+            var requests = _uow.Friendships.Find(f => f.UserRecipientId == currentUserId && f.StatusCodeID=='R', "").ToList();
+
+            foreach(var request in requests)
             {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
-                ValidationHelper.ValidateNotNull(user);
-
-                var requests = uow.FriendshipRepository.Find(f => f.UserRecipientId == currentUserId && f.StatusCodeID=='R').ToList();
-
-                foreach(var request in requests)
-                {
-                    var sender = uow.UserRepository.FirstOrDefault(u => u.Id == request.UserSenderId);
-                    request.UserSender = sender;
-                }
-
-                return requests;
+                var sender = _uow.Users.FirstOrDefault(u => u.Id == request.UserSenderId, "");
+                request.UserSender = sender;
             }
 
+            return requests;
         }
 
         public List<Friendship> SentFriendRequests(long currentUserId)
         {
-            using (var uow = new UnitOfWork())
+            var user = _uow.Users.FirstOrDefault(a => a.Id == currentUserId, "");
+            ValidationHelper.ValidateNotNull(user);
+
+            var requests = _uow.Friendships.Find(f => f.UserSenderId == currentUserId && f.StatusCodeID == 'R', "").ToList();
+
+            foreach (var request in requests)
             {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
-                ValidationHelper.ValidateNotNull(user);
-
-                var requests = uow.FriendshipRepository.Find(f => f.UserSenderId == currentUserId && f.StatusCodeID == 'R').ToList();
-
-                foreach (var request in requests)
-                {
-                    var recipient = uow.UserRepository.FirstOrDefault(u => u.Id == request.UserRecipientId);
-                    request.UserRecipient = recipient;
-                }
-
-                return requests;
+                var recipient = _uow.Users.FirstOrDefault(u => u.Id == request.UserRecipientId, "");
+                request.UserRecipient = recipient;
             }
 
+            return requests;
         }
         
         public List<User> MutualFriends(long currentUserId, long userId)
         {
+            var currUser = _uow.Users.FirstOrDefault(a => a.Id == currentUserId);
+            ValidationHelper.ValidateNotNull(currUser);
 
-            using (var uow = new UnitOfWork())
-            {
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            ValidationHelper.ValidateNotNull(user);
 
-                var currUser = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
-                ValidationHelper.ValidateNotNull(currUser);
+            var myFriends = GetAllMyFriends(currentUserId) as List<User>;
+            var userFriends = GetAllMyFriends(userId) as List<User>;
 
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
+            var mutualFriends = myFriends.Intersect(userFriends).ToList();
 
-                var myFriends = GetAllMyFriends(currentUserId) as List<User>;
-                var userFriends = GetAllMyFriends(userId) as List<User>;
-
-                var mutualFriends = myFriends.Intersect(userFriends).ToList();
-
-                return mutualFriends;
-
-            }
+            return mutualFriends;
         }
+       
         #endregion
 
         #region Private Methods

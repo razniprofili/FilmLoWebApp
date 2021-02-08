@@ -15,7 +15,7 @@ using System.Text.Json;
 using AutoMapper;
 using Core.Services;
 using Marvin.Cache.Headers;
-
+using Core;
 
 namespace FilmLoApp.API.Controllers
 {
@@ -29,7 +29,9 @@ namespace FilmLoApp.API.Controllers
     {
         #region Constructors
 
-        public UserController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        public UserController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker,
+            IUserManager userManager, IFriendshipManager friendshipManager) 
+            : base(mapper, service, checker, userManager, friendshipManager)
         {
         }
 
@@ -37,11 +39,12 @@ namespace FilmLoApp.API.Controllers
 
         #region Routes
 
+        #region Users
         [AllowAnonymous] // ne treba nam autorizacija
         [HttpPost("Register")]
         public object Register([FromBody] RegisterModel registerModel)
         {
-            var user = facade.Register(registerModel);
+            var user = facadeUser.Register(registerModel);
 
             var userModel = new UserModel
             {
@@ -78,7 +81,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("Login")]
         public object Login([FromBody] LoginModel loginModel)
         {
-            var user = facade.Login(loginModel);
+            var user = facadeUser.Login(loginModel);
 
             var userModel = new UserModel
             {
@@ -115,7 +118,7 @@ namespace FilmLoApp.API.Controllers
         [HttpGet(Name = "GetUser")]
         public UserModel GetUser(long id)
         {
-            return facade.GetUser(id);
+            return facadeUser.GetUser(id);
         }
 
         [TokenAuthorize]
@@ -125,7 +128,7 @@ namespace FilmLoApp.API.Controllers
         //[HttpCacheValidation(MustRevalidate = false)]
         public List<UserModel> GetAllUsers()
         {
-            return facade.GetAllUsers(CurrentUser.Id); // jer zelimo da nam prikaze sve korisnike osim ulogovaog
+            return facadeUser.GetAllUsers(CurrentUser.Id); // jer zelimo da nam prikaze sve korisnike osim ulogovaog
         }
 
         // pagination, order by, filter... Can be included
@@ -133,9 +136,9 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allUsersWithParameters", Name = "GetUsers")]
         [HttpHead]
         public IActionResult GetAllUsers([FromQuery] ResourceParameters parameters)
-        { 
+        {
 
-            var usersFromrepo = facade.GetAllUsers(CurrentUser.Id, parameters);
+            var usersFromrepo = facadeUser.GetAllUsers(CurrentUser.Id, parameters);
 
             var paginationMetadata = new
             {
@@ -180,7 +183,7 @@ namespace FilmLoApp.API.Controllers
         {
 
             // return facade.Update(CurrentUser.Id, user); 
-            var userToReturn = facade.Update(CurrentUser.Id, user);
+            var userToReturn = facadeUser.Update(CurrentUser.Id, user);
 
             var links = CreateLinksForUser(userToReturn.Id, null);
 
@@ -199,14 +202,16 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("delete", Name = "DeleteUser")]
         public void DeleteUser()
         {
-            facade.Delete(CurrentUser.Id);
+            facadeUser.Delete(CurrentUser.Id);
         }
+        #endregion
 
+        #region Friends
         [TokenAuthorize]
         [HttpGet("friendInfo/{id}")] //friend id
         public FriendshipModel GetFriendInfo(long id)
         {
-            return facade.GetFriendInfo(id, CurrentUser.Id);
+            return facadeUser.GetFriendInfo(id, CurrentUser.Id);
 
         }
 
@@ -214,14 +219,14 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("deleteFriend/{id}")] // friend id
         public void DeleteFriend(long id)
         {
-            facade.DeleteFriend(id, CurrentUser.Id);
+            facadeUser.DeleteFriend(id, CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("myFriends")]
         public List<UserModel> GetMyFriends()
         {
-            return facade.GetAllMyFriends(CurrentUser.Id);
+            return facadeUser.GetAllMyFriends(CurrentUser.Id);
 
         }
 
@@ -231,7 +236,7 @@ namespace FilmLoApp.API.Controllers
         [HttpHead]
         public IActionResult GetMyFriends([FromQuery] ResourceParameters parameters)
         {
-            var usersFromrepo = facade.GetAllMyFriends(CurrentUser.Id, parameters);
+            var usersFromrepo = facadeUser.GetAllMyFriends(CurrentUser.Id, parameters);
 
             var paginationMetadata = new
             {
@@ -274,7 +279,7 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("myFriends/search")]
         public List<UserModel> SearchMyFriends([FromBody] string searchCriteria)
         {
-            return facade.SearchMyFriends(CurrentUser.Id, searchCriteria);
+            return facadeUser.SearchMyFriends(CurrentUser.Id, searchCriteria);
 
         }
 
@@ -282,14 +287,14 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("addFriend")]
         public FriendshipModel AddFriend([FromBody] AddFriendshipModel model)
         {
-            return facade.Add(model, CurrentUser.Id);
+            return facadeUser.Add(model, CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpPost("acceptRequest/{id}")] // friend id
         public FriendshipModel AcceptRequest(long id)
         {
-            return facade.AcceptRequest(CurrentUser.Id, id);
+            return facadeUser.AcceptRequest(CurrentUser.Id, id);
 
         }
 
@@ -297,30 +302,30 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("declineRequest/{id}")] // friend id
         public void DeclineRequest(long id)
         {
-            facade.DeclineRequest(CurrentUser.Id, id);
+            facadeUser.DeclineRequest(CurrentUser.Id, id);
         }
 
         [TokenAuthorize]
         [HttpGet("friendRequests")]
         public List<FriendshipModel> FriendshipRequests()
         {
-            return facade.FriendRequests(CurrentUser.Id);
+            return facadeUser.FriendRequests(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("sentFriendRequests")]
         public List<FriendshipModel> SentFriendshipRequests()
         {
-            return facade.SentFriendRequests(CurrentUser.Id);
+            return facadeUser.SentFriendRequests(CurrentUser.Id);
         }
 
         [TokenAuthorize]
         [HttpGet("mutualFriends/{userId}")]
         public List<UserModel> GetMutualFriends(long userId)
         {
-            return facade.MutualFriends(CurrentUser.Id, userId);
+            return facadeUser.MutualFriends(CurrentUser.Id, userId);
         }
-
+        #endregion
 
         #endregion
 

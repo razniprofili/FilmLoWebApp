@@ -10,17 +10,20 @@ namespace Core
 {
     public class YearStatisticManager : IYearStatisticManager
     {
+        private readonly IUnitOfWork _uow;
+        public YearStatisticManager(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
         public List<YearStatistic> GetYearStatistic(long currentUserId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
-                ValidationHelper.ValidateNotNull(user);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == currentUserId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var yearStats = uow.YearStatisticRepository.Find(stat => stat.UserId == currentUserId);
+            var yearStats = _uow.YearStatistic.Find(stat => stat.UserId == currentUserId, "");
 
-                return yearStats.ToList();
-            }
+            return yearStats.ToList();
         }
     }
 }

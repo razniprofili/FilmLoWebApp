@@ -1,4 +1,5 @@
-﻿using Facade;
+﻿using Core;
+using Facade;
 using FilmLoApp.API.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using Models.Friendship;
@@ -13,8 +14,18 @@ namespace FilmLoApp.API.Hubs
     
     public class SendFriendRequestHub : Hub
     {
+
+        internal readonly IFriendshipManager _friendshipManager;
+        internal readonly IUserManager _userManager;
+
+        public SendFriendRequestHub(IUserManager userManager, IFriendshipManager friendshipManager)
+        {
+            _userManager = userManager;
+            _friendshipManager = friendshipManager;
+        }
+
         private FilmLoFacade _facade;
-        internal FilmLoFacade facade => _facade ?? (_facade = new FilmLoFacade());
+        internal FilmLoFacade facade => _facade ?? (_facade = new FilmLoFacade(_userManager, _friendshipManager));
 
         public async Task AddFriend(long currentUserId, AddFriendshipModel model)
         {

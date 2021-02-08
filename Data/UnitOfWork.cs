@@ -9,14 +9,11 @@ namespace Data
     {
 
         private DbContext _context;
-        private DbContextOptions<FilmLoWebAppContext> _options;
+        //private DbContextOptions<FilmLoWebAppContext> _options;
 
-        public DbContext DataContext => _context ?? (_context = new FilmLoWebAppContext()); // singlton patern
+        public DbContext DataContext => _context ?? (_context = new FilmLoWebAppContext());
 
         #region Repositories
-
-        //instaciranje repozitorijuma
-        //singlton patern
 
         public IFriendshipRepository Friendships { get; set; }
         public IMovieDetailsJMDBApiRepository MoviesDetails { get; set; }
@@ -29,30 +26,23 @@ namespace Data
         public IYearStatisticRepository YearStatistic { get; set; }
         public INotificationRepository Notification { get; set; }
 
-        // private UserRepository _userRepository;
-        public IUserRepository UserRepository => Users ?? (Users = new UserRepository(DataContext));
+        public UnitOfWork()
+        {
+            Users = new UserRepository(DataContext);
+            YearStatistic = new YearStatisticRepository(DataContext);
+            Notification = new NotificationRepository(DataContext);
+            Friendships = new FriendshipRepository(DataContext);
+            WatchedMoviesStats = new WatchedMoviesStatsRepository(DataContext);
+            PopularMovies = new PopularMoviesRepository(DataContext);
+            SavedMovies = new SavedMovieRepository(DataContext);
+            MoviesDetails = new MovieDetailsJMDBApiRepository(DataContext);
+            MoviesJMDBApi = new MovieJMDBApiRepository(DataContext);
+            Users = new UserRepository(DataContext);
+            WatchedMovies = new WatchedMovieRepository(DataContext);
 
-        //private FriendshipRepository _friendshipRepository;
-        public IFriendshipRepository FriendshipRepository => Friendships ?? (Friendships = new FriendshipRepository(DataContext));
+        }
 
-       // private MovieDetailsJMDBApiRepository _movieDetailsJMDBApiRepository;
-        public IMovieDetailsJMDBApiRepository MovieDetailsJMDBApiRepository => MoviesDetails ?? (MoviesDetails = new MovieDetailsJMDBApiRepository(DataContext));
 
-       // private MovieJMDBApiRepository _movieJMDBApiRepository;
-        public IMovieJMDBApiRepository MovieJMDBApiRepository => MoviesJMDBApi ?? (MoviesJMDBApi = new MovieJMDBApiRepository(DataContext));
-
-       // private SavedMovieRepository _savedMovieRepository;
-        public ISavedMovieRepository SavedMovieRepository => SavedMovies ?? (SavedMovies = new SavedMovieRepository(DataContext));
-
-       // private WatchedMovieRepository _watchedMovieRepository;
-        public IWatchedMovieRepository WatchedMovieRepository => WatchedMovies ?? (WatchedMovies = new WatchedMovieRepository(DataContext));
-
-        public IPopularMoviesRepository PopularMoviesRepository => PopularMovies ?? (PopularMovies = new PopularMoviesRepository(DataContext));
-
-        public IWatchedMoviesStatsRepository WatchedMoviesStatsRepository => WatchedMoviesStats ?? (WatchedMoviesStats = new WatchedMoviesStatsRepository(DataContext));
-        public IYearStatisticRepository YearStatisticRepository => YearStatistic ?? (YearStatistic = new YearStatisticRepository(DataContext));
-
-        public INotificationRepository NotificationRepository => Notification ?? (Notification = new NotificationRepository(DataContext));
         #endregion
 
         public virtual void Save()

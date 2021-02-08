@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Common.ResourceParameters;
+using Core;
 using Core.Services;
 using FilmLoApp.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,9 @@ namespace FilmLoApp.API.Controllers
     public class SavedMoviesController : BaseController
     {
         #region Constructor
-        public SavedMoviesController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker) : base(mapper, service, checker)
+        public SavedMoviesController(IMapper mapper, IPropertyMappingService service, IPropertyCheckerService checker,
+            ISavedMoviesManager savedMoviesManager) 
+            : base(mapper, service, checker, savedMoviesManager)
         {
 
         }
@@ -34,14 +37,14 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("delete/{id}", Name = "DeleteSavedMovie")]
         public void DeleteSavedMovie(string id)
         {
-            facade.DeleteSavedMovie(CurrentUser.Id, id);
+            facadeSavedMovies.DeleteSavedMovie(CurrentUser.Id, id);
         }
 
         [TokenAuthorize]
         [HttpGet( Name = "GetAllSavedMovies")]
         public List<SavedMovieModel> GetAllSavedMovies()
         {
-            return facade.GetAllSavedMovies(CurrentUser.Id);
+            return facadeSavedMovies.GetAllSavedMovies(CurrentUser.Id);
 
         }
 
@@ -50,7 +53,7 @@ namespace FilmLoApp.API.Controllers
         public IActionResult GetAllSavedMovies([FromQuery] ResourceParameters parameters)
         {
 
-            var moviesFromrepo = facade.GetAllSavedMovies(CurrentUser.Id, parameters);
+            var moviesFromrepo = facadeSavedMovies.GetAllSavedMovies(CurrentUser.Id, parameters);
 
             var paginationMetadata = new
             {
@@ -93,7 +96,7 @@ namespace FilmLoApp.API.Controllers
         public ActionResult<SavedMovieModel> GetMovie(string movieId)
         {
            // return facade.GetMovie(CurrentUser.Id, movieId);
-            var movieIdToReturn = facade.GetMovie(CurrentUser.Id, movieId);
+            var movieIdToReturn = facadeSavedMovies.GetMovie(CurrentUser.Id, movieId);
             var links = CreateLinksForMovie(CurrentUser.Id, movieId);
 
             return generateResult(movieIdToReturn, links);
@@ -107,7 +110,7 @@ namespace FilmLoApp.API.Controllers
                 return BadRequest($"Movie can be added only for current user: {CurrentUser.Name} {CurrentUser.Surname}({CurrentUser.Mail})");
 
             // return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
-            var movieToReturn = facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
+            var movieToReturn = facadeSavedMovies.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
 
             var links = CreateLinksForMovie(movieToReturn.UserId, movieToReturn.Id);
 

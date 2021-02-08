@@ -9,17 +9,20 @@ namespace Core
 {
     public class WatchedMoviesStatsManager : IWatchedMoviesStatsManager
     {
+        private readonly IUnitOfWork _uow;
+        public WatchedMoviesStatsManager(IUnitOfWork uow)
+        {
+            _uow = uow;
+        }
+
         public WatchedMoviesStats GetWatchedMoviesStats(long currentUserId)
         {
-            using (var uow = new UnitOfWork())
-            {
-                var user = uow.UserRepository.FirstOrDefault(a => a.Id == currentUserId);
-                ValidationHelper.ValidateNotNull(user);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == currentUserId, "");
+            ValidationHelper.ValidateNotNull(user);
 
-                var moviesStats = uow.WatchedMoviesStatsRepository.FirstOrDefault(stat => stat.UserId == currentUserId);
+            var moviesStats = _uow.WatchedMoviesStats.FirstOrDefault(stat => stat.UserId == currentUserId, "");
 
-                return moviesStats;
-            }
+            return moviesStats;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 namespace Common.Helpers
 {
     // postupak hesiranja passworda i citanje passworda
-    public static class PasswordHelper
+    public  class PasswordHelper : IPasswordHelper
     {
         #region Fields
 
@@ -22,7 +22,7 @@ namespace Common.Helpers
 
         #region Methods
 
-        public static string CreateHash(string password)
+        public string CreateHash(string password)
         {
             RNGCryptoServiceProvider csprng = new RNGCryptoServiceProvider();
             byte[] salt = new byte[SALT_BYTE_SIZE];
@@ -34,7 +34,7 @@ namespace Common.Helpers
                    Convert.ToBase64String(hash);
         }
 
-        public static bool ValidatePassword(string password, string correctHash)
+        public bool ValidatePassword(string password, string correctHash)
         {
             char[] delimiter = { ':' };
             string[] split = correctHash.Split(delimiter);

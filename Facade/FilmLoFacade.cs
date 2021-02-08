@@ -9,13 +9,7 @@ namespace Facade
 {
     public partial class FilmLoFacade
     {
-        //private readonly IUserManager _userManager;
-        //private readonly FriendshipManager _friendshipManager;
-        //public FilmLoFacade(IUserManager userManager, FriendshipManager friendshipManager)
-        //{
-        //    _userManager = userManager;
-        //    _friendshipManager = friendshipManager;
-        //}
+        #region Managers&Services
 
         private IPropertyMappingService _propertyMappingService;
         internal IPropertyMappingService PropertyMappingService => _propertyMappingService ?? (_propertyMappingService = new PropertyMappingService());
@@ -23,32 +17,59 @@ namespace Facade
         private IPropertyCheckerService _propertyCheckerService;
         internal IPropertyCheckerService PropertyCheckerService => _propertyCheckerService ?? (_propertyCheckerService = new PropertyCheckerService());
 
+        private IUserManager UserManager;
+        private IFriendshipManager FriendshipManager;
+        private ISavedMoviesManager SavedMoviesManager;
+        private IWatchedMoviesManager WatchedMoviesManager;
+        private IPopularMoviesManager PopularMoviesManager;
+        private IWatchedMoviesStatsManager WatchedMoviesStatsManager;
+        private INotificationManager NotificationManager;
+        private IYearStatisticManager YearStatisticManager;
+        #endregion
 
-       // private IUnitOfWork _uow;
-       // public IUnitOfWork IUnitOfWork => _uow ?? (_uow = new UnitOfWork());
+        #region Constructors
+        public FilmLoFacade(IUserManager userManager, IFriendshipManager friendshipManager)
+        {
+            UserManager = userManager;
+            FriendshipManager = friendshipManager;
+        }
 
-        private IUserManager _userManager;
-        internal IUserManager UserManager => _userManager ?? (_userManager = new UserManager(PropertyMappingService, PropertyCheckerService));
 
-        private ISavedMoviesManager _savedMoviesManager;
-        internal ISavedMoviesManager SavedMoviesManager => _savedMoviesManager ?? (_savedMoviesManager = new SavedMoviesManager(PropertyMappingService, PropertyCheckerService));
+        public FilmLoFacade(ISavedMoviesManager savedMoviesManager)
+        {
+            SavedMoviesManager = savedMoviesManager;
+        }
 
-        private IWatchedMoviesManager _watchedMoviesManager;
-        internal IWatchedMoviesManager WatchedMoviesManager => _watchedMoviesManager ?? (_watchedMoviesManager = new WatchedMoviesManager(PropertyMappingService, PropertyCheckerService));
 
-        private IFriendshipManager _friendshipManager;
-        internal IFriendshipManager FriendshipManager => _friendshipManager ?? (_friendshipManager = new FriendshipManager(PropertyMappingService, PropertyCheckerService));
+        public FilmLoFacade(IWatchedMoviesManager watchedMoviesManager)
+        {
+            WatchedMoviesManager = watchedMoviesManager;
+        }
 
-        private IPopularMoviesManager _popularMoviesManager;
-        internal IPopularMoviesManager PopularMoviesManager => _popularMoviesManager ?? (_popularMoviesManager = new PopularMoviesManager());
 
-        private IWatchedMoviesStatsManager _watchedMoviesStatsManager;
-        internal IWatchedMoviesStatsManager WatchedMoviesStatsManager => _watchedMoviesStatsManager ?? (_watchedMoviesStatsManager = new WatchedMoviesStatsManager());
+        public FilmLoFacade(IPopularMoviesManager popularMoviesManager)
+        {
+            PopularMoviesManager = popularMoviesManager;
+        }
 
-        private IYearStatisticManager _yearStatisticManager;
-        internal IYearStatisticManager YearStatisticManager => _yearStatisticManager ?? (_yearStatisticManager = new YearStatisticManager());
 
-        private INotificationManager _notificationManager;
-        internal INotificationManager NotificationManager => _notificationManager ?? (_notificationManager = new NotificationManager());
+        public FilmLoFacade(IWatchedMoviesStatsManager watchedMoviesStatsManager)
+        {
+            WatchedMoviesStatsManager = watchedMoviesStatsManager;
+        }
+
+
+
+        public FilmLoFacade(INotificationManager notificationManager)
+        {
+            NotificationManager = notificationManager;
+        }
+
+
+        public FilmLoFacade(IYearStatisticManager yearStatisticManager)
+        {
+            YearStatisticManager = yearStatisticManager;
+        }
+        #endregion
     }
 }
