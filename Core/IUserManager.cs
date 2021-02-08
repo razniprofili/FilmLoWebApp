@@ -14,7 +14,6 @@ namespace Core
         public User GetUser(long id);
         public User Update(long id, User user);
         public void DeleteUser(long id);
-       // public List<User> GetAllUsers(long idUser);
         public object GetAllUsers(long idUser, ResourceParameters usersResourceParameters = null);
 
     }

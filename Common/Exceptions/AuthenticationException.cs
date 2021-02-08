@@ -6,7 +6,7 @@ namespace Common.Exceptions
 {
     public class AuthenticationException : ApplicationException
     {
-        public AuthenticationException(string message) : base(message) //poziva konstruktor od nadklase ApplicationException
+        public AuthenticationException(string message) : base(message)
         {
 
         }

@@ -12,6 +12,7 @@ namespace FilmLoWebApp.Tests.Managers
 {
     public class WatchedMoviesStatsManagerTest
     {
+        #region Setup
         private Mock<IUnitOfWork> _uowMock;
         private IWatchedMoviesStatsManager _manager;
         private User fakeUser;
@@ -39,13 +40,15 @@ namespace FilmLoWebApp.Tests.Managers
             };
             fakeStatsResult = new WatchedMoviesStats
             {
-                UserId = 1, 
-                AverageRate = 5, 
-                TotalCount = 10, 
+                UserId = 1,
+                AverageRate = 5,
+                TotalCount = 10,
                 TotalTime = 60
             };
         }
+        #endregion
 
+        #region Tests
         [Test]
         public void GetWatchedMoviesStats()
         {
@@ -70,5 +73,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.That(ex.Message, Is.EqualTo("User not exist!"));
 
         }
+        #endregion
+
     }
 }

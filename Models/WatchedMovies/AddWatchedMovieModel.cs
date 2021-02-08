@@ -23,7 +23,5 @@ namespace Models.WatchedMovies
         public string Comment { get; set; }
         public string DateTimeWatched { get; set; }
         public string Poster { get; set; }
-        //[Required]
-        //public int UserId { get; set; } // imacu promenljivu koja prati trenutno ulogovanog usera, mozda nam ovo nije neophodno, ili mozemo u ruti da damo id Usera
     }
 }

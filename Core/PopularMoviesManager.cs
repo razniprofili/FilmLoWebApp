@@ -10,12 +10,18 @@ namespace Core
 {
     public class PopularMoviesManager : IPopularMoviesManager
     {
+        #region Fields
         private readonly IUnitOfWork _uow;
+        #endregion
+
+        #region Constructor
         public PopularMoviesManager(IUnitOfWork uow)
         {
             _uow = uow;
         }
+        #endregion
 
+        #region Methods
         public List<PopularMovies> GetPopularMovies(long userId)
         {
             var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
@@ -26,5 +32,7 @@ namespace Core
             return popularMovies.ToList();
 
         }
+        #endregion
+
     }
 }

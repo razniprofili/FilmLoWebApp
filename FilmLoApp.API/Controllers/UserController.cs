@@ -22,9 +22,6 @@ namespace FilmLoApp.API.Controllers
     [ValidateModel]
     [Produces("application/json")]
     [Route("api/User")]
-    // [HttpCacheExpiration(CacheLocation = CacheLocation.Public)] //marvin.cache.headers
-    // [HttpCacheValidation(MustRevalidate = true)]
-    //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class UserController : BaseController
     {
         #region Constructors

@@ -11,17 +11,13 @@ namespace Data
         public IMovieJMDBApiRepository MoviesJMDBApi { get; set; }
         public ISavedMovieRepository SavedMovies { get; set; }
         public IUserRepository Users { get; set; }
-        public IWatchedMovieRepository WatchedMovies { get; set; }
-
-        
+        public IWatchedMovieRepository WatchedMovies { get; set; }     
         public  IYearStatisticRepository YearStatistic { get; set; }
         public IWatchedMoviesStatsRepository WatchedMoviesStats { get; set; }
         public IPopularMoviesRepository PopularMovies { get; set; }
         public INotificationRepository Notification { get; set; }
 
-
-
         void Save();
-       // void Dispose();
+
     }
 }

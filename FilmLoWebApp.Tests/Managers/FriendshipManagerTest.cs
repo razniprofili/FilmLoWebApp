@@ -118,6 +118,7 @@ namespace FilmLoWebApp.Tests.Managers
         }
         #endregion
 
+        #region Tests
         [Test]
         public void GetAllFriendsNoParameters()
         {
@@ -470,7 +471,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.NotNull(result);
             Assert.AreEqual(0, result.Count());
         }
-
+        #endregion
 
     }
 }

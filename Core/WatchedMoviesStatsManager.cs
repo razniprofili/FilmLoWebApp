@@ -9,12 +9,18 @@ namespace Core
 {
     public class WatchedMoviesStatsManager : IWatchedMoviesStatsManager
     {
+        #region Fields
         private readonly IUnitOfWork _uow;
+        #endregion
+
+        #region Constructor
         public WatchedMoviesStatsManager(IUnitOfWork uow)
         {
             _uow = uow;
         }
+        #endregion
 
+        #region Methods
         public WatchedMoviesStats GetWatchedMoviesStats(long currentUserId)
         {
             var user = _uow.Users.FirstOrDefault(a => a.Id == currentUserId, "");
@@ -24,5 +30,7 @@ namespace Core
 
             return moviesStats;
         }
+        #endregion
+
     }
 }

@@ -9,8 +9,6 @@ namespace Data
     {
 
         private DbContext _context;
-        //private DbContextOptions<FilmLoWebAppContext> _options;
-
         public DbContext DataContext => _context ?? (_context = new FilmLoWebAppContext());
 
         #region Repositories
@@ -65,8 +63,6 @@ namespace Data
             }
             _disposed = true;
         }
-
-
         public void Dispose()
         {
             Dispose(true);

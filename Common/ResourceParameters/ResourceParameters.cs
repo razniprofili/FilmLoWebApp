@@ -19,11 +19,8 @@ namespace Common.ResourceParameters
             set => _pageSize = (value > maxPageSize) ? maxPageSize : value;
         }
 
-        public string OrderBy { get; set; } = "Name"; //stavili smo da je name default za sort
-        //ali moramo da pazimo jer je name kod dto objekta,ali ne i entiteta!
-        //zato moramo da mapiramo
+        public string OrderBy { get; set; } = "Name";
 
-        //zbog shaping data tj oblikovanja:
         public string Fields { get; set; }
     }
 }

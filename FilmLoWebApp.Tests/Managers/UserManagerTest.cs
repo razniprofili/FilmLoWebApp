@@ -121,6 +121,7 @@ namespace FilmLoWebApp.Tests.Managers
         }
         #endregion
 
+        #region Register user
         [Test]
         public void RegisterUser()
         {
@@ -168,7 +169,9 @@ namespace FilmLoWebApp.Tests.Managers
             Exception ex = Assert.Throws<ValidationException>(delegate { _manager.Register(newUser); });
             Assert.That(ex.Message, Is.EqualTo("Email currently exists."));
         }
+        #endregion
 
+        #region Login user
         [Test]
         public void LoginUser()
         {
@@ -226,6 +229,9 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.That(ex.Message, Is.EqualTo("Wrong email or password."));
 
         }
+        #endregion
+
+        #region Get
         [Test]
         public void GetUser()
         {
@@ -245,121 +251,6 @@ namespace FilmLoWebApp.Tests.Managers
                  .Returns((User)null);
 
             Exception ex = Assert.Throws<ValidationException>(delegate { _manager.GetUser(1); });
-            Assert.That(ex.Message, Is.EqualTo("User not exist!"));
-
-        }
-
-        [Test]
-        public void UpdateUser()
-        {
-            var userToUpdate = new User
-            {
-                Name = "name for update",
-                Surname = "surname for update"
-            };
-
-            long currentUserId = 1;
-
-            _uowMock.Setup(uow => uow.Users.GetById(currentUserId)).Returns(fakeUser);
-            _uowMock.Setup(uow => uow.Users.Update(fakeUser, currentUserId)).Returns(fakeUser);
-            _uowMock.Setup(uow => uow.Save()).Callback(() => { 
-                fakeUser.Name = "name for update";
-                fakeUser.Surname = "surname for update";
-            });
-
-            var resultUser = _manager.Update(currentUserId, userToUpdate);
-
-            _uowMock.Verify(uow => uow.Users.Update(fakeUser, fakeUser.Id), Times.Once());
-            _uowMock.Verify(uow => uow.Save(), Times.Once());
-
-            Assert.IsNotNull(resultUser);
-            Assert.AreEqual("name for update", resultUser.Name);
-            Assert.AreEqual("surname for update", resultUser.Surname);
-
-        }
-
-        [Test]
-        public void UpdateUserNotExist()
-        {
-            var userToUpdate = new User
-            {
-                Name = "name for update",
-                Surname = "surname for update"
-            };
-
-            long currentUserId = 1;
-
-            _uowMock.Setup(uow => uow.Users.GetById(currentUserId)).Returns((User)null);
-
-            Exception ex = Assert.Throws<ValidationException>(delegate { _manager.Update(currentUserId, userToUpdate); });
-            Assert.That(ex.Message, Is.EqualTo("User not exist!"));
-        }
-
-        [Test]
-        public void DeleteUserWithFriends()
-        {
-            long currentUserId = 1;
-
-            var friends = new List<Friendship>
-            {
-                new Friendship
-            {
-                UserRecipientId = 1,
-                UserRecipient = fakeUser,
-                UserSenderId = 2,
-                UserSender = fakeUserFriend,
-                FriendshipDate = new DateTime(2021,1,12),
-                StatusCodeID = 'A'
-
-            },
-              new Friendship
-            {
-                UserRecipientId = 3,
-                UserRecipient = fakeUserFriendTwo,
-                UserSenderId = 1,
-                UserSender = fakeUser,
-                FriendshipDate = new DateTime(2020,11,22),
-                StatusCodeID = 'A'
-            }
-            };
-
-
-            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns(fakeUser);
-            _uowMock.Setup(uow => uow.Friendships.Find(f => f.UserRecipientId == currentUserId || f.UserSenderId == currentUserId, ""))
-                .Returns(friends.AsQueryable());
-
-            _manager.DeleteUser(currentUserId);
-
-            _uowMock.Verify(uow => uow.Friendships.Delete(It.IsAny<Friendship>()), Times.Exactly(friends.Count()));
-            _uowMock.Verify(uow => uow.Users.Delete(fakeUser), Times.Once());
-            _uowMock.Verify(uow => uow.Save(), Times.Exactly(2));
-
-        }
-
-        [Test]
-        public void DeleteUserWithoutFriends()
-        {
-            long currentUserId = 1;
-
-            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns(fakeUser);
-            _uowMock.Setup(uow => uow.Friendships.Find(f => f.UserRecipientId == currentUserId || f.UserSenderId == currentUserId, ""))
-                .Returns((IQueryable<Friendship>)null);
-
-            _manager.DeleteUser(currentUserId);
-
-            _uowMock.Verify(uow => uow.Friendships.Delete(It.IsAny<Friendship>()), Times.Never);
-            _uowMock.Verify(uow => uow.Users.Delete(fakeUser), Times.Once());
-            _uowMock.Verify(uow => uow.Save(), Times.Exactly(1));
-        }
-
-        [Test]
-        public void DeleteUserNotExist()
-        {
-            long currentUserId = 1;
-
-            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns((User)null);
-           
-            Exception ex = Assert.Throws<ValidationException>(delegate { _manager.DeleteUser(currentUserId); });
             Assert.That(ex.Message, Is.EqualTo("User not exist!"));
 
         }
@@ -428,6 +319,127 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count());
         }
+
+        #endregion
+
+        #region Update
+        [Test]
+        public void UpdateUser()
+        {
+            var userToUpdate = new User
+            {
+                Name = "name for update",
+                Surname = "surname for update"
+            };
+
+            long currentUserId = 1;
+
+            _uowMock.Setup(uow => uow.Users.GetById(currentUserId)).Returns(fakeUser);
+            _uowMock.Setup(uow => uow.Users.Update(fakeUser, currentUserId)).Returns(fakeUser);
+            _uowMock.Setup(uow => uow.Save()).Callback(() => {
+                fakeUser.Name = "name for update";
+                fakeUser.Surname = "surname for update";
+            });
+
+            var resultUser = _manager.Update(currentUserId, userToUpdate);
+
+            _uowMock.Verify(uow => uow.Users.Update(fakeUser, fakeUser.Id), Times.Once());
+            _uowMock.Verify(uow => uow.Save(), Times.Once());
+
+            Assert.IsNotNull(resultUser);
+            Assert.AreEqual("name for update", resultUser.Name);
+            Assert.AreEqual("surname for update", resultUser.Surname);
+
+        }
+
+        [Test]
+        public void UpdateUserNotExist()
+        {
+            var userToUpdate = new User
+            {
+                Name = "name for update",
+                Surname = "surname for update"
+            };
+
+            long currentUserId = 1;
+
+            _uowMock.Setup(uow => uow.Users.GetById(currentUserId)).Returns((User)null);
+
+            Exception ex = Assert.Throws<ValidationException>(delegate { _manager.Update(currentUserId, userToUpdate); });
+            Assert.That(ex.Message, Is.EqualTo("User not exist!"));
+        }
+        #endregion
+
+        #region Delete
+        [Test]
+        public void DeleteUserWithFriends()
+        {
+            long currentUserId = 1;
+
+            var friends = new List<Friendship>
+            {
+                new Friendship
+            {
+                UserRecipientId = 1,
+                UserRecipient = fakeUser,
+                UserSenderId = 2,
+                UserSender = fakeUserFriend,
+                FriendshipDate = new DateTime(2021,1,12),
+                StatusCodeID = 'A'
+
+            },
+              new Friendship
+            {
+                UserRecipientId = 3,
+                UserRecipient = fakeUserFriendTwo,
+                UserSenderId = 1,
+                UserSender = fakeUser,
+                FriendshipDate = new DateTime(2020,11,22),
+                StatusCodeID = 'A'
+            }
+            };
+
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns(fakeUser);
+            _uowMock.Setup(uow => uow.Friendships.Find(f => f.UserRecipientId == currentUserId || f.UserSenderId == currentUserId, ""))
+                .Returns(friends.AsQueryable());
+
+            _manager.DeleteUser(currentUserId);
+
+            _uowMock.Verify(uow => uow.Friendships.Delete(It.IsAny<Friendship>()), Times.Exactly(friends.Count()));
+            _uowMock.Verify(uow => uow.Users.Delete(fakeUser), Times.Once());
+            _uowMock.Verify(uow => uow.Save(), Times.Exactly(2));
+
+        }
+
+        [Test]
+        public void DeleteUserWithoutFriends()
+        {
+            long currentUserId = 1;
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns(fakeUser);
+            _uowMock.Setup(uow => uow.Friendships.Find(f => f.UserRecipientId == currentUserId || f.UserSenderId == currentUserId, ""))
+                .Returns((IQueryable<Friendship>)null);
+
+            _manager.DeleteUser(currentUserId);
+
+            _uowMock.Verify(uow => uow.Friendships.Delete(It.IsAny<Friendship>()), Times.Never);
+            _uowMock.Verify(uow => uow.Users.Delete(fakeUser), Times.Once());
+            _uowMock.Verify(uow => uow.Save(), Times.Exactly(1));
+        }
+
+        [Test]
+        public void DeleteUserNotExist()
+        {
+            long currentUserId = 1;
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns((User)null);
+
+            Exception ex = Assert.Throws<ValidationException>(delegate { _manager.DeleteUser(currentUserId); });
+            Assert.That(ex.Message, Is.EqualTo("User not exist!"));
+
+        }
+        #endregion
 
     }
 }

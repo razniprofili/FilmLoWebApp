@@ -182,6 +182,8 @@ namespace FilmLoWebApp.Tests.Managers
             };
         }
         #endregion
+
+        #region Tests
         [Test]
         public void AddMovie()
         {
@@ -238,15 +240,15 @@ namespace FilmLoWebApp.Tests.Managers
             };
 
             _uowMock.Setup(uow => uow.Users.FirstOrDefault(a => a.Id == currentUserId, "")).Returns(fakeUser);
-           
+
             _uowMock.Setup(uow => uow.WatchedMovies.FirstOrDefault(f => f.UserId == currentUserId && f.MovieJMDBApiId == movieId, "MovieJMDBApi"))
                 .Returns((WatchedMovie)null);
 
             _uowMock.Setup(uow => uow.MoviesJMDBApi.FirstOrDefault(a => a.Id == movieId, "")).Returns(movieAPI);
-            
+
             _uowMock.Setup(uow => uow.SavedMovies.FirstOrDefault(a => a.MovieJMDBApiId == movieId && a.UserId == currentUserId, ""))
                 .Returns((SavedMovie)null);
-            
+
             _uowMock.Setup(uow => uow.WatchedMovies.Add(It.Is<WatchedMovie>(m => m.UserId == 1), "")).Returns(watchedMoive);
 
             var result = _manager.Add(movieToAdd, currentUserId, comment, rate, date, poster, movieId);
@@ -322,7 +324,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.IsNotNull(result);
 
         }
-        
+
         [Test]
         public void DeleteMovie()
         {
@@ -370,5 +372,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.AreEqual(fakeWatchedMovies.Count(), result.Count());
 
         }
+        #endregion
+
     }
 }

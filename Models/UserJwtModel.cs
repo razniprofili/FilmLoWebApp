@@ -12,6 +12,6 @@ namespace Models
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Token { get; set; }
-        public DateTime ExpirationTime { get; set; } //kada istice nas token
+        public DateTime ExpirationTime { get; set; }
     }
 }

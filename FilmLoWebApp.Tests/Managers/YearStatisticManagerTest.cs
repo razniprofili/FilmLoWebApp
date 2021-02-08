@@ -13,6 +13,7 @@ namespace FilmLoWebApp.Tests.Managers
 {
    public class YearStatisticManagerTest
     {
+        #region Setup
         private Mock<IUnitOfWork> _uowMock;
         private IYearStatisticManager _manager;
         private User fakeUser;
@@ -44,7 +45,9 @@ namespace FilmLoWebApp.Tests.Managers
                 new YearStatistic {UserId = 1, Count= 5, Year= "2021."},
             };
         }
+        #endregion
 
+        #region Tests
         [Test]
         public void GetYearStatistic()
         {
@@ -62,10 +65,12 @@ namespace FilmLoWebApp.Tests.Managers
         public void GetYearStatisticUserNotExists()
         {
             _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == 1, "")).Returns((User)null);
-            
+
             Exception ex = Assert.Throws<ValidationException>(delegate { _manager.GetYearStatistic(1); });
-            Assert.That(ex.Message, Is.EqualTo("User not exist!"));          
+            Assert.That(ex.Message, Is.EqualTo("User not exist!"));
 
         }
+        #endregion
+
     }
 }

@@ -39,9 +39,6 @@ namespace FilmLoApp.API.Helpers
             if (user.ExpirationTime < DateTime.Now)
                 throw new AuthenticationException("Token expired, login again!");
 
-            //if (Roles != null && !Roles.Split(',').ToList().Contains(user.Role.Name)) //ako u listi dozvoljenih rola ne postoji rola ulogovanog usera
-            //    throw new AuthenticationException("Nemate prava pristupa!");
-
             var controller = context.Controller as BaseController;
 
             if (controller != null)

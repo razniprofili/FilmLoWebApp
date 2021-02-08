@@ -14,6 +14,7 @@ namespace FilmLoWebApp.Tests.Managers
 {
     public class NotificationManagerTest
     {
+        #region Setup
         private Mock<IUnitOfWork> _uowMock;
         private INotificationManager _manager;
         private User fakeCurrentUser;
@@ -62,17 +63,17 @@ namespace FilmLoWebApp.Tests.Managers
 
             fakeListResult = new List<Notification>
             {
-                new Notification 
+                new Notification
                 {
-                    Id = 1, 
-                    SendingDate = DateTime.Now, 
-                    Text = "Notification 1", 
-                    UserRecipientId = 1, 
+                    Id = 1,
+                    SendingDate = DateTime.Now,
+                    Text = "Notification 1",
+                    UserRecipientId = 1,
                     UserRecipient = fakeCurrentUser,
                     UserSenderId = 2,
                     UserSender = fakeOtherUser
                 },
-                new Notification 
+                new Notification
                 {
                     Id = 2,
                     SendingDate = DateTime.Now,
@@ -117,7 +118,9 @@ namespace FilmLoWebApp.Tests.Managers
                 UserSender = null
             };
         }
+        #endregion
 
+        #region Tests
         [Test]
         public void GetNotifications()
         {
@@ -146,7 +149,7 @@ namespace FilmLoWebApp.Tests.Managers
         [Test]
         public void SendNotification()
         {
-          var  notificationToSend = new Notification // user sends only notification and UserRecipientId!
+            var notificationToSend = new Notification // user sends only notification and UserRecipientId!
             {                                         // other fields set in function!
                 Id = 0,
                 SendingDate = new DateTime(),
@@ -172,8 +175,8 @@ namespace FilmLoWebApp.Tests.Managers
                 .Returns(notificationToSend);
 
             _uowMock.Setup(uow => uow.Save()).Callback(() => { notificationToSend.Id = 11; });
-                
-            var result =  _manager.SendNotification(notificationToSend, 1);
+
+            var result = _manager.SendNotification(notificationToSend, 1);
 
             _uowMock.Verify(uow => uow.Notification.Add(notificationToSend, ""), Times.Once());
             _uowMock.Verify(uow => uow.Save(), Times.Once());
@@ -249,7 +252,7 @@ namespace FilmLoWebApp.Tests.Managers
             _uowMock.Setup(uow => uow.Notification.FirstOrDefault(p => p.UserRecipientId == 1 && p.Id == 1, ""))
                 .Returns(fakeNotification);
 
-             _manager.DeleteNotification(1, 1);
+            _manager.DeleteNotification(1, 1);
 
             _uowMock.Verify(uow => uow.Notification.Delete(It.IsAny<Notification>()), Times.Once());
             _uowMock.Verify(uow => uow.Save(), Times.Once());
@@ -278,6 +281,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.That(ex.Message, Is.EqualTo("Notification not exist!"));
 
         }
+        #endregion
 
     }
 }

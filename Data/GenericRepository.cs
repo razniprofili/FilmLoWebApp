@@ -26,8 +26,6 @@ namespace Data
 
         #region Methods
 
-        //pisemo genericke funkcije koje mozemo da primenimo nad svim repozitorijumima
-
         public IQueryable<T> GetAll()
         {
             return _context.Set<T>();
@@ -59,7 +57,7 @@ namespace Data
             return query.FirstOrDefault(match);
         }
 
-        public IQueryable<T> Find(Expression<Func<T, bool>> match, string includePropreties = null) // includePropreties je opcioni parametar, npr ako ga ima prikazace uz usere i njihove role, a ako ga nema onda samo usere
+        public IQueryable<T> Find(Expression<Func<T, bool>> match, string includePropreties = null) // includePropreties je opcioni parametar
         {
             var query = _context.Set<T>().AsQueryable();
 
@@ -88,16 +86,12 @@ namespace Data
             }
             _context.Set<T>().Add(entity);
 
-            // return query.Append(entity);
-            // _context.SaveChanges();
-
             return entity;
         }
 
         public virtual void Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
-            // _context.SaveChanges();
 
         }
 
@@ -110,7 +104,6 @@ namespace Data
             if (exists != null)
             {
                 _context.Entry(exists).CurrentValues.SetValues(entity);
-                // _context.SaveChanges();
             }
 
             return entity;

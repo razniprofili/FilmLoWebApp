@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Models.WatchedMovies
 {
-    public class WatchedMovieModel // ovo mi vracamo kljentu!
+    public class WatchedMovieModel
     {
         public string Id { get; set; }
         public string Actors { get; set; }

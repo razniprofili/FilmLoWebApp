@@ -7,8 +7,6 @@ namespace Domain
 {
    public class MovieDetailsJMDBApi
     {
-        // nakon sto se pozove api za pretragu filma preko IDja, izbacuje dosta atributa
-        // uzecu neke znacajnije
         public string Actors { get; set; }
         public int? Year { get; set; }
         public string Name { get; set; }

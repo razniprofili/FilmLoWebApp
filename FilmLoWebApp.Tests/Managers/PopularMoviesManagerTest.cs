@@ -13,6 +13,7 @@ namespace FilmLoWebApp.Tests.Managers
 {
     public class PopularMoviesManagerTest
     {
+        #region Setup
         private Mock<IUnitOfWork> _uowMock;
         private IPopularMoviesManager _manager;
         private User fakeUser;
@@ -44,7 +45,9 @@ namespace FilmLoWebApp.Tests.Managers
                 new PopularMovies {UserId = 1, MovieId = "tt12345", MovieName = "Movie 2"},
             };
         }
+        #endregion
 
+        #region Tests
         [Test]
         public void GetPopularMovies()
         {
@@ -67,5 +70,7 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.That(ex.Message, Is.EqualTo("User not exist!"));
 
         }
+        #endregion
+
     }
 }

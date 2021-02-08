@@ -16,6 +16,6 @@ namespace Models.Friendship
         public DateTime FriendshipDate { get; set; }
 
         public char StatusCodeID { get; set; }
-        // public StatusCode StatusCode { get; set; }
+
     }
 }

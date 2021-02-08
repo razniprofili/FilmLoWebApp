@@ -7,8 +7,6 @@ namespace Domain
 {
   public class SavedMovie
     {
-        //asocijativna klasa iz veze vise-vise
-        // pisem je jer pamti i datum
 
         public long UserId { get; set; }
         public User User { get; set; }

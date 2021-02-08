@@ -7,14 +7,12 @@ namespace Domain
 {
    public class WatchedMovie
     {
-        //asocijativna klasa
-
         public long UserId { get; set; }
         public User User { get; set; }
         public string MovieJMDBApiId { get; set; }
         public MovieJMDBApi MovieJMDBApi { get; set; }
         [NotNull]
-        public string WatchingDate { get; set; } // na front delu se bira datum, i mora da bude posebog formata, pa je lakse sacuvatikao string
+        public string WatchingDate { get; set; }
         public DateTime DateTimeAdded { get; set; }
         [NotNull]
         public int Rating { get; set; }

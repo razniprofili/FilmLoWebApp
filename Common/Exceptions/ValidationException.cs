@@ -6,7 +6,7 @@ namespace Common.Exceptions
 {
     public class ValidationException : ApplicationException
     {
-        public ValidationException(string message) : base(message) //poziva konstruktor od nadklase ApplicationException
+        public ValidationException(string message) : base(message)
         {
 
         }

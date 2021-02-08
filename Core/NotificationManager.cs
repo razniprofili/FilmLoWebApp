@@ -10,12 +10,18 @@ namespace Core
 {
     public class NotificationManager : INotificationManager
     {
+        #region Fields
         private readonly IUnitOfWork _uow;
+        #endregion
+
+        #region Constructor
         public NotificationManager(IUnitOfWork uow)
         {
             _uow = uow;
         }
+        #endregion
 
+        #region Methods
         public List<Notification> GetNotifications(long userId)
         {
             //provera da li postoji user za svaki slucaj:
@@ -35,8 +41,8 @@ namespace Core
             var userRecipient = _uow.Users.FirstOrDefault(a => a.Id == notification.UserRecipientId, "");
             ValidationHelper.ValidateNotNull(userRecipient);
 
-            var friendship = _uow.Friendships.FirstOrDefault(f => 
-            (f.UserSenderId == currentUserId && f.UserRecipientId == notification.UserRecipientId && f.StatusCodeID == 'A') 
+            var friendship = _uow.Friendships.FirstOrDefault(f =>
+            (f.UserSenderId == currentUserId && f.UserRecipientId == notification.UserRecipientId && f.StatusCodeID == 'A')
             || (f.UserSenderId == notification.UserRecipientId && f.UserRecipientId == currentUserId && f.StatusCodeID == 'A'), "");
             ValidationHelper.ValidateNotNull(friendship);
 
@@ -51,7 +57,7 @@ namespace Core
             return notification;
 
         }
-    
+
         public void DeleteNotification(long currentUserId, long notificationId)
         {
             //provera da li postoji user za svaki slucaj:
@@ -66,6 +72,7 @@ namespace Core
             _uow.Save();
 
         }
-    
+        #endregion
+
     }
 }

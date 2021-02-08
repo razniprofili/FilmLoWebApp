@@ -8,7 +8,7 @@ namespace Models.Notification
     {
 
         public string Text { get; set; }
-       // public long UserSenderId { get; set; }
+
         public long UserRecipientId { get; set; }
     }
 }
