@@ -47,44 +47,50 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allMoviesWithParameters", Name = "GetAllWatchedMoviesWithParameters")]
         public IActionResult GetAllMovies([FromQuery]ResourceParameters parameters)
         {
-            // return facade.GetAllWatchedMovies(CurrentUser.Id);
-
-            var moviesFromrepo = facadeWatchedMovies.GetAllWatchedMovies(CurrentUser.Id, parameters);
-
-            var paginationMetadata = new
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = moviesFromrepo.TotalCount,
-                pageSize = moviesFromrepo.PageSize,
-                currentPage = moviesFromrepo.CurrentPage,
-                totalPages = moviesFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesWithParameters");
-
-            var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
-
-            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            }
+            else
             {
-                var movieAsDictionary = movie as IDictionary<string, object>;
-                var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
-                movieAsDictionary.Add("links", userLinks);
-                return movieAsDictionary;
-            });
+                var moviesFromrepo = facadeWatchedMovies.GetAllWatchedMovies(CurrentUser.Id, parameters);
 
-            var linkedCollectionResource = new
-            {
-                movies = shapedMoviessWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = moviesFromrepo.TotalCount,
+                    pageSize = moviesFromrepo.PageSize,
+                    currentPage = moviesFromrepo.CurrentPage,
+                    totalPages = moviesFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
+                //hateoas
+                var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesWithParameters");
+
+                var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+                var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+                {
+                    var movieAsDictionary = movie as IDictionary<string, object>;
+                    var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+                    movieAsDictionary.Add("links", userLinks);
+                    return movieAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    movies = shapedMoviessWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+                
         }
 
         [TokenAuthorize]
@@ -99,48 +105,55 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("friendMoviesWithParameters/{friendId}", Name = "GetAllWatchedMoviesForFriendWithParameters")]
         public IActionResult GetAllFriendMovies(long friendId, [FromQuery] ResourceParameters parameters)
         {
-            // return facade.GetAllFriendMovies(CurrentUser.Id, friendId);
-            var moviesFromrepo = facadeWatchedMovies.GetAllFriendMovies(CurrentUser.Id, friendId, parameters);
-
-            var paginationMetadata = new
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = moviesFromrepo.TotalCount,
-                pageSize = moviesFromrepo.PageSize,
-                currentPage = moviesFromrepo.CurrentPage,
-                totalPages = moviesFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesForFriendWithParameters");
-
-            var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
-
-            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            }
+            else
             {
-                var movieAsDictionary = movie as IDictionary<string, object>;
-               // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
-               // movieAsDictionary.Add("links", userLinks);
-                return movieAsDictionary;
-            });
+                var moviesFromrepo = facadeWatchedMovies.GetAllFriendMovies(CurrentUser.Id, friendId, parameters);
 
-            var linkedCollectionResource = new
-            {
-                movies = shapedMoviessWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = moviesFromrepo.TotalCount,
+                    pageSize = moviesFromrepo.PageSize,
+                    currentPage = moviesFromrepo.CurrentPage,
+                    totalPages = moviesFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
+                //hateoas
+                var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllWatchedMoviesForFriendWithParameters");
+
+                var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+                var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+                {
+                    var movieAsDictionary = movie as IDictionary<string, object>;
+                    // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+                    // movieAsDictionary.Add("links", userLinks);
+                    return movieAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    movies = shapedMoviessWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+               
         }
 
 
         [TokenAuthorize]
-        [HttpGet("allFriendsMovies")] // TO DO, HATEOAS, ORDER, FIELDS....
+        [HttpGet("allFriendsMovies")]
         public List<WatchedMovieModel> GetAllFriendsMovies()
         {
             return facadeWatchedMovies.GetAllFriendsMovies(CurrentUser.Id);
@@ -151,42 +164,50 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("allFriendsMoviesWithParameters", Name = "GetAllFriendsMovies")]
         public IActionResult GetAllFriendsMovies([FromQuery] ResourceParameters parameters)
         {
-            // return facade.GetAllFriendsMovies(CurrentUser.Id);
-            var moviesFromrepo = facadeWatchedMovies.GetAllFriendsMovies(CurrentUser.Id, parameters);
-
-            var paginationMetadata = new
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = moviesFromrepo.TotalCount,
-                pageSize = moviesFromrepo.PageSize,
-                currentPage = moviesFromrepo.CurrentPage,
-                totalPages = moviesFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllFriendsMovies");
-
-            var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
-
-            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            }
+            else
             {
-                var movieAsDictionary = movie as IDictionary<string, object>;
-                // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
-                // movieAsDictionary.Add("links", userLinks);
-                return movieAsDictionary;
-            });
+                var moviesFromrepo = facadeWatchedMovies.GetAllFriendsMovies(CurrentUser.Id, parameters);
 
-            var linkedCollectionResource = new
-            {
-                movies = shapedMoviessWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = moviesFromrepo.TotalCount,
+                    pageSize = moviesFromrepo.PageSize,
+                    currentPage = moviesFromrepo.CurrentPage,
+                    totalPages = moviesFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+                //hateoas
+                var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious, "GetAllFriendsMovies");
+
+                var shapedMovies = Mapper.Mapper.MapEnumerableWatchedMovies(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+                var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+                {
+                    var movieAsDictionary = movie as IDictionary<string, object>;
+                    // var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+                    // movieAsDictionary.Add("links", userLinks);
+                    return movieAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    movies = shapedMoviessWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+                
         }
 
 
@@ -217,18 +238,9 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("getMovie/{movieId}", Name = "GetWatchedMovie")]
         public ActionResult<WatchedMovieModel> GetMovie(string movieId)
         {
-          //  return facade.GetWatchedMovie(movieId, CurrentUser.Id);
 
             var movieToReturn = facadeWatchedMovies.GetWatchedMovie(movieId, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
-
-            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
-            //    as IDictionary<string, object>;
-            //linkedResourceToReturn.Add("links", links);
-
-            //return CreatedAtRoute("GetWatchedMovie",
-            //    new { movieId = linkedResourceToReturn["Id"] },
-            //    linkedResourceToReturn);
 
             return generateResult(movieToReturn, links);
         }
@@ -251,18 +263,9 @@ namespace FilmLoApp.API.Controllers
         [HttpPost("addWatchedMovie")]
         public ActionResult<WatchedMovieModel> Add([FromBody] AddWatchedMovieModel movie)
         {
-            //return facade.AddWatchedMovie(movie, CurrentUser.Id);
 
             var movieToReturn = facadeWatchedMovies.AddWatchedMovie(movie, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
-
-            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
-            //    as IDictionary<string, object>;
-            //linkedResourceToReturn.Add("links", links);
-
-            //return CreatedAtRoute("GetWatchedMovie",
-            //    new { movieId = linkedResourceToReturn["Id"] },
-            //    linkedResourceToReturn);
 
             return generateResult(movieToReturn, links);
         }
@@ -271,17 +274,8 @@ namespace FilmLoApp.API.Controllers
         [HttpPut("updateWatchedMovie/{movieId}", Name = "UpdateWatchedMovie")]
         public ActionResult<WatchedMovieModel> Update([FromBody] UpdateWatchedMovieModel movie, string movieId)
         {
-            //  return facade.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
             var movieToReturn = facadeWatchedMovies.UpdateWatchedMovie(movie, movieId, CurrentUser.Id);
             var links = CreateLinksForMovie(CurrentUser.Id, movieToReturn.Id);
-
-            //var linkedResourceToReturn = movieToReturn.ShapeData(null)
-            //    as IDictionary<string, object>;
-            //linkedResourceToReturn.Add("links", links);
-
-            //return CreatedAtRoute("GetWatchedMovie",
-            //    new { movieId = linkedResourceToReturn["Id"] },
-            //    linkedResourceToReturn);
 
             return generateResult(movieToReturn, links);
 

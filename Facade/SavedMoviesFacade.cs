@@ -39,5 +39,11 @@ namespace Facade
             return Mapper.Mapper.MapAdd(savedMovie, userId);
         }
 
+        public List<SavedMovieModel> SearchMovies(long currentUserId, string criteria)
+        {
+            List<MovieJMDBApi> movies = SavedMoviesManager.SearchMovies(currentUserId, criteria);
+            return movies.Select(a => Mapper.Mapper.Map(a, currentUserId)).ToList();
+        }
+
     }
 }

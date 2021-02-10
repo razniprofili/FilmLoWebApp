@@ -11,14 +11,18 @@ namespace Facade
 {
     public partial class FilmLoFacade
     {
-        public User Register(RegisterModel registerModel)
+        public UserModel Register(RegisterModel registerModel)
         {
-            return UserManager.Register(Mapper.Mapper.AutoMap<RegisterModel, User>(registerModel));  
+            var user =  UserManager.Register(Mapper.Mapper.AutoMap<RegisterModel, User>(registerModel));
+            return Mapper.Mapper.AutoMap<User, UserModel>(user);
+
         }
 
-        public User Login(LoginModel loginModel)
+        public UserModel Login(LoginModel loginModel)
         {
-            return UserManager.Login(Mapper.Mapper.AutoMap<LoginModel, User>(loginModel));
+            var user = UserManager.Login(Mapper.Mapper.AutoMap<LoginModel, User>(loginModel));
+            return Mapper.Mapper.AutoMap<User, UserModel>(user);
+
         }
 
         public UserModel GetUser (long userId)

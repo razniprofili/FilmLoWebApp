@@ -52,50 +52,56 @@ namespace FilmLoApp.API.Controllers
         [HttpGet("getAllMoviesWithParameters", Name = "GetAllSavedMovieswithParameters")]
         public IActionResult GetAllSavedMovies([FromQuery] ResourceParameters parameters)
         {
-
-            var moviesFromrepo = facadeSavedMovies.GetAllSavedMovies(CurrentUser.Id, parameters);
-
-            var paginationMetadata = new
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = moviesFromrepo.TotalCount,
-                pageSize = moviesFromrepo.PageSize,
-                currentPage = moviesFromrepo.CurrentPage,
-                totalPages = moviesFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious);
-
-            var shapedMovies = Mapper.Mapper.Map(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
-
-            var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+            }
+            else
             {
-                var movieAsDictionary = movie as IDictionary<string, object>;
-                var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
-                movieAsDictionary.Add("links", userLinks);
-                return movieAsDictionary;
-            });
+                var moviesFromrepo = facadeSavedMovies.GetAllSavedMovies(CurrentUser.Id, parameters);
 
-            var linkedCollectionResource = new
-            {
-                movies = shapedMoviessWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = moviesFromrepo.TotalCount,
+                    pageSize = moviesFromrepo.PageSize,
+                    currentPage = moviesFromrepo.CurrentPage,
+                    totalPages = moviesFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
+                //hateoas
+                var links = CreateLinksForMovie(parameters, moviesFromrepo.HasNext, moviesFromrepo.HasPrevious);
+
+                var shapedMovies = Mapper.Mapper.Map(moviesFromrepo, CurrentUser.Id).ShapeData(parameters.Fields);
+
+                var shapedMoviessWithLinks = shapedMovies.Select(movie =>
+                {
+                    var movieAsDictionary = movie as IDictionary<string, object>;
+                    var userLinks = CreateLinksForMoviesWithFields(movieAsDictionary["Id"].ToString());
+                    movieAsDictionary.Add("links", userLinks);
+                    return movieAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    movies = shapedMoviessWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+              
         }
 
         [TokenAuthorize]
         [HttpGet("{movieId}", Name = "GetMovie")]
         public ActionResult<SavedMovieModel> GetMovie(string movieId)
         {
-           // return facade.GetMovie(CurrentUser.Id, movieId);
             var movieIdToReturn = facadeSavedMovies.GetMovie(CurrentUser.Id, movieId);
             var links = CreateLinksForMovie(CurrentUser.Id, movieId);
 
@@ -109,7 +115,6 @@ namespace FilmLoApp.API.Controllers
             if (savedMovieModel.UserId != CurrentUser.Id)
                 return BadRequest($"Movie can be added only for current user: {CurrentUser.Name} {CurrentUser.Surname}({CurrentUser.Mail})");
 
-            // return facade.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
             var movieToReturn = facadeSavedMovies.AddSavedMovie(savedMovieModel.UserId, savedMovieModel);
 
             var links = CreateLinksForMovie(movieToReturn.UserId, movieToReturn.Id);
@@ -124,16 +129,14 @@ namespace FilmLoApp.API.Controllers
             };
         }
 
-        // Ovo moze i na front delu :)
 
-        //[TokenAuthorize]
-        //[HttpGet("search/{criteria}")]
-        //public List<SavedMovieModel> SearchMoviesByName(string criteria)
-        //{
-        //    List<MovieJMDBApi> movies = SavedMoviesManager.SearchMovies(CurrentUser.Id, criteria);
+        [TokenAuthorize]
+        [HttpGet("search/{criteria}")]
+        public List<SavedMovieModel> SearchMoviesByName(string criteria)
+        {
+            return facadeSavedMovies.SearchMovies(CurrentUser.Id, criteria);
 
-        //    return movies.Select(a => Mapper.Map(a, CurrentUser.Id)).ToList();
-        //}
+        }
 
         #endregion
 

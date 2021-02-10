@@ -37,30 +37,16 @@ namespace FilmLoApp.API.Controllers
         #region Routes
 
         #region Users
-        [AllowAnonymous] // ne treba nam autorizacija
+        [AllowAnonymous]
         [HttpPost("Register")]
         public object Register([FromBody] RegisterModel registerModel)
         {
-            var user = facadeUser.Register(registerModel);
-
-            var userModel = new UserModel
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Surname = user.Surname,
-                Email = user.Email,
-                Picture = user.Picture
-            };
+            var userModel = facadeUser.Register(registerModel);
 
             var userToReturn = new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(userModel)
             };
-
-            //return new
-            //{
-            //    AuthResponseData = SecurityHelper.CreateLoginToken(user)
-            //};
 
             var links = CreateLinksForUser(userToReturn.AuthResponseData.Id, null);
 
@@ -74,30 +60,16 @@ namespace FilmLoApp.API.Controllers
 
         }
 
-        [AllowAnonymous] // ne treba nam autorizacija
+        [AllowAnonymous]
         [HttpPost("Login")]
         public object Login([FromBody] LoginModel loginModel)
         {
-            var user = facadeUser.Login(loginModel);
-
-            var userModel = new UserModel
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Surname = user.Surname,
-                Email = user.Email,
-                Picture = user.Picture
-            };
+            var userModel = facadeUser.Login(loginModel);
 
             var userToReturn = new
             {
                 AuthResponseData = SecurityHelper.CreateLoginToken(userModel)
             };
-
-            //return new
-            //{
-            //    AuthResponseData = SecurityHelper.CreateLoginToken(user)
-            //};
 
             var links = CreateLinksForUser(userToReturn.AuthResponseData.Id, null);
 
@@ -120,12 +92,9 @@ namespace FilmLoApp.API.Controllers
 
         [TokenAuthorize]
         [HttpGet("allUsers")]
-        //[ResponseCache(Duration = 120)]
-        //[HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)] //marvin.cache.headers
-        //[HttpCacheValidation(MustRevalidate = false)]
         public List<UserModel> GetAllUsers()
         {
-            return facadeUser.GetAllUsers(CurrentUser.Id); // jer zelimo da nam prikaze sve korisnike osim ulogovaog
+            return facadeUser.GetAllUsers(CurrentUser.Id);
         }
 
         // pagination, order by, filter... Can be included
@@ -134,43 +103,49 @@ namespace FilmLoApp.API.Controllers
         [HttpHead]
         public IActionResult GetAllUsers([FromQuery] ResourceParameters parameters)
         {
-
-            var usersFromrepo = facadeUser.GetAllUsers(CurrentUser.Id, parameters);
-
-            var paginationMetadata = new
+            
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = usersFromrepo.TotalCount,
-                pageSize = usersFromrepo.PageSize,
-                currentPage = usersFromrepo.CurrentPage,
-                totalPages = usersFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForUser(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
-
-            var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
-
-            var shapedUsersWithLinks = shapedUsers.Select(user =>
+            } else
             {
-                var userAsDictionary = user as IDictionary<string, object>;
-                var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
-                userAsDictionary.Add("links", userLinks);
-                return userAsDictionary;
-            });
+                var usersFromrepo = facadeUser.GetAllUsers(CurrentUser.Id, parameters);
 
-            var linkedCollectionResource = new
-            {
-                users = shapedUsersWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = usersFromrepo.TotalCount,
+                    pageSize = usersFromrepo.PageSize,
+                    currentPage = usersFromrepo.CurrentPage,
+                    totalPages = usersFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
+                //hateoas
+                var links = CreateLinksForUser(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
+
+                var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
+
+                var shapedUsersWithLinks = shapedUsers.Select(user =>
+                {
+                    var userAsDictionary = user as IDictionary<string, object>;
+                    var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
+                    userAsDictionary.Add("links", userLinks);
+                    return userAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    users = shapedUsersWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
         }
 
 
@@ -179,7 +154,6 @@ namespace FilmLoApp.API.Controllers
         public ActionResult<UserModel> UpdateUser([FromBody] UpdateModel user)
         {
 
-            // return facade.Update(CurrentUser.Id, user); 
             var userToReturn = facadeUser.Update(CurrentUser.Id, user);
 
             var links = CreateLinksForUser(userToReturn.Id, null);
@@ -193,7 +167,6 @@ namespace FilmLoApp.API.Controllers
                 linkedResourceToReturn);
 
         }
-
 
         [TokenAuthorize]
         [HttpPut("delete", Name = "DeleteUser")]
@@ -233,42 +206,50 @@ namespace FilmLoApp.API.Controllers
         [HttpHead]
         public IActionResult GetMyFriends([FromQuery] ResourceParameters parameters)
         {
-            var usersFromrepo = facadeUser.GetAllMyFriends(CurrentUser.Id, parameters);
-
-            var paginationMetadata = new
+            if (parameters.Fields != null && !parameters.Fields.ToLower().Contains("id"))
             {
-                totalCount = usersFromrepo.TotalCount,
-                pageSize = usersFromrepo.PageSize,
-                currentPage = usersFromrepo.CurrentPage,
-                totalPages = usersFromrepo.TotalPages
-                //previousPageLink,
-                //nextPageLink
-            };
+                return BadRequest("Result must include Id.");
 
-            //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
-
-            //hateoas
-            var links = CreateLinksForFriends(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
-
-            var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
-
-            var shapedUsersWithLinks = shapedUsers.Select(user =>
+            }
+            else
             {
-                var userAsDictionary = user as IDictionary<string, object>;
-                var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
-                userAsDictionary.Add("links", userLinks);
-                return userAsDictionary;
-            });
+                var usersFromrepo = facadeUser.GetAllMyFriends(CurrentUser.Id, parameters);
 
-            var linkedCollectionResource = new
-            {
-                friends = shapedUsersWithLinks,
-                links
-            };
+                var paginationMetadata = new
+                {
+                    totalCount = usersFromrepo.TotalCount,
+                    pageSize = usersFromrepo.PageSize,
+                    currentPage = usersFromrepo.CurrentPage,
+                    totalPages = usersFromrepo.TotalPages
+                    //previousPageLink,
+                    //nextPageLink
+                };
 
-            return Ok(linkedCollectionResource);
+                //dodajemo u response heder klijentu, mozee biti bilo koji format ne mora json
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
+                //hateoas
+                var links = CreateLinksForFriends(parameters, usersFromrepo.HasNext, usersFromrepo.HasPrevious);
+
+                var shapedUsers = Mapper.Mapper.Map(usersFromrepo).ShapeData(parameters.Fields);
+
+                var shapedUsersWithLinks = shapedUsers.Select(user =>
+                {
+                    var userAsDictionary = user as IDictionary<string, object>;
+                    var userLinks = CreateLinksForUser((long)userAsDictionary["Id"], null);
+                    userAsDictionary.Add("links", userLinks);
+                    return userAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    friends = shapedUsersWithLinks,
+                    links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+             
         }
 
 
