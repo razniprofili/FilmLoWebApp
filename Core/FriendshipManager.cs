@@ -215,7 +215,7 @@ namespace Core
             return friendship;
         }
 
-        public void DeclineRequest(long userId, long requestUserId) // kao delete metoda, obrisace friendship
+        public void DeclineRequest(long userId, long requestUserId)
         {
             //provera da li postoji useri i prijateljstvo za svaki slucaj:
             var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");

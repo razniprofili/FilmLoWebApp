@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Common.Exceptions;
+using Core;
 using Core.Services;
 using Data;
 using Domain;
@@ -371,6 +372,121 @@ namespace FilmLoWebApp.Tests.Managers
             Assert.IsNotNull(result);
             Assert.AreEqual(fakeWatchedMovies.Count(), result.Count());
 
+        }
+
+        [Test]
+        public void GetMovie()
+        {
+            var movieGetID = "tt123";
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == 1, ""))
+                 .Returns(fakeUser);
+
+            _uowMock.Setup(uow => uow.WatchedMovies.FirstOrDefault(m => m.UserId == 1 && m.MovieJMDBApiId == "tt123", ""))
+                .Returns(fakeWatchedMoive);
+
+            _uowMock.Setup(uow => uow.MoviesJMDBApi.GetById(movieGetID)).Returns(fakeWatchedMoive.MovieJMDBApi);
+
+            var result = _manager.GetMovie(movieGetID, 1);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(fakeWatchedMoive.MovieJMDBApi, result);
+        }
+
+        [Test]
+        public void GetMovieNotExists()
+        {
+            var movieGetID = "tt123";
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == 1, ""))
+                 .Returns(fakeUser);
+
+            _uowMock.Setup(uow => uow.WatchedMovies.FirstOrDefault(m => m.UserId == 1 && m.MovieJMDBApiId == "tt123", ""))
+                .Returns((WatchedMovie)null);
+
+            Exception ex = Assert.Throws<ValidationException>(delegate { _manager.GetMovie(movieGetID, 1); });
+            Assert.That(ex.Message, Is.EqualTo("WatchedMovie not exist!"));
+        }
+        [Test]
+        public void CountMovies()
+        {
+            _uowMock.Setup(uow => uow.WatchedMovies.Count(x => x.UserId == 1)).Returns(11);
+
+            var res = _manager.CountMovies(1);
+
+            Assert.IsNotNull(res);
+            Assert.AreEqual(11, res);
+        }
+        [Test]
+        public void GetFriendCommentRate()
+        {
+
+            long userId = 1;
+            long friendId = 2;
+            string movieId = "tt123";
+
+            var friendship = new Friendship
+            {
+                UserSenderId = 1,
+                UserSender = fakeUser,
+                UserRecipientId = 2,
+                UserRecipient = fakeUserFriend,
+                FriendshipDate = new DateTime(2020, 1, 15),
+                StatusCodeID = 'A'
+            };
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == userId, ""))
+                 .Returns(fakeUser);
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == friendId, ""))
+                  .Returns(fakeUserFriend);
+
+            _uowMock.Setup(uow => uow.Friendships.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A')
+            || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'), ""))
+                 .Returns(friendship);
+
+            _uowMock.Setup(uow => uow.WatchedMovies.FirstOrDefault(x => x.UserId == friendId && x.MovieJMDBApiId == movieId, ""))
+                 .Returns(fakeWatchedMoive);
+
+            var res = _manager.GetFriendCommentRate(movieId, userId, friendId);
+
+            Assert.IsNotNull(res);
+            Assert.AreEqual(fakeWatchedMoive, res);
+
+        }
+        [Test]
+        public void GetCommentRate()
+        {
+            long userId = 1;
+            string movieId = "tt123";
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == userId, ""))
+                .Returns(fakeUser);
+
+            _uowMock.Setup(uow => uow.WatchedMovies.FirstOrDefault(x => x.UserId == userId && x.MovieJMDBApiId == movieId, ""))
+                .Returns(fakeWatchedMoive);
+
+            var res = _manager.GetCommentRate(movieId, userId);
+
+            Assert.IsNotNull(res);
+            Assert.AreEqual(fakeWatchedMoive, res);
+
+        }
+        [Test]
+        public void GetAllMoviesNoParameters()
+        {
+            long userId = 1;
+
+            _uowMock.Setup(uow => uow.Users.FirstOrDefault(x => x.Id == userId, ""))
+                .Returns(fakeUser);
+
+            _uowMock.Setup(uow => uow.WatchedMovies.Find(x => x.UserId == userId, "MovieJMDBApi"))
+                .Returns(fakeWatchedMovies.AsQueryable());
+
+            var res = _manager.GetAllMovies(userId) as List<MovieJMDBApi>;
+
+            Assert.IsNotNull(res);
+            Assert.AreEqual(fakeWatchedMovies.Count(), res.Count());
         }
         #endregion
 

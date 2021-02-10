@@ -46,7 +46,7 @@ namespace Core
         {
 
             //provera da li postoji user za svaki slucaj:
-            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(user);
 
             if( parameters != null)
@@ -189,8 +189,6 @@ namespace Core
 
         }
 
-        //prijatelji koji su takodje odgledali taj film:
-
         public List<User> FriendsWatchThatMovie(long userId, string movieId)
         {
 
@@ -239,10 +237,10 @@ namespace Core
         public WatchedMovie GetCommentRate(string movieId, long userId)
         {
 
-            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(user);
 
-            var movie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId);
+            var movie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId, "");
             ValidationHelper.ValidateNotNull(movie);
 
             return movie;
@@ -252,18 +250,18 @@ namespace Core
         public WatchedMovie GetFriendCommentRate(string movieId, long userId, long friendId)
         {
 
-            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(user);
 
-            var userFriend = _uow.Users.FirstOrDefault(a => a.Id == friendId);
+            var userFriend = _uow.Users.FirstOrDefault(a => a.Id == friendId, "");
             ValidationHelper.ValidateNotNull(userFriend);
 
             //provera prijateljstva:
             var exist = _uow.Friendships.FirstOrDefault(f => (f.UserSenderId == userId && f.UserRecipientId == friendId && f.StatusCodeID == 'A') 
-            || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'));
+            || (f.UserSenderId == friendId && f.UserRecipientId == userId && f.StatusCodeID == 'A'), "");
             ValidationHelper.ValidateNotNull(exist);
 
-            var movie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == friendId && a.MovieJMDBApiId == movieId);
+            var movie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == friendId && a.MovieJMDBApiId == movieId, "");
             ValidationHelper.ValidateNotNull(movie);
 
             return movie;
@@ -273,10 +271,10 @@ namespace Core
         public MovieJMDBApi GetMovie(string movieId, long userId)
         {
 
-            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(user);
 
-            var watchedMovie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId);
+            var watchedMovie = _uow.WatchedMovies.FirstOrDefault(a => a.UserId == userId && a.MovieJMDBApiId == movieId, "");
             ValidationHelper.ValidateNotNull(watchedMovie);
 
             var movie = _uow.MoviesJMDBApi.GetById(movieId);
