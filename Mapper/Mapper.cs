@@ -23,11 +23,12 @@ namespace Mapper
             return mapper.Map<TDestination>(source);
         }
 
+        #region User mappings
         public static IEnumerable<UserModel> Map(PagedList<User> users)
         {
             List<UserModel> usersToReturn = new List<UserModel>();
 
-            foreach(var user in users)
+            foreach (var user in users)
             {
                 var userModel = new UserModel
                 {
@@ -36,7 +37,7 @@ namespace Mapper
                     Name = user.Name,
                     Surname = user.Surname,
                     Picture = user.Picture
-                    
+
                 };
 
                 usersToReturn.Add(userModel);
@@ -44,7 +45,9 @@ namespace Mapper
 
             return usersToReturn;
         }
+        #endregion
 
+        #region Saved movies mappings
         public static IEnumerable<AddSavedMovieModel> Map(PagedList<MovieJMDBApi> movies, long currentUserId)
         {
             List<AddSavedMovieModel> moviesToReturn = new List<AddSavedMovieModel>();
@@ -72,11 +75,58 @@ namespace Mapper
             return moviesToReturn;
         }
 
+        public static SavedMovieModel Map(MovieJMDBApi movie, long userId)
+        {
+            var userMovie = new User();
+            DateTime dateTimeSaved = new DateTime();
+            foreach (var movie1 in movie.SavedUsers)
+            {
+                if (movie1.UserId == userId)
+                {
+                    userMovie = movie1.User;
+                    dateTimeSaved = movie1.SavingDate;
+                    break;
+                }
+
+            }
+            return new SavedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Poster = movie.Poster,
+                DateTimeSaved = dateTimeSaved,
+                UserId = userId,
+                User = AutoMap<User, UserModel>(userMovie)
+            };
+        }
+
+        public static AddSavedMovieModel MapAdd(MovieJMDBApi movie, long userId)
+        {
+
+            return new AddSavedMovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                Poster = movie.Poster,
+                UserId = userId,
+                Actors = movie.MovieDetailsJMDBApi.Actors,
+                Genre = movie.MovieDetailsJMDBApi.Genre,
+                Duration = movie.MovieDetailsJMDBApi.Duration,
+                Year = movie.MovieDetailsJMDBApi.Year,
+                Country = movie.MovieDetailsJMDBApi.Country,
+                Director = movie.MovieDetailsJMDBApi.Director
+                // User = AutoMap<User, UserModel>(userMovie)
+            };
+        }
+
+        #endregion
+
+        #region Watched movies mappings
         public static IEnumerable<WatchedMovieModel> MapEnumerableWatchedMovies(PagedList<MovieJMDBApi> movies, long currentUserId)
         {
             List<WatchedMovieModel> moviesToReturn = new List<WatchedMovieModel>();
 
-            foreach(var movie in movies)
+            foreach (var movie in movies)
             {
                 var watchedMovie = new WatchedMovie();
                 foreach (var movieIter in movie.WatchedUsers)
@@ -84,7 +134,7 @@ namespace Mapper
                     if (movieIter.MovieJMDBApiId == movie.Id)
                         watchedMovie = movieIter;
                 }
-                var movieToadd =  new WatchedMovieModel
+                var movieToadd = new WatchedMovieModel
                 {
                     Id = movie.Id,
                     Name = movie.Name,
@@ -108,58 +158,6 @@ namespace Mapper
             return moviesToReturn;
 
         }
-
-        public static MovieDetailsJMDBApi MapWatchedMovie(AddWatchedMovieModel movieModel)
-        {
-            return new MovieDetailsJMDBApi
-            {
-                Name = movieModel.Name,
-                Actors = movieModel.Actors,
-                Year = movieModel.Year,
-                Director = movieModel.Director,
-                Duration = movieModel.Duration,
-                Genre = movieModel.Genre,
-                Country = movieModel.Country,
-            };
-        }
-
-        public static MovieJMDBApi Map(AddSavedMovieModel movieModel)
-        {
-            return new MovieJMDBApi
-            {
-                Id = movieModel.Id,
-                Name = movieModel.Name,
-                Poster = movieModel.Poster,
-                MovieDetailsJMDBApi = new MovieDetailsJMDBApi
-                {
-                    Actors = movieModel.Actors,
-                    Genre = movieModel.Genre,
-                    Duration = movieModel.Duration,
-                    Year = movieModel.Year,
-                    Country = movieModel.Country,
-                    Name = movieModel.Name,
-                    Director = movieModel.Director
-                }
-
-            };
-        }
-
-        public static NotificationModel Map(Notification notification)
-        {
-            return new NotificationModel
-            {
-                Id = notification.Id,
-                Text = notification.Text,
-                SendingDate = notification.SendingDate,
-                UserRecipient = AutoMap<User, UserModel>(notification.UserRecipient),
-                UserRecipientId = notification.UserRecipientId,
-                UserSender = AutoMap<User, UserModel>(notification.UserSender),
-                UserSenderId = notification.UserSenderId,
-
-            };
-        }
-
-      //  public static 
 
         public static WatchedMovie MapUpdate(UpdateWatchedMovieModel updateModel)
         {
@@ -199,41 +197,6 @@ namespace Mapper
             };
 
         }
-
-        public static SavedMovieModel Map(MovieJMDBApi movie, long userId)
-        {
-            var userMovie = new User();
-            DateTime dateTimeSaved = new DateTime();
-            foreach (var movie1 in movie.SavedUsers)
-            {
-                if (movie1.UserId == userId)
-                {
-                    userMovie = movie1.User;
-                    dateTimeSaved = movie1.SavingDate;
-                    break;
-                }
-
-            }
-            return new SavedMovieModel
-            {
-                Id = movie.Id,
-                Name = movie.Name,
-                Poster = movie.Poster,
-                DateTimeSaved = dateTimeSaved,
-                UserId = userId,
-                User = AutoMap<User, UserModel>(userMovie)
-            };
-        }
-
-        public static Friendship Map(AddFriendshipModel model, long userId)
-        {
-            return new Friendship
-            {
-                UserSenderId = userId,
-                UserRecipientId = model.UserRecipientId
-            };
-        }
-
         public static WatchedMovieModel MapFriend(MovieJMDBApi movie, WatchedMovie watchedMovie)
         {
             return new WatchedMovieModel
@@ -256,25 +219,6 @@ namespace Mapper
             };
         }
 
-        public static AddSavedMovieModel MapAdd(MovieJMDBApi movie, long userId)
-        {
-
-            return new AddSavedMovieModel
-            {
-                Id = movie.Id,
-                Name = movie.Name,
-                Poster = movie.Poster,
-                UserId = userId,
-                Actors = movie.MovieDetailsJMDBApi.Actors,
-                Genre = movie.MovieDetailsJMDBApi.Genre,
-                Duration = movie.MovieDetailsJMDBApi.Duration,
-                Year = movie.MovieDetailsJMDBApi.Year,
-                Country = movie.MovieDetailsJMDBApi.Country,
-                Director = movie.MovieDetailsJMDBApi.Director
-                // User = AutoMap<User, UserModel>(userMovie)
-            };
-        }
-
         public static CommentRateModel Map(WatchedMovie movie)
         {
             return new CommentRateModel
@@ -282,6 +226,72 @@ namespace Mapper
                 Rate = movie.Rating,
                 Comment = movie.Comment,
                 DateTimeWatched = movie.WatchingDate
+            };
+        }
+
+        #endregion
+
+        #region Movie mappings
+        public static MovieDetailsJMDBApi MapWatchedMovie(AddWatchedMovieModel movieModel)
+        {
+            return new MovieDetailsJMDBApi
+            {
+                Name = movieModel.Name,
+                Actors = movieModel.Actors,
+                Year = movieModel.Year,
+                Director = movieModel.Director,
+                Duration = movieModel.Duration,
+                Genre = movieModel.Genre,
+                Country = movieModel.Country,
+            };
+        }
+
+        public static MovieJMDBApi Map(AddSavedMovieModel movieModel)
+        {
+            return new MovieJMDBApi
+            {
+                Id = movieModel.Id,
+                Name = movieModel.Name,
+                Poster = movieModel.Poster,
+                MovieDetailsJMDBApi = new MovieDetailsJMDBApi
+                {
+                    Actors = movieModel.Actors,
+                    Genre = movieModel.Genre,
+                    Duration = movieModel.Duration,
+                    Year = movieModel.Year,
+                    Country = movieModel.Country,
+                    Name = movieModel.Name,
+                    Director = movieModel.Director
+                }
+
+            };
+        }
+        #endregion
+
+        #region Notification mapping
+        public static NotificationModel Map(Notification notification)
+        {
+            return new NotificationModel
+            {
+                Id = notification.Id,
+                Text = notification.Text,
+                SendingDate = notification.SendingDate,
+                UserRecipient = AutoMap<User, UserModel>(notification.UserRecipient),
+                UserRecipientId = notification.UserRecipientId,
+                UserSender = AutoMap<User, UserModel>(notification.UserSender),
+                UserSenderId = notification.UserSenderId,
+
+            };
+        }
+        #endregion
+
+        #region Friendship mappings
+        public static Friendship Map(AddFriendshipModel model, long userId)
+        {
+            return new Friendship
+            {
+                UserSenderId = userId,
+                UserRecipientId = model.UserRecipientId
             };
         }
 
@@ -297,5 +307,6 @@ namespace Mapper
                 UserSender = AutoMap<User, UserModel>(friendship.UserSender)
             };
         }
+        #endregion
     }
 }
