@@ -40,40 +40,38 @@ namespace Core
 
         public List<User> SearchMyFriends(long idUser, string searchCriteria)
         {
-            //using (var uow = new UnitOfWork())
-            //{
-                //provera da li postoji user za svaki slucaj:
-                var user = _uow.Users.FirstOrDefault(a => a.Id == idUser);
-                ValidationHelper.ValidateNotNull(user);
 
-                var friendships = _uow.Friendships.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') 
-                || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList(); // ali mora i da bude prihvaceno prijateljstvo
+            //provera da li postoji user za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == idUser);
+            ValidationHelper.ValidateNotNull(user);
 
-                List<User> friends = new List<User>();
+            var friendships = _uow.Friendships.Find(m => (m.UserSenderId == idUser && m.StatusCodeID == 'A') 
+            || (m.UserRecipientId == idUser && m.StatusCodeID == 'A')).ToList(); // ali mora i da bude prihvaceno prijateljstvo
 
-                foreach (var friend in friendships)
+            List<User> friends = new List<User>();
+
+            foreach (var friend in friendships)
+            {
+                if (friend.UserRecipientId == idUser)
                 {
-                    if (friend.UserRecipientId == idUser)
-                    {
-                        var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserSenderId 
-                        && (f.Name.Contains(searchCriteria) 
-                        || f.Surname.Contains(searchCriteria)));
+                    var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserSenderId 
+                    && (f.Name.Contains(searchCriteria) 
+                    || f.Surname.Contains(searchCriteria)));
 
-                        if (userFriend != null)
-                            friends.Add(userFriend);
-                    }
-                    else
-                    {
-                        var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserRecipientId 
-                        && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
-
-                        if (userFriend != null)
-                            friends.Add(userFriend);
-                    }
+                    if (userFriend != null)
+                        friends.Add(userFriend);
                 }
+                else
+                {
+                    var userFriend = _uow.Users.FirstOrDefault(f => f.Id == friend.UserRecipientId 
+                    && (f.Name.Contains(searchCriteria) || f.Surname.Contains(searchCriteria)));
 
-                return friends;
-           // }
+                    if (userFriend != null)
+                        friends.Add(userFriend);
+                }
+            }
+
+            return friends;
         }
 
         public object GetAllMyFriends(long idUser, ResourceParameters usersResourceParameters = null)
@@ -130,7 +128,7 @@ namespace Core
 
         public Friendship Add(Friendship friendship, long userId)
         {
-            // proveravamo da li postoje useri za kje se unosi prijateljstvo:
+            // proveravamo da li postoje useri za koje se unosi prijateljstvo:
             var userSender = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(userSender);
 

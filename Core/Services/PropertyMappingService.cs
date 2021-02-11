@@ -13,8 +13,7 @@ namespace Core.Services
     {
 
         #region PrivateFields
-
-        //mapiranje, jer sort po godini znaci da sortiramo datum rodjenja entiteta npr... 
+ 
         private Dictionary<string, PropertyMappingValue> _userPropertyMapping =
           new Dictionary<string, PropertyMappingValue>(StringComparer.OrdinalIgnoreCase)
           {
@@ -30,15 +29,6 @@ namespace Core.Services
           {
                { "Id", new PropertyMappingValue(new List<string>() { "Id" } ) },
                { "Name", new PropertyMappingValue(new List<string>() { "Name"}) }
-               //{ "UserId", new PropertyMappingValue(new List<string>() { "UserId"}) },
-               //{ "Actors", new PropertyMappingValue(new List<string>() { "Actors"}) },
-               //{ "Year", new PropertyMappingValue(new List<string>() { "Year"}) },
-               //{ "Director", new PropertyMappingValue(new List<string>() { "Director"}) },
-               //{ "Duration", new PropertyMappingValue(new List<string>() { "Duration"}) },
-               //{ "Genre", new PropertyMappingValue(new List<string>() { "Genre"}) },
-               //{ "Country", new PropertyMappingValue(new List<string>() { "Country"}) }
-
-
           };
 
         private IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping>();
@@ -58,8 +48,6 @@ namespace Core.Services
 
         #region Methods
 
-        //provera da li postoji property po kom klijent zeli da sortira podatke, proveravamo
-        //u kontroleru!!! ne zaboravi
         public bool ValidMappingExistsFor<TSource, TDestination>(string fields)
         {
             var propertyMapping = GetPropertyMapping<TSource, TDestination>();

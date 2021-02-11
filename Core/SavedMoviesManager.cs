@@ -139,7 +139,6 @@ namespace Core
 
             foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
             {
-                // var movieAPI = uow.MovieJMDBApiRepository.GetById(movie.MovieJMDBApiId);
                 usersSavedMovies.Add(movie.MovieJMDBApi);
             }
 
@@ -171,24 +170,22 @@ namespace Core
 
         public List<MovieJMDBApi> SearchMovies(long userId, string critearia)
         {
-            //using (var uow = new UnitOfWork())
-            //{
-                //provera da li postoji user za svaki slucaj:
-                var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
-                ValidationHelper.ValidateNotNull(user);
 
-                var savedMovies = _uow.SavedMovies.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
+            //provera da li postoji user za svaki slucaj:
+            var user = _uow.Users.FirstOrDefault(a => a.Id == userId);
+            ValidationHelper.ValidateNotNull(user);
 
-                List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
+            var savedMovies = _uow.SavedMovies.Find(m => m.UserId == userId).ToList(); //pronalazi sve sacuvane filmove za tog usera
 
-                foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
-                {
-                    var movieAPI = _uow.MoviesJMDBApi.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId && m.Name == critearia);
-                    usersSavedMovies.Add(movieAPI);
-                }
+            List<MovieJMDBApi> usersSavedMovies = new List<MovieJMDBApi>();
 
-                return usersSavedMovies;
-            //}
+            foreach (var movie in savedMovies) // za sve te sacuvane filmove uzima njihove detalje
+            {
+                var movieAPI = _uow.MoviesJMDBApi.FirstOrDefault(m => m.Id == movie.MovieJMDBApiId && m.Name == critearia);
+                usersSavedMovies.Add(movieAPI);
+            }
+
+            return usersSavedMovies;
         }
 
         #endregion

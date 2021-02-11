@@ -23,11 +23,8 @@ namespace Domain
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-           //  base.OnConfiguring(optionsBuilder);
 
              optionsBuilder.UseSqlServer(Helper.ConnectionString);
-           // optionsBuilder.UseSqlServer("Server=DESKTOP-S892R9E\\TICASQL;Database=Test1Database;Trusted_Connection=True");
-            // optionsBuilder.UseSqlServer("Server=TMILOSEVIC-HP; Database=Test1Database;Trusted_Connection=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

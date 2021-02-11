@@ -307,8 +307,6 @@ namespace Core
 
         public MovieJMDBApi Add(MovieDetailsJMDBApi movie, long userId, string comment, int rate, string date, string poster, string movieAPIid)
         {
-            // 1. dodati film u MovieJMDBApi ako ne postoji
-            // 2. uneti odgledan film na kraju, pod USLOVOM da ga taj user NIJE pogledao
 
             var user = _uow.Users.FirstOrDefault(a => a.Id == userId, "");
             ValidationHelper.ValidateNotNull(user);
@@ -344,7 +342,6 @@ namespace Core
             var watchedMovieAdded = _uow.WatchedMovies.Add(watchedMoive, "");
             _uow.Save();
             
-            // we need to delete movie from saved list (if exists)
             var savedMovie = _uow.SavedMovies.FirstOrDefault(m => m.MovieJMDBApiId == movieAPIid && m.UserId == userId);
 
             if (savedMovie != null)
