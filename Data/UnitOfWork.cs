@@ -35,7 +35,6 @@ namespace Data
             SavedMovies = new SavedMovieRepository(DataContext);
             MoviesDetails = new MovieDetailsJMDBApiRepository(DataContext);
             MoviesJMDBApi = new MovieJMDBApiRepository(DataContext);
-            Users = new UserRepository(DataContext);
             WatchedMovies = new WatchedMovieRepository(DataContext);
 
         }
